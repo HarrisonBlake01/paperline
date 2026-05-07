@@ -11,6 +11,18 @@ const Body = z.object({
   plan: z.enum(["pro", "team"]),
 });
 
+async function parseBody(req: Request) {
+  const contentType = req.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return Body.safeParse(await req.json().catch(() => ({})));
+  }
+  if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+    const form = await req.formData();
+    return Body.safeParse({ plan: form.get("plan") });
+  }
+  return Body.safeParse({});
+}
+
 export async function POST(req: Request) {
   let ctx;
   try {
@@ -23,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = Body.safeParse(await req.json().catch(() => ({})));
+  const body = await parseBody(req);
   if (!body.success) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
@@ -77,5 +89,9 @@ export async function POST(req: Request) {
     allow_promotion_codes: true,
   });
 
-  return NextResponse.json({ url: session.url });
+  const wantsJson = (req.headers.get("accept") || "").includes("application/json") || (req.headers.get("content-type") || "").includes("application/json");
+  if (wantsJson) {
+    return NextResponse.json({ url: session.url });
+  }
+  return NextResponse.redirect(session.url || `${appUrl}/settings/billing`, 303);
 }

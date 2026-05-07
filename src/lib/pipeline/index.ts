@@ -18,6 +18,8 @@ import { parsePdf, looksLikeScan } from "@/lib/parsing/pdf";
 import { chunkPages } from "@/lib/parsing/chunk";
 import { embedTexts } from "@/lib/ai/embed";
 import { classifyDocument } from "@/lib/ai/classify";
+import { getBasicUser } from "@/lib/auth/clerk-users";
+import { sendDocumentReadyEmail, sendUsageWarningEmail } from "@/lib/email/send";
 import type { DocType } from "@/lib/types";
 
 export interface ProcessOptions {
@@ -126,6 +128,45 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
       target_id: doc.id,
       metadata: { page_count: parsed.pageCount, doc_type: docType },
     });
+
+    const uploader = await getBasicUser(doc.uploader_id);
+    if (uploader?.email) {
+      try {
+        await sendDocumentReadyEmail({
+          to: uploader.email,
+          name: uploader.firstName ?? undefined,
+          documentId: doc.id,
+          filename: doc.filename,
+          docType,
+          pageCount: parsed.pageCount,
+        });
+      } catch {
+        // Non-fatal.
+      }
+    }
+
+    const { data: workspace } = await sb
+      .from("workspaces")
+      .select("name, pages_used_this_period, pages_limit")
+      .eq("id", doc.workspace_id)
+      .single();
+
+    if (workspace && workspace.pages_limit > 0 && uploader?.email) {
+      const percent = Math.floor(
+        (workspace.pages_used_this_period / workspace.pages_limit) * 100,
+      );
+      if (percent >= 80 && percent < 100) {
+        try {
+          await sendUsageWarningEmail({
+            to: uploader.email,
+            workspaceName: workspace.name,
+            percent,
+          });
+        } catch {
+          // Non-fatal.
+        }
+      }
+    }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     await sb

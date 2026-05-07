@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/plans";
+import { sendWelcomeEmail } from "@/lib/email/send";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -130,6 +131,18 @@ export async function POST(req: Request) {
     target_id: ws.id,
     metadata: { source: "clerk.user.created" },
   });
+
+  const email = data.email_addresses?.[0]?.email_address;
+  if (email) {
+    try {
+      await sendWelcomeEmail({
+        to: email,
+        name: data.first_name ?? data.username ?? undefined,
+      });
+    } catch {
+      // Do not fail signup provisioning if email send hiccups.
+    }
+  }
 
   return NextResponse.json({ ok: true, workspace_id: ws.id });
 }
