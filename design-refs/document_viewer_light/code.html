@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paperline - Document Viewer</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS & Config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#ffddae",
+                        "surface-container-low": "#f3f3fc",
+                        "on-surface-variant": "#424752",
+                        "secondary-container": "#fed79d",
+                        "tertiary-container": "#a46700",
+                        "surface-container": "#ededf6",
+                        "primary-container": "#3d72d2",
+                        "on-primary-fixed-variant": "#004397",
+                        "secondary-fixed-dim": "#e7c189",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-tertiary-container": "#fffbff",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-tint": "#1e5bba",
+                        "on-background": "#191b22",
+                        "surface": "#faf9ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d9d9e2",
+                        "on-secondary-container": "#795c2d",
+                        "tertiary": "#825100",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#c3c6d4",
+                        "primary": "#1a58b7",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e1e2ea",
+                        "on-primary-container": "#fefcff",
+                        "on-primary": "#ffffff",
+                        "background": "#faf9ff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e1e2ea",
+                        "surface-bright": "#faf9ff",
+                        "inverse-surface": "#2e3037",
+                        "inverse-on-surface": "#f0f0f9",
+                        "on-secondary-fixed": "#281800",
+                        "on-surface": "#191b22",
+                        "primary-fixed": "#d8e2ff",
+                        "outline": "#737784",
+                        "on-primary-fixed": "#001a43",
+                        "secondary": "#76592b",
+                        "on-secondary-fixed-variant": "#5c4216",
+                        "inverse-primary": "#aec6ff",
+                        "primary-fixed-dim": "#aec6ff",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e7e7f0",
+                        "on-tertiary-fixed-variant": "#653e00"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "4px",
+                        "container-max": "1280px",
+                        "sm": "8px",
+                        "unit": "4px",
+                        "md": "16px",
+                        "gutter": "20px",
+                        "lg": "24px",
+                        "xl": "48px"
+                    },
+                    fontFamily: {
+                        "h1": ["Inter Tight"],
+                        "h2": ["Inter Tight"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "h3": ["Inter Tight"],
+                        "label-caps": ["Inter"]
+                    },
+                    fontSize: {
+                        "h1": ["40px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "h2": ["32px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "body-sm": ["13px", { lineHeight: "1.4", fontWeight: "400" }],
+                        "body-md": ["15px", { lineHeight: "1.5", fontWeight: "400" }],
+                        "data-mono": ["13px", { lineHeight: "1.5", letterSpacing: "0.02em", fontWeight: "450" }],
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "h3": ["24px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "500" }],
+                        "label-caps": ["11px", { lineHeight: "1", letterSpacing: "0.05em", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md h-screen w-full flex flex-col overflow-hidden antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Document Header (Sub-page context, replaces global navs) -->
+<header class="flex items-center justify-between px-md py-sm border-b border-outline-variant bg-surface-container-lowest z-10 shrink-0">
+<div class="flex items-center gap-sm">
+<button class="p-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-body-md text-body-md font-medium text-on-surface truncate max-w-[200px] md:max-w-md">MSA_Acme_Corp_v2.pdf</h1>
+<span class="font-body-sm text-body-sm text-on-surface-variant">4 Pages • 1.2 MB</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<!-- Status Pill -->
+<div class="hidden sm:flex items-center gap-xs px-2 py-1 bg-primary-fixed text-on-primary-fixed rounded-full font-label-caps text-label-caps border border-primary-fixed-dim">
+<span class="material-symbols-outlined text-[14px] fill">check_circle</span>
+                Analyzed
+            </div>
+<button class="p-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area: Stacked Layout -->
+<main class="flex-1 flex flex-col md:flex-row overflow-hidden bg-surface-container">
+<!-- Document Canvas (Top on Mobile, Left on Desktop) -->
+<section class="flex-1 overflow-auto p-md md:p-xl flex justify-center items-start bg-surface-container-high relative">
+<!-- Zoom Controls Floating -->
+<div class="absolute right-md bottom-md md:right-xl md:bottom-xl flex flex-col bg-surface-container-lowest border border-outline-variant rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors border-b border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+</div>
+<!-- The Document Page (Simulated) -->
+<div class="w-full max-w-[800px] aspect-[8.5/11] bg-surface-container-lowest shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-outline-variant relative group overflow-hidden">
+<!-- Highlight Overlay Example -->
+<div class="absolute top-[15%] left-[10%] w-[40%] h-[3%] bg-secondary-fixed/40 mix-blend-multiply border-b border-secondary hidden md:block"></div>
+<!-- Document Image Placeholder -->
+<div class="w-full h-full bg-cover bg-center" data-alt="A clean, highly detailed, close-up macro shot of crisp black typography printed on thick, premium white matte paper. The lighting is bright, even, and hyper-realistic, casting subtle shadows that emphasize the texture of the paper grain. The text resembles a formal legal document or contract, aligned perfectly in a grid, reflecting a professional, technical, and precise minimalist aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPu6sLHi_uJ9pkps0SNRHP6Ml3XPK70PCpdgZXCC3y49bZEuhGBSgGnM1m36hkEnDyO5IssjEdlC1j4VuDE_uV8MEnAz_ZsslRBZkrZykj6aJyZzlSX9zMyCUWuU1ApcBEoRGXMKGbe9pHZxFpLuQe1KXiF-G4389GqraDgQjvkEv-P9WC3tOsXKCDWPLUWYxKXDqB1bDkAefX2rrlLwBNfC-ImvP6WSeub37ed-QASZe2TpcWAsjm4rH9PakyZMNzeakHbQ0-y0E');"></div>
+</div>
+</section>
+<!-- AI Intelligence Panel (Bottom on Mobile, Right on Desktop) -->
+<aside class="h-[442px] md:h-full md:w-[400px] bg-surface-container-lowest border-t md:border-t-0 md:border-l border-outline-variant flex flex-col shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.02)] z-20">
+<!-- Panel Tabs -->
+<div class="flex items-center px-md border-b border-outline-variant pt-sm bg-surface-container-lowest">
+<button class="flex-1 pb-sm border-b-[1.5px] border-primary text-primary font-body-md text-body-md font-medium flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">chip_extraction</span>
+                    Extract
+                </button>
+<button class="flex-1 pb-sm border-b-[1.5px] border-transparent text-on-surface-variant hover:text-on-surface font-body-md text-body-md flex justify-center items-center gap-xs transition-colors">
+<span class="material-symbols-outlined text-[18px]">chat_spark</span>
+                    Chat
+                </button>
+</div>
+<!-- Panel Content: Extracted Data -->
+<div class="flex-1 overflow-y-auto p-md space-y-lg">
+<div class="flex items-center justify-between">
+<h2 class="font-h3 text-h3 text-on-surface">Key Entities</h2>
+<button class="text-primary font-body-sm text-body-sm flex items-center gap-xs hover:underline">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                        Export
+                    </button>
+</div>
+<!-- Data Field 1 -->
+<div class="group border border-outline-variant rounded-lg p-sm bg-surface hover:border-primary/50 transition-colors cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">corporate_fare</span>
+                            Contracting Party
+                        </span>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-primary">99%</span>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface mb-2">Acme Corporation Inc.</div>
+<!-- Confidence Bar -->
+<div class="h-[2px] w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[99%]"></div>
+</div>
+</div>
+<!-- Data Field 2 -->
+<div class="group border border-outline-variant rounded-lg p-sm bg-surface hover:border-primary/50 transition-colors cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                            Effective Date
+                        </span>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-primary">95%</span>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface mb-2">October 15, 2023</div>
+<!-- Confidence Bar -->
+<div class="h-[2px] w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[95%]"></div>
+</div>
+</div>
+<!-- Data Field 3 (Warning/Lower Confidence) -->
+<div class="group border border-tertiary-container/30 rounded-lg p-sm bg-surface hover:border-tertiary/50 transition-colors cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">gavel</span>
+                            Governing Law
+                        </span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">warning</span>
+<span class="font-label-caps text-label-caps text-tertiary">72%</span>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface mb-2">State of Delaware</div>
+<!-- Confidence Bar -->
+<div class="h-[2px] w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[72%]"></div>
+</div>
+</div>
+<!-- Data Field 4 -->
+<div class="group border border-outline-variant rounded-lg p-sm bg-surface hover:border-primary/50 transition-colors cursor-pointer relative overflow-hidden">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">payments</span>
+                            Total Value
+                        </span>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-primary">88%</span>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface mb-2">$1,250,000.00 USD</div>
+<!-- Confidence Bar -->
+<div class="h-[2px] w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[88%]"></div>
+</div>
+</div>
+</div>
+<!-- Quick Action / Pagination Footer -->
+<div class="p-sm border-t border-outline-variant bg-surface flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">14 Entities Found</span>
+<div class="flex items-center gap-xs">
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="font-data-mono text-data-mono text-on-surface px-2">1 / 3</span>
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</aside>
+</main>
+</body></html>

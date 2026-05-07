@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paperline - Mobile Settings</title>
+<!-- Google Fonts: Inter, Inter Tight, JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#00275e",
+                        "background": "#111319",
+                        "on-primary": "#002e6b",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#472a00",
+                        "surface-bright": "#373940",
+                        "surface-container-highest": "#33353b",
+                        "surface-container-lowest": "#0c0e14",
+                        "on-secondary": "#432c02",
+                        "surface-variant": "#33353b",
+                        "primary-fixed-dim": "#aec6ff",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-container-high": "#282a30",
+                        "on-secondary-fixed": "#281800",
+                        "inverse-on-surface": "#2e3037",
+                        "inverse-surface": "#e1e2ea",
+                        "primary-fixed": "#d8e2ff",
+                        "on-surface": "#e1e2ea",
+                        "on-primary-fixed": "#001a43",
+                        "outline": "#8d909e",
+                        "on-secondary-fixed-variant": "#5c4216",
+                        "secondary": "#e7c189",
+                        "inverse-primary": "#1e5bba",
+                        "on-primary-fixed-variant": "#004397",
+                        "secondary-fixed-dim": "#e7c189",
+                        "tertiary-fixed": "#ffddb8",
+                        "secondary-fixed": "#ffddae",
+                        "surface-container-low": "#191b22",
+                        "on-surface-variant": "#c3c6d4",
+                        "secondary-container": "#5e4418",
+                        "primary-container": "#5d8ef1",
+                        "surface-container": "#1d1f26",
+                        "tertiary-container": "#ca8103",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#424752",
+                        "primary": "#aec6ff",
+                        "on-tertiary-container": "#3e2400",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-tint": "#aec6ff",
+                        "surface": "#111319",
+                        "on-background": "#e1e2ea",
+                        "surface-dim": "#111319",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#d7b37c",
+                        "tertiary": "#ffb960"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "stack-sm": "8px",
+                        "margin-page": "48px",
+                        "stack-xs": "4px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "h3": ["Inter Tight"],
+                        "label": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "h1": ["Inter Tight"],
+                        "h2": ["Inter Tight"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label": ["12px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "450" }],
+                        "h1": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "h2": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for clean horizontal scrolling tabs */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-24 md:pb-0 font-body-sm flex justify-center">
+<!-- Mobile Device Simulator Wrapper (Fluid max-width for display purposes) -->
+<div class="w-full max-w-[480px] min-h-screen border-x border-outline-variant/20 relative flex flex-col bg-background shadow-2xl">
+<!-- Mobile Header -->
+<header class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-outline-variant px-gutter h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-primary">analytics</span>
+</div>
+<h1 class="font-h3 text-[18px] font-semibold tracking-tight text-on-surface">Settings</h1>
+</div>
+<img alt="User Profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A close-up, high-contrast studio portrait of a young professional male. The lighting is dramatic and cool-toned, fitting a dark-mode, technical aesthetic. Deep shadows and sharp focus emphasize structural facial features against a pure black background. Minimalist and corporate in mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDk04WbHiWXqdRlVmzGCTaQ0SD2TlI56lx5-LQUsRed8qFXaYkQmEU0BbMnt4Em466iSr1EvJ6IYvDFVWP28gwSGxD--nsOl__6plmim6akUZ5RJ69IQEddL-gjCJz5ymnb78MIJSE_hAsRUfOA3PNEE8ouj0ZDa1Km0krNY33WbKvkVS1d9Qscrv_xVvO_HwAWQQq2i13S5ooAnH3dd9HXK-wshP2UMxqS2j6jX7el3Q8UcJhIDaSNpiyQgLBCqx7MxbaCzqrRe0"/>
+</header>
+<!-- Horizontal Tabs -->
+<nav class="flex overflow-x-auto border-b border-outline-variant px-gutter gap-6 pt-4 scrollbar-hide bg-surface">
+<button class="text-on-surface-variant font-label pb-3 uppercase tracking-widest text-[10px] whitespace-nowrap hover:text-on-surface transition-colors">Profile</button>
+<button class="text-primary border-b-[2px] border-primary font-label pb-3 uppercase tracking-widest text-[10px] whitespace-nowrap">Workspace</button>
+<button class="text-on-surface-variant font-label pb-3 uppercase tracking-widest text-[10px] whitespace-nowrap hover:text-on-surface transition-colors">Members</button>
+<button class="text-on-surface-variant font-label pb-3 uppercase tracking-widest text-[10px] whitespace-nowrap hover:text-on-surface transition-colors">Billing</button>
+</nav>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto flex flex-col pt-stack-md pb-stack-lg gap-stack-lg">
+<!-- Members Section -->
+<section class="px-gutter flex flex-col gap-stack-md">
+<div class="flex justify-between items-end">
+<div class="flex flex-col gap-1">
+<h2 class="font-h3 text-[20px] text-on-surface">Members</h2>
+<p class="font-body-sm text-[13px] text-on-surface-variant">Manage team access and roles.</p>
+</div>
+<!-- Secondary Button (Ghost) -->
+<button class="border border-outline-variant text-on-surface hover:text-primary hover:border-primary transition-colors rounded-lg px-3 py-1.5 font-label text-[11px] uppercase tracking-wider flex items-center gap-1.5 h-fit">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+                        Invite
+                    </button>
+</div>
+<!-- High-Density Data List -->
+<div class="border border-outline-variant rounded-xl bg-surface-container-low flex flex-col divide-y divide-outline-variant/50 overflow-hidden">
+<!-- Member Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<img class="w-9 h-9 rounded-full object-cover border border-outline-variant" data-alt="A tight headshot of a confident professional woman with minimal makeup. The lighting is stark and technical, with a cool bluish rim light against an absolute dark gray background. The overall aesthetic is sleek, corporate, and fits a high-end software platform identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXUIz0XvBjwdMbGoKlpx6uziZuPydE_6GWcOiqrVVHm9Lzfv123aRAdQCL5rdGuvA6ZAfvhmAn9fj5AbqbBKBwyxJgMPMZLfchqbB141qgHj0__PoR34h_rG6BLKNXysdvtR7NPBdNHI-QG2OKNevwbZy5BqaiZE9VZZotiHEEL10cdX4O1QYGa_66VsfqUewnEL4Qrd3fKubycNVSJCi7LZF2EKrCEvVQ3dOaJl1qrpeWgbgpKJqxbpR1Hb8wY0fPYNm5Fdl5zEc"/>
+<div class="flex flex-col">
+<span class="font-body-sm text-on-surface leading-tight">Sarah Jenkins</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant mt-0.5">sarah@paperline.ai</span>
+</div>
+</div>
+<span class="font-data-mono text-[10px] text-primary bg-primary/10 border border-primary/20 px-2 py-1 rounded-md uppercase tracking-wider">Admin</span>
+</div>
+<!-- Member Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-data-mono text-[12px] text-on-surface">
+                                MK
+                            </div>
+<div class="flex flex-col">
+<span class="font-body-sm text-on-surface leading-tight">Michael Kim</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant mt-0.5">michael@paperline.ai</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="font-data-mono text-[11px]">Member</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Member Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center font-data-mono text-[12px] text-on-surface">
+                                EL
+                            </div>
+<div class="flex flex-col">
+<span class="font-body-sm text-on-surface leading-tight">Emma Lin</span>
+<span class="font-data-mono text-[11px] text-on-surface-variant mt-0.5">emma.l@external.com</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="font-data-mono text-[11px]">Viewer</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Billing Section (Bento Card Style) -->
+<section class="px-gutter flex flex-col gap-stack-md mt-4">
+<h2 class="font-h3 text-[20px] text-on-surface">Billing</h2>
+<div class="border border-outline-variant rounded-xl bg-surface-container-low relative overflow-hidden flex flex-col">
+<!-- AI Intelligence Denotation (Gold hairline left border) -->
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-secondary opacity-80 shadow-[0_0_8px_rgba(231,193,137,0.5)]"></div>
+<div class="p-5 flex flex-col gap-6">
+<!-- Header & Action -->
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="font-label text-secondary uppercase tracking-widest text-[10px]">Current Plan</span>
+<span class="material-symbols-outlined text-secondary text-[14px]">bolt</span>
+</div>
+<h3 class="font-h2 text-[24px] text-on-surface leading-none">Professional Plan</h3>
+<p class="font-body-sm text-[13px] text-on-surface-variant mt-1">$49.00 / month</p>
+</div>
+<!-- Primary Button -->
+<button class="bg-primary text-[#001a43] hover:bg-primary/90 hover:after:bg-white/10 relative overflow-hidden rounded-lg px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all">
+                                Upgrade
+                            </button>
+</div>
+<!-- Technical Progress Bar -->
+<div class="flex flex-col gap-3 pt-5 border-t border-outline-variant/30">
+<div class="flex justify-between items-end">
+<span class="font-label text-on-surface uppercase tracking-widest text-[10px]">Pages Processed</span>
+<div class="font-data-mono text-[13px] text-on-surface">
+                                    4,200 <span class="text-outline">/ 5,000</span>
+</div>
+</div>
+<div class="h-1.5 w-full bg-[#1A1C23] border border-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[84%] rounded-full shadow-[0_0_10px_rgba(174,198,255,0.4)]"></div>
+</div>
+<p class="font-data-mono text-[10px] text-on-surface-variant text-right mt-1">Resets in 12 days</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile Bottom Nav Shell (Derived from JSON intent) -->
+<nav class="absolute bottom-0 w-full bg-background/95 backdrop-blur-xl border-t border-outline-variant h-[72px] flex justify-between items-center px-6 z-50 pb-safe">
+<!-- Home -->
+<button class="flex flex-col items-center gap-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-label text-[9px] uppercase tracking-wider">Home</span>
+</button>
+<!-- Documents -->
+<button class="flex flex-col items-center gap-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[24px]">description</span>
+<span class="font-label text-[9px] uppercase tracking-wider">Docs</span>
+</button>
+<!-- Workflows -->
+<button class="flex flex-col items-center gap-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[24px]">account_tree</span>
+<span class="font-label text-[9px] uppercase tracking-wider">Flows</span>
+</button>
+<!-- Settings (Active) -->
+<button class="flex flex-col items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label text-[9px] uppercase tracking-wider">Settings</span>
+</button>
+</nav>
+</div>
+</body></html>

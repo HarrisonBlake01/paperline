@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paperline - Mobile Document Viewer</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Inter+Tight:wght@500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#00275e",
+                        "background": "#111319",
+                        "on-primary": "#002e6b",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#472a00",
+                        "surface-bright": "#373940",
+                        "surface-container-highest": "#33353b",
+                        "surface-container-lowest": "#0c0e14",
+                        "on-secondary": "#432c02",
+                        "surface-variant": "#33353b",
+                        "primary-fixed-dim": "#aec6ff",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-container-high": "#282a30",
+                        "on-secondary-fixed": "#281800",
+                        "inverse-on-surface": "#2e3037",
+                        "inverse-surface": "#e1e2ea",
+                        "primary-fixed": "#d8e2ff",
+                        "on-surface": "#e1e2ea",
+                        "on-primary-fixed": "#001a43",
+                        "outline": "#8d909e",
+                        "on-secondary-fixed-variant": "#5c4216",
+                        "secondary": "#e7c189",
+                        "inverse-primary": "#1e5bba",
+                        "on-primary-fixed-variant": "#004397",
+                        "secondary-fixed-dim": "#e7c189",
+                        "tertiary-fixed": "#ffddb8",
+                        "secondary-fixed": "#ffddae",
+                        "surface-container-low": "#191b22",
+                        "on-surface-variant": "#c3c6d4",
+                        "secondary-container": "#5e4418",
+                        "primary-container": "#5d8ef1",
+                        "surface-container": "#1d1f26",
+                        "tertiary-container": "#ca8103",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#424752",
+                        "primary": "#aec6ff",
+                        "on-tertiary-container": "#3e2400",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-tint": "#aec6ff",
+                        "surface": "#111319",
+                        "on-background": "#e1e2ea",
+                        "surface-dim": "#111319",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-container": "#d7b37c",
+                        "tertiary": "#ffb960"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "stack-sm": "8px",
+                        "margin-page": "48px",
+                        "stack-xs": "4px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "stack-md": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "h3": ["Inter Tight"],
+                        "label": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "h1": ["Inter Tight"],
+                        "h2": ["Inter Tight"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label": ["12px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "450" }],
+                        "h1": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "h2": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background h-screen flex flex-col overflow-hidden font-body-sm text-body-sm antialiased selection:bg-primary-container/30">
+<!-- Task-Focused Header (Overrides global TopAppBar) -->
+<header class="flex-none h-14 bg-surface border-b border-outline-variant flex items-center justify-between px-stack-md z-20">
+<button class="flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors p-stack-xs rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center justify-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary">description</span>
+<h1 class="font-label text-label text-on-surface truncate max-w-[180px]">MSA_Acme_Corp_v2.pdf</h1>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="font-data-mono text-[10px] text-secondary uppercase tracking-widest leading-none">Analyzed</span>
+</div>
+</div>
+<button class="flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors p-stack-xs rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</header>
+<!-- Top Pane: PDF Viewer Area -->
+<main class="flex-1 relative bg-surface-container-low overflow-hidden flex justify-center items-center p-stack-md">
+<!-- Document Canvas -->
+<div class="w-full max-w-sm h-full bg-surface-bright border border-outline-variant rounded-sm shadow-md overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-80" data-alt="A close-up, high-contrast black and white photograph of a legal contract document. The image features dense paragraphs of structured text, subtle divider lines, and official-looking formatting. The lighting is bright and even, creating a crisp, technical aesthetic suitable for a digital document viewer interface. The mood is formal and authoritative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDg1Ek9RF_eV5tk0oxo4J3QUycZ9Hl07TXmFwHVpE1QUWzMvJ_5oIITm6alaZGYuE0YS2LUR0xW-jOnynp2vWOoClI0rWUU22_3UR6hKHCXZvKdF3hC5sqShjfw2Iph5Txk5kux-Tq-VejkIGLsKgL3750UNAOfvtGcmRSgYE-SuL--QHMKLYjn_4Mvn6oaEYK0tmMn8PkSFoBkWvmVQ7I644M-XQzJS-5s1sIFC6z7x4AlDUGffGPzTOGNQdbqy8ArFsVOD-CL4ZI"/>
+<!-- Simulated Highlights / AI bounding boxes -->
+<div class="absolute top-[20%] left-[10%] w-[40%] h-[5%] bg-secondary/20 border border-secondary/50 rounded-sm mix-blend-screen"></div>
+<div class="absolute top-[35%] left-[10%] w-[25%] h-[3%] bg-primary/20 border border-primary/50 rounded-sm mix-blend-screen"></div>
+</div>
+<!-- Floating Controls -->
+<div class="absolute bottom-stack-md left-1/2 -translate-x-1/2 flex items-center bg-surface-container-highest/90 backdrop-blur-sm border border-outline-variant rounded-full px-stack-md py-stack-xs gap-stack-md shadow-lg">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<div class="font-data-mono text-data-mono text-on-surface tracking-tight min-w-[3rem] text-center">
+                1<span class="text-on-surface-variant">/45</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</main>
+<!-- Bottom Pane: Collapsible AI Panel -->
+<section class="flex-none h-[397px] bg-surface flex flex-col border-t border-outline-variant relative z-10 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+<!-- Drag Handle Indicator -->
+<div class="w-full flex justify-center py-2 absolute top-0 left-0">
+<div class="w-10 h-1 bg-surface-container-highest rounded-full"></div>
+</div>
+<!-- AI Panel Header & Tabs -->
+<div class="flex items-end px-stack-lg pt-stack-lg border-b border-outline-variant gap-stack-lg">
+<!-- Active Tab: Extract -->
+<button class="flex items-center gap-2 pb-stack-sm border-b-2 border-primary relative group">
+<span class="material-symbols-outlined text-[16px] text-primary group-hover:text-primary-fixed transition-colors">data_object</span>
+<span class="font-label text-label text-primary group-hover:text-primary-fixed transition-colors">Extract</span>
+<!-- AI Sparkle indicator -->
+<span class="absolute -top-1 -right-3 material-symbols-outlined text-[10px] text-secondary">magic_button</span>
+</button>
+<!-- Inactive Tab: Chat -->
+<button class="flex items-center gap-2 pb-stack-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span class="font-label text-label">Chat</span>
+</button>
+<!-- Inactive Tab: Activity -->
+<button class="flex items-center gap-2 pb-stack-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span class="font-label text-label">Activity</span>
+</button>
+</div>
+<!-- Extract Tab Content Area -->
+<div class="flex-1 overflow-y-auto p-stack-md flex flex-col gap-stack-md bg-surface">
+<!-- Extracted Field 1 -->
+<div class="bg-surface-container border border-outline-variant rounded p-stack-sm flex flex-col gap-stack-xs relative overflow-hidden group hover:border-outline transition-colors">
+<!-- AI Feature Left Border -->
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-secondary"></div>
+<div class="flex justify-between items-center pl-stack-xs">
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Merchant Entity</span>
+<button class="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</button>
+</div>
+<div class="pl-stack-xs">
+<span class="font-data-mono text-[14px] text-on-surface tracking-tight">Acme Global Corporation</span>
+</div>
+<div class="flex items-center gap-2 pl-stack-xs mt-1">
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[98%] rounded-full"></div>
+</div>
+<span class="font-data-mono text-[10px] text-secondary">98%</span>
+</div>
+</div>
+<!-- Extracted Field 2 -->
+<div class="bg-surface-container border border-outline-variant rounded p-stack-sm flex flex-col gap-stack-xs relative overflow-hidden group hover:border-outline transition-colors">
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-secondary"></div>
+<div class="flex justify-between items-center pl-stack-xs">
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Total Contract Value</span>
+<button class="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</button>
+</div>
+<div class="pl-stack-xs">
+<span class="font-data-mono text-[14px] text-primary tracking-tight">$4,250,000.00</span>
+</div>
+<div class="flex items-center gap-2 pl-stack-xs mt-1">
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[92%] rounded-full"></div>
+</div>
+<span class="font-data-mono text-[10px] text-secondary">92%</span>
+</div>
+</div>
+<!-- Extracted Field 3 -->
+<div class="bg-surface-container border border-outline-variant rounded p-stack-sm flex flex-col gap-stack-xs relative overflow-hidden group hover:border-outline transition-colors">
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-secondary"></div>
+<div class="flex justify-between items-center pl-stack-xs">
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Effective Date</span>
+<button class="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</button>
+</div>
+<div class="pl-stack-xs">
+<span class="font-data-mono text-[14px] text-on-surface tracking-tight">2023-11-15</span>
+</div>
+<div class="flex items-center gap-2 pl-stack-xs mt-1">
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[100%] rounded-full"></div>
+</div>
+<span class="font-data-mono text-[10px] text-secondary">100%</span>
+</div>
+</div>
+</div>
+</section>
+</body></html>

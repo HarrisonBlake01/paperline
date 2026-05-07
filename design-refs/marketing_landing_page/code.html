@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Paperline - AI Document Intelligence</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter & JetBrains Mono & Inter Tight -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#00275e",
+                      "background": "#111319",
+                      "on-primary": "#002e6b",
+                      "error-container": "#93000a",
+                      "on-tertiary": "#472a00",
+                      "surface-bright": "#373940",
+                      "surface-container-highest": "#33353b",
+                      "surface-container-lowest": "#0c0e14",
+                      "on-secondary": "#432c02",
+                      "surface-variant": "#33353b",
+                      "primary-fixed-dim": "#aec6ff",
+                      "on-error": "#690005",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "surface-container-high": "#282a30",
+                      "on-secondary-fixed": "#281800",
+                      "inverse-on-surface": "#2e3037",
+                      "inverse-surface": "#e1e2ea",
+                      "primary-fixed": "#d8e2ff",
+                      "on-surface": "#e1e2ea",
+                      "on-primary-fixed": "#001a43",
+                      "outline": "#8d909e",
+                      "on-secondary-fixed-variant": "#5c4216",
+                      "secondary": "#e7c189",
+                      "inverse-primary": "#1e5bba",
+                      "on-primary-fixed-variant": "#004397",
+                      "secondary-fixed-dim": "#e7c189",
+                      "tertiary-fixed": "#ffddb8",
+                      "secondary-fixed": "#ffddae",
+                      "surface-container-low": "#191b22",
+                      "on-surface-variant": "#c3c6d4",
+                      "secondary-container": "#5e4418",
+                      "primary-container": "#5d8ef1",
+                      "surface-container": "#1d1f26",
+                      "tertiary-container": "#ca8103",
+                      "error": "#ffb4ab",
+                      "outline-variant": "#424752",
+                      "primary": "#aec6ff",
+                      "on-tertiary-container": "#3e2400",
+                      "tertiary-fixed-dim": "#ffb960",
+                      "on-tertiary-fixed": "#2a1700",
+                      "surface-tint": "#aec6ff",
+                      "surface": "#111319",
+                      "on-background": "#e1e2ea",
+                      "surface-dim": "#111319",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-container": "#d7b37c",
+                      "tertiary": "#ffb960"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-max": "1440px",
+                      "stack-sm": "8px",
+                      "margin-page": "48px",
+                      "stack-xs": "4px",
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "stack-md": "16px",
+                      "stack-lg": "32px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "h3": ["Inter Tight"],
+                      "label": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "data-mono": ["JetBrains Mono"],
+                      "h1": ["Inter Tight"],
+                      "h2": ["Inter Tight"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                      "h3": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                      "label": ["12px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                      "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                      "data-mono": ["13px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "450" }],
+                      "h1": ["40px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                      "h2": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Custom scrollbar for data sections */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: theme('colors.outline-variant'); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.outline'); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col">
+<!-- Marketing Navigation (Custom built, replacing app shell for marketing context) -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-outline-variant h-16 flex items-center justify-between px-gutter">
+<div class="flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-h3 text-h3 text-on-surface">Paperline</span>
+</div>
+<div class="hidden md:flex items-center gap-stack-lg">
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#features">Features</a>
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#demo">Demo</a>
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#pricing">Pricing</a>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="font-label text-label text-on-surface hover:text-primary transition-colors">Sign in</button>
+<button class="font-label text-label bg-primary-container text-on-primary-container px-4 py-2 rounded-xl hover:opacity-90 transition-opacity">Start free</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[120px] pb-margin-page px-gutter max-w-container-max mx-auto w-full flex flex-col gap-[120px]">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center w-full max-w-4xl mx-auto gap-stack-lg">
+<div class="flex flex-col gap-stack-md items-center">
+<div class="flex items-center gap-2 border border-secondary/30 bg-secondary/10 px-3 py-1.5 rounded-full mb-4">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-data-mono text-[11px] text-secondary tracking-wide uppercase">New: Vision API 2.0</span>
+</div>
+<h1 class="font-h1 text-[56px] leading-[1.05] tracking-[-0.03em] font-semibold text-on-surface">Turn documents into answers.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-2">Extract structured data and chat with your documents using enterprise-grade AI. Built for high-stakes accuracy and technical workflows.</p>
+</div>
+<div class="flex items-center gap-stack-md mt-4">
+<button class="font-label text-label bg-primary-container text-on-primary-container px-6 py-3 rounded-xl hover:opacity-90 transition-opacity">Start for free</button>
+<button class="font-label text-label border border-outline-variant text-on-surface px-6 py-3 rounded-xl hover:text-primary transition-colors">Book a demo</button>
+</div>
+<!-- Hero Mockup Container -->
+<div class="w-full mt-12 relative rounded-xl border border-outline-variant bg-surface-container-low p-2 overflow-hidden shadow-2xl shadow-black/50">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+<div class="w-full aspect-[16/9] rounded-lg bg-surface-container-lowest overflow-hidden border border-outline-variant flex">
+<!-- Left: Document View -->
+<div class="w-2/3 h-full border-r border-outline-variant relative bg-[#ececec]">
+<img alt="Document Mockup" class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="A clean, minimalist close-up shot of a complex financial invoice document lying flat. The document features structured tables, numerical data, and a modern corporate letterhead. The lighting is bright and even, simulating a high-quality scan within a digital interface. The overall mood is professional, precise, and analytical, fitting for a sophisticated AI document processing platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC38j9ZvoV4-h6vxGsMqLGwBnTFjnIe6tTpWH1dgMm0bR7uFGBoHL6hxe44c-sxiPClqWEJJ6sR0qV7WexVfNz6ZFrzu2wfCJC8K1r8u3oiBboUv7woFSMI0PlRU1ImYFcPvJWaXXxxxBPouL4BJJTNvPomnjK5ZyJuB_Q26oiARfhi7syMLKoNAPIFlPjpVi3VcTbMvsIJsX_Qsat3cigQOzT-d6bH7bNG7UIZ86073XLIZtBsDgb7f-vJWerdlQSXhtu7RWYtK60"/>
+</div>
+<!-- Right: AI Intelligence Panel -->
+<div class="w-1/3 h-full bg-surface p-4 flex flex-col gap-stack-md">
+<div class="flex items-center gap-2 border-b border-outline-variant pb-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">auto_awesome</span>
+<span class="font-label text-label text-on-surface">Extraction Results</span>
+</div>
+<div class="flex-grow overflow-y-auto">
+<pre class="font-data-mono text-[11px] text-primary-fixed-dim leading-relaxed">{
+  "vendor": "Acme Corp",
+  "invoice_id": "INV-2023-089",
+  "total_amount": 4520.00,
+  "confidence_score": 0.992,
+  "line_items": [
+    {
+      "desc": "Server Rack A",
+      "qty": 2,
+      "price": 1200.00
+    }
+  ]
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="flex flex-col gap-stack-lg pt-12" id="features">
+<div class="text-center max-w-2xl mx-auto mb-8">
+<h2 class="font-h2 text-h2 text-on-surface">Engineered for accuracy.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Everything you need to automate your document pipelines, built with technical minimalism and unparalleled precision.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors">
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-surface">cloud_upload</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">Upload anything</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Process PDFs, scans, images, and raw text formats with a single unified endpoint.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-[2px] bg-secondary"></div>
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-secondary">data_object</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">Extract data</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Transform unstructured documents into structured, type-safe JSON arrays automatically.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors">
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-surface">forum</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">Chat with citations</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ask questions across your document corpus and receive verifiable answers with exact source citations.</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors">
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-surface">schema</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">Templates</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Define rigid JSON schemas to guarantee output structures match your database requirements.</p>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors">
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-surface">group_work</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">Team workspaces</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Collaborate securely with granular RBAC, audit logs, and shared extraction rules.</p>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-6 flex flex-col gap-stack-sm hover:border-primary/50 transition-colors">
+<div class="h-10 w-10 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-on-surface">api</span>
+</div>
+<h3 class="font-label text-label text-on-surface text-[14px]">API First</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Integrate in minutes with our RESTful API and comprehensive webhooks architecture.</p>
+</div>
+</div>
+</section>
+<!-- Live Demo / Technical Preview -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter pt-12 items-center" id="demo">
+<div class="flex flex-col gap-stack-md pr-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">memory</span>
+<span class="font-data-mono text-[12px] text-secondary uppercase tracking-widest">Live Extraction</span>
+</div>
+<h2 class="font-h2 text-h2 text-on-surface">Confidence in every token.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">We don't just guess. Paperline provides token-level confidence scores, allowing you to build automated routing logic for human-in-the-loop verification only when necessary.</p>
+<ul class="flex flex-col gap-3 mt-4">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Zero-shot extraction logic</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Multi-page table spanning</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Handwriting recognition (OCR)</span>
+</li>
+</ul>
+</div>
+<!-- Code/Terminal Window -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+<div class="flex items-center justify-between px-4 py-2 border-b border-outline-variant bg-surface">
+<div class="flex gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+</div>
+<span class="font-data-mono text-[11px] text-on-surface-variant">response.json</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">content_copy</span>
+</div>
+<div class="p-6 overflow-x-auto">
+<pre class="font-data-mono text-[13px] leading-[1.6]"><span class="text-on-surface-variant">{</span>
+  <span class="text-primary-container">"status"</span><span class="text-on-surface-variant">:</span> <span class="text-secondary">"success"</span><span class="text-on-surface-variant">,</span>
+  <span class="text-primary-container">"processing_time_ms"</span><span class="text-on-surface-variant">:</span> <span class="text-[#a3defe]">842</span><span class="text-on-surface-variant">,</span>
+  <span class="text-primary-container">"data"</span><span class="text-on-surface-variant">: {</span>
+    <span class="text-primary-container">"merchant_name"</span><span class="text-on-surface-variant">: {</span>
+      <span class="text-primary-container">"value"</span><span class="text-on-surface-variant">:</span> <span class="text-secondary">"Global Logistics Inc."</span><span class="text-on-surface-variant">,</span>
+      <span class="text-primary-container">"confidence"</span><span class="text-on-surface-variant">:</span> <span class="text-[#a3defe]">0.998</span>
+    <span class="text-on-surface-variant">},</span>
+    <span class="text-primary-container">"tax_amount"</span><span class="text-on-surface-variant">: {</span>
+      <span class="text-primary-container">"value"</span><span class="text-on-surface-variant">:</span> <span class="text-[#a3defe]">45.20</span><span class="text-on-surface-variant">,</span>
+      <span class="text-primary-container">"confidence"</span><span class="text-on-surface-variant">:</span> <span class="text-[#a3defe]">0.985</span><span class="text-on-surface-variant">,</span>
+      <span class="text-primary-container">"flagged_for_review"</span><span class="text-on-surface-variant">:</span> <span class="text-error">false</span>
+    <span class="text-on-surface-variant">}</span>
+  <span class="text-on-surface-variant">}</span>
+<span class="text-on-surface-variant">}</span></pre>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="flex flex-col gap-stack-lg pt-12 mb-12" id="pricing">
+<div class="text-center max-w-2xl mx-auto mb-8">
+<h2 class="font-h2 text-h2 text-on-surface">Transparent, scalable pricing.</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Start building for free. Scale to enterprise volumes without friction.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
+<!-- Free Plan -->
+<div class="bg-surface border border-outline-variant rounded-xl p-8 flex flex-col">
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Developer</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="font-h1 text-[40px] font-semibold text-on-surface">$0</span>
+<span class="font-label text-label text-on-surface-variant">/mo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-8 pb-8 border-b border-outline-variant">Perfect for testing the API and building proof of concepts.</p>
+<ul class="flex flex-col gap-4 mb-8 flex-grow">
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">100 pages / month</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Standard extraction</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Community support</span></li>
+</ul>
+<button class="w-full font-label text-label border border-outline-variant text-on-surface py-3 rounded-xl hover:text-primary transition-colors">Start Free</button>
+</div>
+<!-- Pro Plan (Highlighted) -->
+<div class="bg-surface border border-primary relative rounded-xl p-8 flex flex-col shadow-[0_0_30px_rgba(93,142,241,0.1)]">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary-container text-on-primary-container font-label text-[10px] uppercase tracking-wider px-3 py-1 rounded-full">Most Popular</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Professional</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="font-h1 text-[40px] font-semibold text-on-surface">$49</span>
+<span class="font-label text-label text-on-surface-variant">/mo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-8 pb-8 border-b border-outline-variant">For production workloads requiring high accuracy and speed.</p>
+<ul class="flex flex-col gap-4 mb-8 flex-grow">
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">5,000 pages / month</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Advanced Table Extraction</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Confidence Scores</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Email Support</span></li>
+</ul>
+<button class="w-full font-label text-label bg-primary-container text-on-primary-container py-3 rounded-xl hover:opacity-90 transition-opacity">Upgrade to Pro</button>
+</div>
+<!-- Enterprise Plan -->
+<div class="bg-surface border border-outline-variant rounded-xl p-8 flex flex-col">
+<h3 class="font-h3 text-h3 text-on-surface mb-2">Enterprise</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="font-h1 text-[40px] font-semibold text-on-surface">Custom</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-8 pb-8 border-b border-outline-variant">Custom SLAs, dedicated infrastructure, and advanced security.</p>
+<ul class="flex flex-col gap-4 mb-8 flex-grow">
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Unlimited volume pricing</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Custom model fine-tuning</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">SSO &amp; Audit Logs</span></li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-outline-variant text-[18px]">check</span><span class="font-body-sm text-body-sm text-on-surface">Dedicated Account Manager</span></li>
+</ul>
+<button class="w-full font-label text-label border border-outline-variant text-on-surface py-3 rounded-xl hover:text-primary transition-colors">Contact Sales</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="border-t border-outline-variant bg-surface py-12 px-gutter">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-stack-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label text-label text-on-surface-variant">© 2024 Paperline Inc.</span>
+</div>
+<div class="flex gap-stack-lg">
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#">Privacy</a>
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms</a>
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#">Twitter</a>
+<a class="font-label text-label text-on-surface-variant hover:text-on-surface transition-colors" href="#">GitHub</a>
+</div>
+</div>
+</footer>
+</body></html>

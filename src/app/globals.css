@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   Paperline — design tokens
+   Dark by default, with a polished light variant on `.theme-light`.
+   ===================================================================== */
+
+:root {
+  /* Dark (default) */
+  --pl-bg:           #0B0B0F;
+  --pl-surface:      #14141A;
+  --pl-surface-2:    #1C1C24;
+  --pl-border:       #23232C;
+  --pl-fg:           #F4F4F5;
+  --pl-fg-dim:       #A1A1AA;
+  --pl-accent:       #5B8DEF;
+  --pl-accent-2:     #E8C28A;
+  --pl-success:      #4ADE80;
+  --pl-warning:      #FACC15;
+  --pl-danger:       #F87171;
+}
+
+.theme-light {
+  --pl-bg:           #FAFAF9;
+  --pl-surface:      #FFFFFF;
+  --pl-surface-2:    #F4F4F5;
+  --pl-border:       #E4E4E7;
+  --pl-fg:           #0F1115;
+  --pl-fg-dim:       #52525B;
+  --pl-accent:       #1A58B7;
+  --pl-accent-2:     #76592B;
+}
+
+@theme inline {
+  --color-pl-bg:        var(--pl-bg);
+  --color-pl-surface:   var(--pl-surface);
+  --color-pl-surface-2: var(--pl-surface-2);
+  --color-pl-border:    var(--pl-border);
+  --color-pl-fg:        var(--pl-fg);
+  --color-pl-fg-dim:    var(--pl-fg-dim);
+  --color-pl-accent:    var(--pl-accent);
+  --color-pl-accent-2:  var(--pl-accent-2);
+
+  --font-sans:    var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono:    var(--font-mono);
+}
+
+* {
+  border-color: var(--pl-border);
+}
+
+html, body {
+  background: var(--pl-bg);
+  color: var(--pl-fg);
+  font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--pl-accent) 30%, transparent);
+}
