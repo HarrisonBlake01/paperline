@@ -9,6 +9,7 @@ import {
   Settings,
   Workflow,
 } from "lucide-react";
+import { PaperlineMark } from "@/components/paperline-mark";
 
 const NAV = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -24,13 +25,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen grid-cols-[clamp(220px,22vw,260px)_1fr]">
       <aside className="sticky top-0 flex h-screen min-w-0 flex-col overflow-hidden border-r border-pl-border bg-pl-surface">
-        <div className="flex items-center gap-2 px-5 py-5 font-[var(--font-display)] text-base font-semibold tracking-tight">
-          <span
-            className="inline-block h-4 w-4 shrink-0 rounded-sm border border-pl-fg/80"
-            aria-hidden
-          />
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2.5 px-5 py-5 font-[var(--font-display)] text-xl font-semibold tracking-tight hover:opacity-90"
+        >
+          <PaperlineMark className="h-7 w-7 shrink-0 text-[var(--pl-accent)]" />
           <span className="truncate">paperline</span>
-        </div>
+        </Link>
         <nav className="flex-1 overflow-y-auto px-2">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
