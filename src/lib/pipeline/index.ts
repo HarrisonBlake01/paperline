@@ -67,10 +67,16 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
 
     // Parse
     let parsed;
+    let ocrMeta: { truncated: boolean; totalPages: number } | null = null;
     if (doc.mime_type === "application/pdf") {
       parsed = await parsePdf(buf);
       if (looksLikeScan(parsed)) {
-        parsed = await parseScannedPdfWithOcr(buf);
+        const ocrParsed = await parseScannedPdfWithOcr(buf, parsed.pageCount);
+        ocrMeta = {
+          truncated: ocrParsed.truncated,
+          totalPages: ocrParsed.totalPages,
+        };
+        parsed = ocrParsed;
       }
     } else if (doc.mime_type === "text/plain") {
       parsed = parsePlainText(buf);
@@ -93,8 +99,10 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
     }
 
     // Classify (unless forced)
-    let docType = opts.forceDocType ?? doc.doc_type;
-    if (!docType) {
+    let docType: DocType;
+    if (opts.forceDocType) {
+      docType = opts.forceDocType;
+    } else {
       try {
         docType = await classifyDocument(parsed.text);
       } catch {
@@ -153,7 +161,11 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
       action: "document.processed",
       target_type: "document",
       target_id: doc.id,
-      metadata: { page_count: parsed.pageCount, doc_type: docType },
+      metadata: {
+        page_count: parsed.pageCount,
+        doc_type: docType,
+        ocr: ocrMeta ?? undefined,
+      },
     });
 
     const uploader = await getBasicUser(doc.uploader_id);

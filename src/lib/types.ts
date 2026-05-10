@@ -3,7 +3,23 @@
 // =====================================================================
 
 export type DocStatus = "queued" | "processing" | "ready" | "failed";
-export type DocType = "invoice" | "contract" | "resume" | "report" | "other";
+export type DocType =
+  | "invoice"
+  | "receipt"
+  | "contract"
+  | "agreement"
+  | "resume"
+  | "report"
+  | "letter"
+  | "email"
+  | "memo"
+  | "form"
+  | "manual"
+  | "worksheet"
+  | "presentation"
+  | "spreadsheet"
+  | "note"
+  | "other";
 export type ExtractionStatus = "queued" | "processing" | "succeeded" | "failed";
 export type Role = "owner" | "admin" | "member";
 

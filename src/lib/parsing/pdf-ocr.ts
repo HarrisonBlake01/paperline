@@ -3,10 +3,14 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { extractTextFromImageBuffer } from "@/lib/ai/ocr";
+import {
+  OCR_LIMITS,
+  extractTextFromImageBuffer,
+  runWithConcurrency,
+} from "@/lib/ai/ocr";
 
 const execFileAsync = promisify(execFile);
-const MAX_OCR_PDF_PAGES = 10;
+
 const SWIFT_RENDER_SCRIPT = String.raw`
 import Foundation
 import PDFKit
@@ -44,9 +48,14 @@ export interface ParsedOcrPdf {
   text: string;
   pageCount: number;
   pages: { page: number; text: string }[];
+  truncated: boolean;
+  totalPages: number;
 }
 
-export async function parseScannedPdfWithOcr(buffer: Buffer): Promise<ParsedOcrPdf> {
+export async function parseScannedPdfWithOcr(
+  buffer: Buffer,
+  totalPages: number,
+): Promise<ParsedOcrPdf> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "paperline-pdf-ocr-"));
   const pdfPath = path.join(tempDir, "input.pdf");
   const outputDir = path.join(tempDir, "pages");
@@ -54,27 +63,37 @@ export async function parseScannedPdfWithOcr(buffer: Buffer): Promise<ParsedOcrP
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(pdfPath, buffer);
 
+  const limit = OCR_LIMITS.maxPdfPages;
+  const truncated = totalPages > limit;
+
   try {
-    await execFileAsync("swift", ["-e", SWIFT_RENDER_SCRIPT, pdfPath, outputDir, String(MAX_OCR_PDF_PAGES)], {
-      maxBuffer: 10 * 1024 * 1024,
-    });
+    await execFileAsync(
+      "swift",
+      ["-e", SWIFT_RENDER_SCRIPT, pdfPath, outputDir, String(limit)],
+      { maxBuffer: 10 * 1024 * 1024 },
+    );
 
     const files = (await fs.readdir(outputDir))
       .filter((name) => name.endsWith(".png"))
       .sort();
 
-    const pages: { page: number; text: string }[] = [];
-    for (const [index, file] of files.entries()) {
+    const ocrResults = await runWithConcurrency(files, async (file) => {
       const imageBuffer = await fs.readFile(path.join(outputDir, file));
-      const text = await extractTextFromImageBuffer(imageBuffer, "image/png");
-      pages.push({ page: index + 1, text: text.trim() });
-    }
+      return extractTextFromImageBuffer(imageBuffer, "image/png");
+    });
+
+    const pages = ocrResults.map((text, index) => ({
+      page: index + 1,
+      text: text.trim(),
+    }));
 
     const combined = pages.map((p) => p.text).filter(Boolean).join("\n\n");
     return {
       text: combined,
       pageCount: pages.length,
       pages,
+      truncated,
+      totalPages,
     };
   } finally {
     await fs.rm(tempDir, { recursive: true, force: true });

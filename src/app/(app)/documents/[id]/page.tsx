@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { explainDocumentFailure } from "@/lib/documents/failure";
+import { ReprocessButton } from "@/components/reprocess-button";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,9 @@ export default async function DocumentDetailPage({
   if (!doc) notFound();
 
   const failure = explainDocumentFailure(doc.error_message, doc.mime_type);
+  const ocrMeta = (doc.metadata && typeof doc.metadata === "object"
+    ? (doc.metadata as Record<string, unknown>).ocr
+    : null) as { truncated?: boolean; totalPages?: number } | null;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-10">
@@ -46,16 +50,19 @@ export default async function DocumentDetailPage({
             {doc.page_count ? ` · ${doc.page_count} pages` : ""}
           </p>
         </div>
-        <form action={`/api/documents/${doc.id}/process`} method="post">
-          <button className="rounded-lg border border-pl-border px-3 py-2 text-sm hover:bg-pl-surface">
-            Re-process
-          </button>
-        </form>
+        <ReprocessButton documentId={doc.id} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-2xl border border-pl-border bg-pl-surface p-5">
-          <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Extracted text preview</div>
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Extracted text preview</div>
+            {ocrMeta?.truncated && ocrMeta.totalPages ? (
+              <div className="text-[11px] text-amber-300">
+                OCR limited to first {doc.page_count} of {ocrMeta.totalPages} pages
+              </div>
+            ) : null}
+          </div>
           <pre className="mt-4 max-h-[70vh] overflow-auto whitespace-pre-wrap font-sans text-sm leading-6 text-pl-fg/90">
             {doc.text_content?.slice(0, 15000) || "No extracted text yet."}
           </pre>
