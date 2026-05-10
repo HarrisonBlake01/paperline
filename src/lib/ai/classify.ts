@@ -51,13 +51,15 @@ export async function classifyDocument(text: string): Promise<DocType> {
   const openai = getOpenAI();
   const excerpt = text.slice(0, 4000);
 
-  console.log(
-    `[classifyDocument] start ${JSON.stringify({
-      model: MODELS.extraction,
-      excerptLength: excerpt.length,
-      excerptPreview: excerpt.slice(0, 200),
-    })}`,
-  );
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      `[classifyDocument] start ${JSON.stringify({
+        model: MODELS.extraction,
+        excerptLength: excerpt.length,
+        excerptPreview: excerpt.slice(0, 200),
+      })}`,
+    );
+  }
 
   const resp = await openai.chat.completions.create({
     model: MODELS.extraction,
@@ -77,14 +79,16 @@ export async function classifyDocument(text: string): Promise<DocType> {
   const exact = ALLOWED_DOC_TYPES.find((d) => tokens.includes(d));
   const fuzzy = exact ?? ALLOWED_DOC_TYPES.find((d) => raw.includes(d));
 
-  console.log(
-    `[classifyDocument] result ${JSON.stringify({
-      raw,
-      matched: fuzzy ?? null,
-      finishReason: resp.choices[0]?.finish_reason ?? null,
-      usage: resp.usage ?? null,
-    })}`,
-  );
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      `[classifyDocument] result ${JSON.stringify({
+        raw,
+        matched: fuzzy ?? null,
+        finishReason: resp.choices[0]?.finish_reason ?? null,
+        usage: resp.usage ?? null,
+      })}`,
+    );
+  }
 
   if (!fuzzy) {
     console.warn(
