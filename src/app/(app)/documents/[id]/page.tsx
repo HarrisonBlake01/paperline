@@ -4,6 +4,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { explainDocumentFailure } from "@/lib/documents/failure";
 import { ReprocessButton } from "@/components/reprocess-button";
 import { ChatWithDocButton } from "@/components/chat-with-doc-button";
+import { RunExtractionForm } from "@/components/run-extraction-form";
+import type { TemplateRow } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,7 @@ export default async function DocumentDetailPage({
   const { id } = await params;
 
   const sb = createServiceClient();
-  const [{ data: doc }, { data: extractions }] = await Promise.all([
+  const [{ data: doc }, { data: extractions }, { data: templates }] = await Promise.all([
     sb
       .from("documents")
       .select("*")
@@ -30,6 +32,12 @@ export default async function DocumentDetailPage({
       .eq("document_id", id)
       .eq("workspace_id", ctx.workspace.id)
       .order("created_at", { ascending: false }),
+    sb
+      .from("templates")
+      .select("*")
+      .or(`workspace_id.is.null,workspace_id.eq.${ctx.workspace.id}`)
+      .order("is_builtin", { ascending: false })
+      .order("name", { ascending: true }),
   ]);
 
   if (!doc) notFound();
@@ -38,6 +46,8 @@ export default async function DocumentDetailPage({
   const ocrMeta = (doc.metadata && typeof doc.metadata === "object"
     ? (doc.metadata as Record<string, unknown>).ocr
     : null) as { truncated?: boolean; totalPages?: number } | null;
+  const templateRows = (templates ?? []) as TemplateRow[];
+  const templateNames = new Map(templateRows.map((template) => [template.id, template.name]));
 
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-10">
@@ -97,12 +107,30 @@ export default async function DocumentDetailPage({
 
           <section className="rounded-2xl border border-pl-border bg-pl-surface p-5">
             <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Extractions</div>
+            <p className="mt-2 text-sm text-pl-fg-dim">
+              Pick a template to turn this document into structured fields.
+              Paperline suggests a template from the detected type, or AI can create a reusable custom template from this document.
+            </p>
+            <div className="mt-4">
+              <RunExtractionForm
+                documentId={doc.id}
+                disabled={doc.status !== "ready"}
+                suggestedDocType={doc.doc_type}
+                templates={templateRows.map((template) => ({
+                  id: template.id,
+                  name: template.name,
+                  docType: template.doc_type,
+                  fieldCount: template.schema.fields?.length ?? 0,
+                  isBuiltin: template.is_builtin,
+                }))}
+              />
+            </div>
             <div className="mt-4 space-y-3">
               {extractions?.length ? (
                 extractions.map((ex) => (
                   <div key={ex.id} className="rounded-xl border border-pl-border p-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
-                      <span>{ex.status}</span>
+                      <span>{templateNames.get(ex.template_id) ?? "Template"} · {ex.status}</span>
                       <span className="font-mono text-xs text-pl-fg-dim">{ex.model ?? "—"}</span>
                     </div>
                     {ex.result ? (

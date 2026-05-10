@@ -74,6 +74,12 @@ export interface TemplateRow {
   doc_type: DocType;
   schema: TemplateSchema;
   is_builtin: boolean;
+  is_community?: boolean;
+  source_template_id?: string | null;
+  published_by?: string | null;
+  published_at?: string | null;
+  upvotes_count?: number;
+  uses_count?: number;
   created_by: string | null;
   created_at: string;
 }

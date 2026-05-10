@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, FileText, Layers, MessageSquare, Sparkles, Users, Zap } from "lucide-react";
+import { PaperlineMark } from "@/components/paperline-mark";
 import { PLANS } from "@/lib/plans";
 
 export default function HomePage() {
@@ -9,7 +10,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-30 border-b border-pl-border/70 backdrop-blur supports-[backdrop-filter]:bg-pl-bg/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2 font-[var(--font-display)] text-lg font-semibold tracking-tight">
-            <span className="inline-block h-5 w-5 rounded-sm border border-pl-fg/80" aria-hidden />
+            <PaperlineMark className="h-5 w-5 shrink-0 text-pl-fg" />
             paperline
           </Link>
           <nav className="hidden items-center gap-7 text-sm text-pl-fg-dim md:flex">

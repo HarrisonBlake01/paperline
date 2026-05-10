@@ -12,6 +12,7 @@ export interface Plan {
   pagesPerMonth: number; // -1 = unlimited
   seats: number; // -1 = unlimited
   customTemplates: boolean;
+  aiTemplateGenerationsPerMonth: number; // -1 = unlimited
   integrations: boolean;
   apiAccess: boolean;
   sso: boolean;
@@ -29,9 +30,10 @@ export const PLANS: Record<PlanId, Plan> = {
     name: "Free",
     priceMonthly: 0,
     priceCents: 0,
-    pagesPerMonth: 50,
+    pagesPerMonth: 25,
     seats: 1,
-    customTemplates: false,
+    customTemplates: true,
+    aiTemplateGenerationsPerMonth: 1,
     integrations: false,
     apiAccess: false,
     sso: false,
@@ -39,9 +41,11 @@ export const PLANS: Record<PlanId, Plan> = {
     prioritizedQueue: false,
     description: "Try Paperline with a small monthly allowance.",
     features: [
-      "50 pages / month",
+      "25 pages / month",
       "1 user",
       "4 built-in templates (Invoice, Contract, Resume, Report)",
+      "Community template library",
+      "1 AI-generated custom template / month",
       "Document chat with citations",
       "Paperline branding on shared links",
     ],
@@ -54,6 +58,7 @@ export const PLANS: Record<PlanId, Plan> = {
     pagesPerMonth: 1_000,
     seats: 3,
     customTemplates: true,
+    aiTemplateGenerationsPerMonth: 25,
     integrations: true,
     apiAccess: false,
     sso: false,
@@ -65,6 +70,8 @@ export const PLANS: Record<PlanId, Plan> = {
       "1,000 pages / month",
       "Up to 3 users",
       "Custom extraction templates",
+      "Community template publishing + reuse",
+      "25 AI-generated custom templates / month",
       "Google Drive, Dropbox, email-to-inbox",
       "Priority email support",
       "Remove Paperline branding",
@@ -79,6 +86,7 @@ export const PLANS: Record<PlanId, Plan> = {
     pagesPerMonth: 10_000,
     seats: -1,
     customTemplates: true,
+    aiTemplateGenerationsPerMonth: 250,
     integrations: true,
     apiAccess: true,
     sso: true,
@@ -89,6 +97,8 @@ export const PLANS: Record<PlanId, Plan> = {
       "10,000 pages / month",
       "Unlimited users",
       "API access + webhooks",
+      "Community template publishing + reuse",
+      "250 AI-generated custom templates / month",
       "Priority processing queue",
       "SSO (Google Workspace)",
       "Audit log export",
@@ -103,6 +113,7 @@ export const PLANS: Record<PlanId, Plan> = {
     pagesPerMonth: -1,
     seats: -1,
     customTemplates: true,
+    aiTemplateGenerationsPerMonth: -1,
     integrations: true,
     apiAccess: true,
     sso: true,
@@ -111,6 +122,7 @@ export const PLANS: Record<PlanId, Plan> = {
     description: "Custom volume, dedicated support, security review.",
     features: [
       "Custom page volume",
+      "Custom AI template generation volume",
       "Dedicated success manager",
       "DPA / MSA / security review",
       "Custom SSO + role mapping",

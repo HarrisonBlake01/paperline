@@ -3,9 +3,8 @@ import type { SVGProps } from "react";
 /**
  * Paperline mark.
  *
- * Concept: a sheet of paper with a single continuous line that exits the page
- * and becomes the underline of the wordmark. The "P" is suggested by the
- * folded corner of the sheet. The line itself = "the paperline".
+ * Updated to match the submitted logo: a minimal document outline with a
+ * folded corner and a single blue paperline wave through the center.
  */
 export function PaperlineMark({
   className,
@@ -19,56 +18,33 @@ export function PaperlineMark({
       className={className}
       {...rest}
     >
-      {/* Soft accent backdrop */}
-      <rect
-        x={5}
-        y={3}
-        width={22}
-        height={26}
-        rx={4}
-        fill="currentColor"
-        opacity={0.12}
-      />
-
       {/* Sheet of paper */}
       <path
-        d="M9 4h11l5 5v17a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
+        d="M8.5 3.5h10.9L25.5 9.6v16.1a2.8 2.8 0 0 1-2.8 2.8H8.5a2.8 2.8 0 0 1-2.8-2.8V6.3a2.8 2.8 0 0 1 2.8-2.8z"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
+        stroke="color-mix(in srgb, currentColor 72%, white)"
+        strokeWidth={2.1}
         strokeLinejoin="round"
       />
 
-      {/* Folded corner — also forms the bowl of a stylized "P" */}
+      {/* Folded corner */}
       <path
-        d="M20 4v4a2 2 0 0 0 2 2h3"
+        d="M19.4 3.8v4.1a2.1 2.1 0 0 0 2.1 2.1h3.8"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
+        stroke="color-mix(in srgb, currentColor 72%, white)"
+        strokeWidth={2.1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* The "line" — a single continuous stroke that flows across the page,
-          dips, exits the right edge, and underlines beyond the sheet. */}
+      {/* The paperline */}
       <path
-        d="M10 16
-           C 14 16, 14 21, 18 21
-           S 22 16, 26 16
-           L 30 16"
+        d="M6.9 16.2h7.2c2.1 0 2.9 3.8 5.1 3.8 2.4 0 3.2-3.8 5.4-3.8h4.5"
         fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
+        stroke="var(--pl-accent)"
+        strokeWidth={2.25}
         strokeLinecap="round"
-      />
-
-      {/* A second, lighter line to suggest "lines on paper" */}
-      <path
-        d="M10 23h8"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        opacity={0.55}
+        strokeLinejoin="round"
       />
     </svg>
   );
