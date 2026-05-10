@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
+import { explainDocumentFailure } from "@/lib/documents/failure";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ export default async function DocumentDetailPage({
   ]);
 
   if (!doc) notFound();
+
+  const failure = explainDocumentFailure(doc.error_message, doc.mime_type);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-10">
@@ -61,6 +64,15 @@ export default async function DocumentDetailPage({
         <aside className="space-y-6">
           <section className="rounded-2xl border border-pl-border bg-pl-surface p-5">
             <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Details</div>
+            {failure ? (
+              <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm">
+                <div className="font-medium text-red-300">{failure.title}</div>
+                <p className="mt-1 text-red-200/90">{failure.guidance}</p>
+                {doc.error_message ? (
+                  <p className="mt-3 font-mono text-xs text-red-200/80">Raw error: {doc.error_message}</p>
+                ) : null}
+              </div>
+            ) : null}
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-pl-fg-dim">Status</dt><dd>{doc.status}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-pl-fg-dim">Type</dt><dd>{doc.doc_type ?? "—"}</dd></div>

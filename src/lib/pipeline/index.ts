@@ -15,6 +15,10 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordUsage } from "@/lib/auth/usage";
 import { parsePdf, looksLikeScan } from "@/lib/parsing/pdf";
+import { parseScannedPdfWithOcr } from "@/lib/parsing/pdf-ocr";
+import { parsePlainText } from "@/lib/parsing/text";
+import { parseDocx } from "@/lib/parsing/docx";
+import { parseImageWithOcr } from "@/lib/parsing/image";
 import { chunkPages } from "@/lib/parsing/chunk";
 import { embedTexts } from "@/lib/ai/embed";
 import { classifyDocument } from "@/lib/ai/classify";
@@ -28,6 +32,10 @@ export interface ProcessOptions {
    * If provided, skip auto-classification and force this doc_type.
    */
   forceDocType?: DocType;
+}
+
+function unsupportedDocumentMessage(mimeType: string): string {
+  return `Unsupported document type for processing: ${mimeType}`;
 }
 
 export async function processDocument(opts: ProcessOptions): Promise<void> {
@@ -58,11 +66,30 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
     const buf = Buffer.from(await file.arrayBuffer());
 
     // Parse
-    const parsed = await parsePdf(buf);
-    if (looksLikeScan(parsed)) {
-      throw new Error(
-        "This PDF appears to be a scan with no embedded text. OCR support is coming soon.",
-      );
+    let parsed;
+    if (doc.mime_type === "application/pdf") {
+      parsed = await parsePdf(buf);
+      if (looksLikeScan(parsed)) {
+        parsed = await parseScannedPdfWithOcr(buf);
+      }
+    } else if (doc.mime_type === "text/plain") {
+      parsed = parsePlainText(buf);
+    } else if (
+      doc.mime_type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      parsed = await parseDocx(buf);
+    } else if (
+      doc.mime_type === "image/png" ||
+      doc.mime_type === "image/jpeg"
+    ) {
+      parsed = await parseImageWithOcr(buf, doc.mime_type);
+    } else {
+      throw new Error(unsupportedDocumentMessage(doc.mime_type));
+    }
+
+    if (!parsed.text.trim()) {
+      throw new Error("No readable text could be extracted from this file.");
     }
 
     // Classify (unless forced)
@@ -169,6 +196,11 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
+    console.error("[pipeline.processDocument] failed", {
+      documentId: doc.id,
+      mimeType: doc.mime_type,
+      detail: message,
+    });
     await sb
       .from("documents")
       .update({ status: "failed", error_message: message })

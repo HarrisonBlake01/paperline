@@ -8,11 +8,31 @@ const isProtectedRoute = createRouteMatcher([
   "/chats(.*)",
   "/integrations(.*)",
   "/settings(.*)",
-  "/api/(?!webhooks|public).*",
+]);
+
+const isApiRoute = createRouteMatcher([
+  "/api/:path*",
+]);
+
+const isPublicApiRoute = createRouteMatcher([
+  "/api/webhooks(.*)",
+  "/api/public(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
+    await auth.protect();
+    return;
+  }
+
+  if (
+    req.nextUrl.pathname.match(/^\/api\/documents\/[^/]+\/process$/) &&
+    req.headers.get("x-internal-trigger") === "1"
+  ) {
+    return;
+  }
+
+  if (isApiRoute(req) && !isPublicApiRoute(req)) {
     await auth.protect();
   }
 });

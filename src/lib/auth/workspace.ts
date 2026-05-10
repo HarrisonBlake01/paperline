@@ -4,6 +4,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { provisionPersonalWorkspace } from "@/lib/auth/provision";
 import type { Role, Workspace } from "@/lib/types";
 
 export interface WorkspaceContext {
@@ -34,7 +35,9 @@ export async function getActiveWorkspace(
     .eq("user_id", userId);
 
   if (mErr) throw mErr;
-  if (!memberships?.length) return null;
+  if (!memberships?.length) {
+    return provisionPersonalWorkspace(userId);
+  }
 
   const target =
     memberships.find((m) => m.workspace_id === preferredWorkspaceId) ??

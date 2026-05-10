@@ -6,6 +6,8 @@
 // path in that case (planned: tesseract.js or AWS Textract).
 // =====================================================================
 
+import fs from "node:fs";
+import path from "node:path";
 import { PDFParse } from "pdf-parse";
 
 export interface ParsedPdf {
@@ -17,7 +19,11 @@ export interface ParsedPdf {
 /**
  * Parse a PDF buffer into per-page text using pdf-parse v2's class API.
  */
+const pdfPackageDir = fs.realpathSync(path.join(process.cwd(), "node_modules", "pdf-parse"));
+const pdfWorkerPath = path.join(pdfPackageDir, "dist", "worker", "pdf.worker.mjs");
+
 export async function parsePdf(buffer: Buffer): Promise<ParsedPdf> {
+  PDFParse.setWorker(pdfWorkerPath);
   const parser = new PDFParse({ data: new Uint8Array(buffer) });
   const result = await parser.getText();
   const pageRecords = (result.pages ?? []).map((p, i) => ({

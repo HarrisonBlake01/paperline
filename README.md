@@ -74,8 +74,13 @@ Visit <http://localhost:3000>.
 ### Setting up auth
 
 1. Create a Clerk app, paste keys into `.env.local`.
-2. In Clerk dashboard, configure the JWT template that Supabase uses for RLS
+2. Add a Clerk webhook pointing to `/api/webhooks/clerk` and set
+   `CLERK_WEBHOOK_SECRET` in `.env.local`.
+3. In Clerk dashboard, configure the JWT template that Supabase uses for RLS
    (claim: `sub`).
+
+Paperline now also auto-provisions a personal workspace on first authenticated
+request as a fallback, so signup is not blocked if the webhook is delayed.
 
 ### Setting up payments
 

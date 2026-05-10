@@ -16,7 +16,7 @@ create extension if not exists "vector";
 -- =====================================================================
 
 create table workspaces (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   slug            text unique not null,
   name            text not null,
   logo_url        text,
@@ -45,7 +45,7 @@ create index workspace_members_user_idx on workspace_members(user_id);
 -- =====================================================================
 
 create table folders (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   name            text not null,
   color           text,
@@ -60,7 +60,7 @@ create index folders_workspace_idx on folders(workspace_id);
 -- =====================================================================
 
 create table documents (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   folder_id       uuid references folders(id) on delete set null,
   uploader_id     text not null,
@@ -85,7 +85,7 @@ create index documents_doc_type_idx on documents(doc_type);
 
 -- Tags (many-to-many)
 create table tags (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   name            text not null,
   color           text,
@@ -103,7 +103,7 @@ create table document_tags (
 -- =====================================================================
 
 create table document_chunks (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   document_id     uuid not null references documents(id) on delete cascade,
   chunk_index     int not null,
@@ -116,17 +116,17 @@ create table document_chunks (
 
 create index document_chunks_doc_idx on document_chunks(document_id);
 create index document_chunks_workspace_idx on document_chunks(workspace_id);
--- HNSW index for semantic search (cosine distance)
-create index document_chunks_embedding_idx
-  on document_chunks
-  using hnsw (embedding vector_cosine_ops);
+-- NOTE: Intentionally skipping an ANN index here for launch.
+-- This Supabase pgvector instance rejects HNSW indexes on 3072-dimension
+-- `vector` columns. We can add a compatible index later after either
+-- reducing dimensions or switching index/type strategy.
 
 -- =====================================================================
 -- Extraction templates + runs
 -- =====================================================================
 
 create table templates (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid references workspaces(id) on delete cascade,  -- null = built-in
   name            text not null,
   description     text,
@@ -141,7 +141,7 @@ create index templates_workspace_idx on templates(workspace_id);
 create index templates_doctype_idx on templates(doc_type);
 
 create table extractions (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   document_id     uuid not null references documents(id) on delete cascade,
   template_id     uuid not null references templates(id),
@@ -165,7 +165,7 @@ create index extractions_workspace_idx on extractions(workspace_id);
 -- =====================================================================
 
 create table workflows (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   name            text not null,
   template_id     uuid not null references templates(id),
@@ -178,7 +178,7 @@ create table workflows (
 );
 
 create table workflow_items (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workflow_id     uuid not null references workflows(id) on delete cascade,
   document_id     uuid not null references documents(id) on delete cascade,
   extraction_id   uuid references extractions(id),
@@ -193,7 +193,7 @@ create index workflow_items_workflow_idx on workflow_items(workflow_id);
 -- =====================================================================
 
 create table chats (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   title           text,
   created_by      text not null,
@@ -207,7 +207,7 @@ create table chat_documents (
 );
 
 create table chat_messages (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   chat_id         uuid not null references chats(id) on delete cascade,
   role            text not null check (role in ('user','assistant','system')),
   content         text not null,
@@ -222,7 +222,7 @@ create index chat_messages_chat_idx on chat_messages(chat_id, created_at);
 -- =====================================================================
 
 create table api_keys (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   name            text not null,
   prefix          text not null,                          -- e.g. "pl_live_a1b2"
@@ -240,7 +240,7 @@ create index api_keys_workspace_idx on api_keys(workspace_id);
 -- =====================================================================
 
 create table audit_logs (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   actor_user_id   text,
   action          text not null,                          -- e.g. 'document.uploaded'
@@ -257,7 +257,7 @@ create index audit_logs_workspace_idx on audit_logs(workspace_id, created_at des
 -- =====================================================================
 
 create table usage_events (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   workspace_id    uuid not null references workspaces(id) on delete cascade,
   kind            text not null check (kind in ('pages','tokens','storage')),
   amount          int not null,

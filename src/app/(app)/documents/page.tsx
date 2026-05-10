@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
+import { explainDocumentFailure } from "@/lib/documents/failure";
 import { formatBytes } from "@/lib/utils";
 import { FileText } from "lucide-react";
 
@@ -62,13 +63,20 @@ export default async function DocumentsPage() {
                   className="border-b border-pl-border/60 last:border-0"
                 >
                   <td className="px-4 py-3">
-                    <Link
-                      href={`/documents/${d.id}`}
-                      className="inline-flex items-center gap-2 hover:text-[var(--pl-accent)]"
-                    >
-                      <FileText className="h-4 w-4 text-pl-fg-dim" strokeWidth={1.5} />
-                      {d.filename}
-                    </Link>
+                    <div>
+                      <Link
+                        href={`/documents/${d.id}`}
+                        className="inline-flex items-center gap-2 hover:text-[var(--pl-accent)]"
+                      >
+                        <FileText className="h-4 w-4 text-pl-fg-dim" strokeWidth={1.5} />
+                        {d.filename}
+                      </Link>
+                      {d.status === "failed" ? (
+                        <p className="mt-1 text-xs text-red-300">
+                          {explainDocumentFailure(d.error_message, d.mime_type)?.title ?? "Processing failed"}
+                        </p>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-pl-fg-dim">{d.doc_type ?? "—"}</td>
                   <td className="px-4 py-3 font-mono text-xs">

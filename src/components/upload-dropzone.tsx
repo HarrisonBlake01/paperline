@@ -30,8 +30,21 @@ export function UploadDropzone({ onUploaded }: { onUploaded?: (doc: UploadedDoc)
             body: fd,
           });
           if (!res.ok) {
-            const detail = await res.text();
-            toast.error(`Upload failed: ${file.name}`, { description: detail });
+            let description = await res.text();
+            try {
+              const parsed = JSON.parse(description) as {
+                error?: string;
+                detail?: string;
+                mime?: string;
+                maxBytes?: number;
+              };
+              description = parsed.detail
+                ? `${parsed.error ?? "upload_failed"}: ${parsed.detail}`
+                : parsed.error ?? description;
+            } catch {
+              // keep raw text if response is not JSON
+            }
+            toast.error(`Upload failed: ${file.name}`, { description });
             continue;
           }
           const { document: doc } = await res.json();

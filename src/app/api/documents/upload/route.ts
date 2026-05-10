@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     ctx = await requireWorkspace();
   } catch (e) {
     if (e instanceof Response) return e;
+    console.error("[documents.upload] workspace resolution failed", e);
     throw e;
   }
 
@@ -73,6 +74,11 @@ export async function POST(req: Request) {
       upsert: false,
     });
   if (upErr) {
+    console.error("[documents.upload] storage upload failed", {
+      bucket,
+      storagePath,
+      detail: upErr.message,
+    });
     return NextResponse.json(
       { error: "storage_upload_failed", detail: upErr.message },
       { status: 500 },
@@ -95,13 +101,19 @@ export async function POST(req: Request) {
     .select()
     .single();
   if (insErr) {
+    console.error("[documents.upload] document insert failed", {
+      workspaceId: ctx.workspace.id,
+      userId: ctx.userId,
+      storagePath,
+      detail: insErr.message,
+    });
     return NextResponse.json(
       { error: "db_insert_failed", detail: insErr.message },
       { status: 500 },
     );
   }
 
-  await sb.from("audit_logs").insert({
+  const { error: auditErr } = await sb.from("audit_logs").insert({
     workspace_id: ctx.workspace.id,
     actor_user_id: ctx.userId,
     action: "document.uploaded",
@@ -109,6 +121,13 @@ export async function POST(req: Request) {
     target_id: id,
     metadata: { filename: file.name, size_bytes: file.size },
   });
+  if (auditErr) {
+    console.error("[documents.upload] audit log insert failed", {
+      workspaceId: ctx.workspace.id,
+      userId: ctx.userId,
+      detail: auditErr.message,
+    });
+  }
 
   // Kick off processing asynchronously (fire-and-forget). When Inngest is
   // wired up, replace this with a typed event emit.
@@ -118,8 +137,11 @@ export async function POST(req: Request) {
       method: "POST",
       headers: { "x-internal-trigger": "1" },
     },
-  ).catch(() => {
-    /* intentionally swallow — the document will stay queued and retry button can re-trigger */
+  ).catch((error) => {
+    console.error("[documents.upload] async process trigger failed", {
+      documentId: id,
+      detail: error instanceof Error ? error.message : String(error),
+    });
   });
 
   return NextResponse.json({ document: doc });

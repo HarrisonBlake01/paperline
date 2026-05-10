@@ -29,3 +29,7 @@ next-env.d.ts
 *.log
 scripts/samples/
 !scripts/samples/README.md
+
+# local agent / supabase state
+.learnings/
+supabase/.temp/

@@ -5,8 +5,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import { createServiceClient } from "@/lib/supabase/server";
-import { PLANS } from "@/lib/plans";
+import { provisionPersonalWorkspace } from "@/lib/auth/provision";
 import { sendWelcomeEmail } from "@/lib/email/send";
 
 export const runtime = "nodejs";
@@ -23,14 +22,6 @@ interface ClerkUserCreatedEvent {
   };
 }
 type ClerkEvent = ClerkUserCreatedEvent | { type: string; data: unknown };
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 32) || "workspace";
-}
 
 export async function POST(req: Request) {
   const secret = process.env.CLERK_WEBHOOK_SECRET;
@@ -64,76 +55,24 @@ export async function POST(req: Request) {
   }
 
   const data = (event as ClerkUserCreatedEvent).data;
-  const sb = createServiceClient();
 
-  // Skip if user already has a workspace
-  const { data: existing } = await sb
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", data.id)
-    .limit(1);
-  if (existing?.length) {
-    return NextResponse.json({ ok: true, alreadyProvisioned: true });
-  }
-
-  const displayName =
-    [data.first_name, data.last_name].filter(Boolean).join(" ").trim() ||
-    data.username ||
-    data.email_addresses?.[0]?.email_address?.split("@")[0] ||
-    "Workspace";
-
-  const baseSlug = slugify(displayName);
-  let slug = baseSlug;
-  for (let i = 0; i < 10; i++) {
-    const { data: clash } = await sb
-      .from("workspaces")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-    if (!clash) break;
-    slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
-  }
-
-  const { data: ws, error: wsErr } = await sb
-    .from("workspaces")
-    .insert({
-      slug,
-      name: `${displayName}'s workspace`,
-      plan: "free",
-      pages_limit: PLANS.free.pagesPerMonth,
-    })
-    .select()
-    .single();
-  if (wsErr || !ws) {
+  let ctx;
+  try {
+    ctx = await provisionPersonalWorkspace(data.id);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "unknown_error";
     return NextResponse.json(
-      { error: "create_workspace_failed", detail: wsErr?.message },
+      { error: "provision_workspace_failed", detail },
       { status: 500 },
     );
   }
 
-  const { error: memErr } = await sb.from("workspace_members").insert({
-    workspace_id: ws.id,
-    user_id: data.id,
-    role: "owner",
-  });
-  if (memErr) {
-    return NextResponse.json(
-      { error: "create_member_failed", detail: memErr.message },
-      { status: 500 },
-    );
+  if (!ctx) {
+    return NextResponse.json({ error: "provision_workspace_failed" }, { status: 500 });
   }
-
-  await sb.from("audit_logs").insert({
-    workspace_id: ws.id,
-    actor_user_id: data.id,
-    action: "workspace.created",
-    target_type: "workspace",
-    target_id: ws.id,
-    metadata: { source: "clerk.user.created" },
-  });
 
   const email = data.email_addresses?.[0]?.email_address;
-  if (email) {
+  if (ctx.created && email) {
     try {
       await sendWelcomeEmail({
         to: email,
@@ -144,5 +83,9 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, workspace_id: ws.id });
+  return NextResponse.json({
+    ok: true,
+    workspace_id: ctx.workspace.id,
+    created: ctx.created,
+  });
 }
