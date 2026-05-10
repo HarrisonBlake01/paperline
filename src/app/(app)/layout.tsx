@@ -22,32 +22,37 @@ const NAV = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-screen grid-cols-[260px_1fr]">
-      <aside className="border-r border-pl-border bg-pl-surface">
+    <div className="grid min-h-screen grid-cols-[clamp(220px,22vw,260px)_1fr]">
+      <aside className="sticky top-0 flex h-screen min-w-0 flex-col overflow-hidden border-r border-pl-border bg-pl-surface">
         <div className="flex items-center gap-2 px-5 py-5 font-[var(--font-display)] text-base font-semibold tracking-tight">
-          <span className="inline-block h-4 w-4 rounded-sm border border-pl-fg/80" aria-hidden />
-          paperline
+          <span
+            className="inline-block h-4 w-4 shrink-0 rounded-sm border border-pl-fg/80"
+            aria-hidden
+          />
+          <span className="truncate">paperline</span>
         </div>
-        <nav className="px-2">
+        <nav className="flex-1 overflow-y-auto px-2">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-pl-fg-dim hover:bg-pl-surface-2 hover:text-pl-fg"
             >
-              <Icon className="h-4 w-4" strokeWidth={1.5} />
-              {label}
+              <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+              <span className="truncate">{label}</span>
             </Link>
           ))}
         </nav>
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="flex items-center justify-between rounded-xl border border-pl-border bg-pl-bg px-3 py-2 text-sm">
+        <div className="shrink-0 p-3">
+          <div className="flex min-w-0 items-center gap-2 rounded-xl border border-pl-border bg-pl-bg px-3 py-2 text-sm">
             <UserButton />
-            <span className="text-xs text-pl-fg-dim">Signed in</span>
+            <span className="min-w-0 flex-1 truncate text-xs text-pl-fg-dim">
+              Signed in
+            </span>
           </div>
         </div>
       </aside>
-      <div className="flex flex-col">{children}</div>
+      <div className="flex min-w-0 flex-col">{children}</div>
     </div>
   );
 }
