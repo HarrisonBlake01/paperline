@@ -5,6 +5,7 @@
 
 import { getOpenAI, MODELS } from "@/lib/openai";
 import type {
+  ExtractedField,
   ExtractionResult,
   TemplateField,
   TemplateSchema,
@@ -28,8 +29,13 @@ function buildPrompt(schema: TemplateSchema, docExcerpt: string): string {
     "- Return ONLY a JSON object matching the schema below.",
     "- For each field, include a confidence score from 0 to 100 based on how clearly it appears in the source.",
     "- If a field is not present, set value to null and confidence to 0.",
-    "- For list fields, return an array; for date fields use ISO 8601 (YYYY-MM-DD).",
-    "- Do not invent data.",
+    "- Never invent data. Prefer null over guessing.",
+    "- For list fields, return an array of strings or numbers; do not nest objects.",
+    "- For date fields use ISO 8601 (YYYY-MM-DD).",
+    "- For currency fields, return a plain number (no symbols or commas).",
+    "- For number fields, return a plain JSON number.",
+    "- For boolean fields, return true or false.",
+    "- Use the exact field names from the schema as JSON keys.",
     "",
     "Output schema:",
     '{ "fields": { "<field_name>": { "value": <value|null>, "confidence": <0-100> }, ... } }',
@@ -41,7 +47,7 @@ function buildPrompt(schema: TemplateSchema, docExcerpt: string): string {
   ].join("\n");
 }
 
-const MAX_DOC_CHARS = 80_000; // ~20k tokens, well within context
+const MAX_DOC_CHARS = 80_000;
 
 export interface ExtractionRunResult {
   result: ExtractionResult;
@@ -51,9 +57,81 @@ export interface ExtractionRunResult {
   model: string;
 }
 
-// Rough cost estimate (USD per 1M tokens) — easy to tune later.
 const COST_USD_PER_M_PROMPT = 2.5;
 const COST_USD_PER_M_COMPLETION = 10;
+
+function clampConfidence(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function coerceFieldValue(
+  type: TemplateField["type"],
+  raw: unknown,
+): unknown {
+  if (raw === null || raw === undefined || raw === "") return null;
+  switch (type) {
+    case "text":
+      return typeof raw === "string" ? raw.trim() : String(raw);
+    case "number":
+    case "currency": {
+      if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+      const cleaned = String(raw).replace(/[^0-9.\-]/g, "");
+      const n = Number.parseFloat(cleaned);
+      return Number.isFinite(n) ? n : null;
+    }
+    case "date": {
+      const s = String(raw).trim();
+      const direct = /^\d{4}-\d{2}-\d{2}/.exec(s);
+      if (direct) return direct[0];
+      const d = new Date(s);
+      if (Number.isNaN(d.getTime())) return null;
+      return d.toISOString().slice(0, 10);
+    }
+    case "boolean": {
+      if (typeof raw === "boolean") return raw;
+      const s = String(raw).trim().toLowerCase();
+      if (["true", "yes", "y", "1"].includes(s)) return true;
+      if (["false", "no", "n", "0"].includes(s)) return false;
+      return null;
+    }
+    case "list": {
+      if (Array.isArray(raw)) {
+        return raw
+          .map((v) => (typeof v === "string" ? v.trim() : v))
+          .filter((v) => v !== null && v !== "");
+      }
+      if (typeof raw === "string") {
+        return raw
+          .split(/\r?\n|,(?![^()]*\))/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      return [];
+    }
+    default:
+      return raw;
+  }
+}
+
+function normalizeResult(
+  schema: TemplateSchema,
+  parsed: ExtractionResult,
+): ExtractionResult {
+  const fields: Record<string, ExtractedField> = {};
+  const incoming = parsed.fields ?? {};
+  for (const field of schema.fields) {
+    const raw = incoming[field.name] as ExtractedField | undefined;
+    const value = coerceFieldValue(field.type, raw?.value);
+    const confidence = clampConfidence(raw?.confidence ?? 0);
+    fields[field.name] = {
+      value: value ?? null,
+      confidence: value === null ? 0 : confidence,
+    };
+  }
+  return { fields };
+}
 
 export async function extractStructured(opts: {
   text: string;
@@ -71,7 +149,7 @@ export async function extractStructured(opts: {
       {
         role: "system",
         content:
-          "You are a precise extraction engine. You only emit valid JSON matching the requested schema.",
+          "You are a precise extraction engine. You only emit valid JSON matching the requested schema. You never invent values.",
       },
       { role: "user", content: prompt },
     ],
@@ -86,6 +164,8 @@ export async function extractStructured(opts: {
   }
   if (!parsed.fields) parsed.fields = {};
 
+  const normalized = normalizeResult(opts.schema, parsed);
+
   const promptTokens = resp.usage?.prompt_tokens ?? 0;
   const completionTokens = resp.usage?.completion_tokens ?? 0;
   const costCents = Math.round(
@@ -96,7 +176,7 @@ export async function extractStructured(opts: {
   );
 
   return {
-    result: parsed,
+    result: normalized,
     promptTokens,
     completionTokens,
     costCents,
