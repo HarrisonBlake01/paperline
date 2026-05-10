@@ -3,6 +3,7 @@ import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { explainDocumentFailure } from "@/lib/documents/failure";
 import { ReprocessButton } from "@/components/reprocess-button";
+import { ChatWithDocButton } from "@/components/chat-with-doc-button";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,13 @@ export default async function DocumentDetailPage({
             {doc.page_count ? ` · ${doc.page_count} pages` : ""}
           </p>
         </div>
-        <ReprocessButton documentId={doc.id} />
+        <div className="flex items-center gap-2">
+          <ChatWithDocButton
+            documentId={doc.id}
+            disabled={doc.status !== "ready"}
+          />
+          <ReprocessButton documentId={doc.id} />
+        </div>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
