@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 import { TEMPLATE_FIELD_TYPES } from "@/lib/templates/validation";
 import type { TemplateField, TemplateRow } from "@/lib/types";
 
@@ -104,7 +105,10 @@ export function CustomTemplateForm({
       };
       if (!res.ok || !body.template) {
         toast.error(isEditing ? "Could not update template" : "Could not create template", {
-          description: typeof body.detail === "string" ? body.detail : body.error ?? "Check the field names and try again.",
+          description: errorDescription(
+            body.detail ?? body.error,
+            "Check the field names and try again.",
+          ),
         });
         return;
       }

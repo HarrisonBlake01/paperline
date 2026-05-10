@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 
 export function ReprocessButton({ documentId }: { documentId: string }) {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function ReprocessButton({ documentId }: { documentId: string }) {
       };
       if (!res.ok || !body.ok) {
         toast.error("Re-process failed", {
-          description: body.error ?? "Unknown error",
+          description: errorDescription(body.error),
         });
         return;
       }

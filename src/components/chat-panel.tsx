@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 
 export interface ChatCitationView {
   chunk_id: string;
@@ -61,18 +62,18 @@ export function ChatPanel({
       const body = (await res.json().catch(() => ({}))) as {
         message?: ChatMessageView;
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.message) {
         toast.error("Chat failed", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }
       setMessages((prev) => [...prev, body.message!]);
     } catch (err) {
       toast.error("Chat failed", {
-        description: err instanceof Error ? err.message : String(err),
+        description: errorDescription(err),
       });
     } finally {
       setIsSending(false);

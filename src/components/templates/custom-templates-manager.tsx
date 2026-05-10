@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Edit3, FileText, Share2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CustomTemplateForm } from "@/components/templates/custom-template-form";
+import { errorDescription } from "@/lib/client-errors";
 import type { TemplateField, TemplateRow } from "@/lib/types";
 
 export function CustomTemplatesManager({ templates }: { templates: TemplateRow[] }) {
@@ -26,11 +27,11 @@ export function CustomTemplatesManager({ templates }: { templates: TemplateRow[]
       const body = (await res.json().catch(() => ({}))) as {
         template?: { name: string };
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.template) {
         toast.error("Could not publish template", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }
@@ -54,11 +55,11 @@ export function CustomTemplatesManager({ templates }: { templates: TemplateRow[]
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.ok) {
         toast.error("Could not delete template", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }

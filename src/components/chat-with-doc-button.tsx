@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 
 export function ChatWithDocButton({
   documentId,
@@ -26,11 +27,11 @@ export function ChatWithDocButton({
       const body = (await res.json().catch(() => ({}))) as {
         chat?: { id: string };
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.chat) {
         toast.error("Could not start chat", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }

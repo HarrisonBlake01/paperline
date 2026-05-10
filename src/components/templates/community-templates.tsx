@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, FileText, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 import type { TemplateField, TemplateRow } from "@/lib/types";
 
 export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) {
@@ -19,11 +20,11 @@ export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) 
       const body = (await res.json().catch(() => ({}))) as {
         template?: { name: string };
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.template) {
         toast.error("Could not add template", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }
@@ -44,11 +45,11 @@ export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) 
       const body = (await res.json().catch(() => ({}))) as {
         upvoted?: boolean;
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok) {
         toast.error("Could not update vote", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }

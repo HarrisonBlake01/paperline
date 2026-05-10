@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 
 interface ExtractionTemplateOption {
   id: string;
@@ -45,11 +46,11 @@ export function RunExtractionForm({
       const body = (await res.json().catch(() => ({}))) as {
         template?: { name: string };
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.template) {
         toast.error("Could not generate template", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }
@@ -76,11 +77,11 @@ export function RunExtractionForm({
       });
       const body = (await res.json().catch(() => ({}))) as {
         error?: string;
-        detail?: string;
+        detail?: unknown;
       };
       if (!res.ok) {
         toast.error("Extraction failed", {
-          description: body.detail ?? body.error ?? "Unknown error",
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }

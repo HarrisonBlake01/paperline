@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import { errorDescription } from "@/lib/client-errors";
 import { formatBytes } from "@/lib/utils";
 
 interface UploadedDoc {
@@ -34,13 +35,14 @@ export function UploadDropzone({ onUploaded }: { onUploaded?: (doc: UploadedDoc)
             try {
               const parsed = JSON.parse(description) as {
                 error?: string;
-                detail?: string;
+                detail?: unknown;
                 mime?: string;
                 maxBytes?: number;
               };
-              description = parsed.detail
-                ? `${parsed.error ?? "upload_failed"}: ${parsed.detail}`
-                : parsed.error ?? description;
+              description = errorDescription(
+                parsed.detail ?? parsed.error,
+                description,
+              );
             } catch {
               // keep raw text if response is not JSON
             }
