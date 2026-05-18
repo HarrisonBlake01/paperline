@@ -5,20 +5,39 @@ import { UploadDropzone } from "@/components/upload-dropzone";
 import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { explainDocumentFailure } from "@/lib/documents/failure";
+import { getPlan } from "@/lib/plans";
 import { formatBytes } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
   const user = await currentUser();
   const ctx = await getActiveWorkspace();
+  const sb = createServiceClient();
+  const plan = getPlan(ctx?.workspace.plan ?? "free");
+  const pagesUsed = ctx?.workspace.pages_used_this_period ?? 0;
+  const pagesLimit = ctx?.workspace.pages_limit ?? plan.pagesPerMonth;
   const recentDocs = ctx
-    ? (await createServiceClient()
+    ? (await sb
         .from("documents")
         .select("*")
         .eq("workspace_id", ctx.workspace.id)
         .order("created_at", { ascending: false })
         .limit(5)).data
     : [];
+  const documentCount = ctx
+    ? (await sb
+        .from("documents")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", ctx.workspace.id)).count ?? 0
+    : 0;
+  const aiTemplatesUsed = ctx
+    ? (await sb
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", ctx.workspace.id)
+        .eq("action", "template.generated")
+        .gte("created_at", monthStartIso())).count ?? 0
+    : 0;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-8 py-10">
@@ -89,12 +108,23 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          { label: "Pages this month", value: "0" },
-          { label: "Documents", value: "0" },
-          { label: "Tokens used", value: "0" },
-          { label: "Est. cost", value: "$0.00" },
+          {
+            label: "Pages this month",
+            value: `${formatNumber(pagesUsed)} / ${formatLimit(pagesLimit)}`,
+            detail: "monthly page allowance",
+          },
+          {
+            label: "Documents",
+            value: formatNumber(documentCount),
+            detail: "stored in workspace",
+          },
+          {
+            label: "AI templates",
+            value: `${formatNumber(aiTemplatesUsed)} / ${formatLimit(plan.aiTemplateGenerationsPerMonth)}`,
+            detail: "generated templates this month",
+          },
         ].map((s) => (
           <div
             key={s.label}
@@ -106,11 +136,25 @@ export default async function DashboardPage() {
             <div className="mt-2 font-[var(--font-display)] text-2xl font-semibold">
               {s.value}
             </div>
+            <div className="mt-1 text-xs text-pl-fg-dim">{s.detail}</div>
           </div>
         ))}
       </div>
     </main>
   );
+}
+
+function monthStartIso() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+function formatLimit(value: number) {
+  return value === -1 ? "Unlimited" : formatNumber(value);
 }
 
 function StatusPill({ status }: { status: string }) {

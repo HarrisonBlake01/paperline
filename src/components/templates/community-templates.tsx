@@ -1,16 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Download, FileText, ThumbsUp } from "lucide-react";
+import { Download, FileText, Search, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { errorDescription } from "@/lib/client-errors";
 import type { TemplateField, TemplateRow } from "@/lib/types";
 
-export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) {
+type CommunityTemplatesProps = {
+  templates: TemplateRow[];
+  showFilters?: boolean;
+};
+
+type SortKey = "popular" | "most-used" | "newest" | "name";
+
+export function CommunityTemplates({ templates, showFilters = false }: CommunityTemplatesProps) {
   const router = useRouter();
   const [usingId, setUsingId] = useState<string | null>(null);
   const [votingId, setVotingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [docType, setDocType] = useState("all");
+  const [fieldType, setFieldType] = useState("all");
+  const [sort, setSort] = useState<SortKey>("popular");
+
+  const docTypes = useMemo(
+    () => Array.from(new Set(templates.map((template) => template.doc_type))).sort(),
+    [templates],
+  );
+  const fieldTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          templates.flatMap((template) =>
+            (template.schema.fields ?? []).map((field) => field.type),
+          ),
+        ),
+      ).sort(),
+    [templates],
+  );
+  const filteredTemplates = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return templates
+      .filter((template) => {
+        const fields = template.schema.fields ?? [];
+        const searchable = [
+          template.name,
+          template.description ?? "",
+          template.doc_type,
+          ...fields.flatMap((field) => [field.name, field.description ?? "", field.type]),
+        ]
+          .join(" ")
+          .toLowerCase();
+        const matchesQuery = !normalizedQuery || searchable.includes(normalizedQuery);
+        const matchesDocType = docType === "all" || template.doc_type === docType;
+        const matchesFieldType = fieldType === "all" || fields.some((field) => field.type === fieldType);
+        return matchesQuery && matchesDocType && matchesFieldType;
+      })
+      .sort((a, b) => {
+        if (sort === "name") return a.name.localeCompare(b.name);
+        if (sort === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        if (sort === "most-used") return (b.uses_count ?? 0) - (a.uses_count ?? 0);
+        return (b.upvotes_count ?? 0) - (a.upvotes_count ?? 0) || (b.uses_count ?? 0) - (a.uses_count ?? 0);
+      });
+  }, [docType, fieldType, query, sort, templates]);
 
   async function addTemplate(template: TemplateRow) {
     if (usingId) return;
@@ -69,8 +121,48 @@ export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) 
   }
 
   return (
-    <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {templates.map((template) => (
+    <div className="mt-4 space-y-4">
+      {showFilters ? (
+        <div className="rounded-2xl border border-pl-border bg-pl-surface p-4">
+          <div className="grid gap-3 lg:grid-cols-[1fr_180px_180px_180px]">
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pl-fg-dim" strokeWidth={1.75} />
+              <span className="sr-only">Search community templates</span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search by template, field, description..."
+                className="w-full rounded-xl border border-pl-border bg-pl-bg py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[var(--pl-accent)]"
+              />
+            </label>
+            <FilterSelect label="Document type" value={docType} onChange={setDocType}>
+              <option value="all">All document types</option>
+              {docTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </FilterSelect>
+            <FilterSelect label="Field type" value={fieldType} onChange={setFieldType}>
+              <option value="all">All field types</option>
+              {fieldTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </FilterSelect>
+            <FilterSelect label="Sort" value={sort} onChange={(value) => setSort(value as SortKey)}>
+              <option value="popular">Most popular</option>
+              <option value="most-used">Most used</option>
+              <option value="newest">Newest</option>
+              <option value="name">Name A-Z</option>
+            </FilterSelect>
+          </div>
+          <div className="mt-3 text-sm text-pl-fg-dim">
+            Showing {filteredTemplates.length} of {templates.length} community templates.
+          </div>
+        </div>
+      ) : null}
+
+      {filteredTemplates.length ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredTemplates.map((template) => (
         <article key={template.id} className="flex min-h-[280px] flex-col rounded-2xl border border-pl-border bg-pl-surface p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-xl bg-[var(--pl-accent)]/12 p-2 text-[var(--pl-accent)]">
@@ -126,8 +218,39 @@ export function CommunityTemplates({ templates }: { templates: TemplateRow[] }) 
             </button>
           </div>
         </article>
-      ))}
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-pl-border bg-pl-surface p-6 text-sm text-pl-fg-dim">
+          No templates match those filters. Try a broader search or another document type.
+        </div>
+      )}
     </div>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="sr-only">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-xl border border-pl-border bg-pl-bg px-3 py-2.5 text-sm outline-none focus:border-[var(--pl-accent)]"
+      >
+        {children}
+      </select>
+    </label>
   );
 }
 

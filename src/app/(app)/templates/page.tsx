@@ -89,7 +89,12 @@ export default async function TemplatesPage() {
               Reuse popular schemas from other users instead of spending AI credits generating from scratch.
             </p>
           </div>
-          <span className="text-sm text-pl-fg-dim">{community.length} shown</span>
+          <Link
+            href="/templates/community"
+            className="rounded-lg border border-pl-border px-3 py-1.5 text-sm hover:bg-pl-surface"
+          >
+            Browse all
+          </Link>
         </div>
         <CommunityTemplates templates={community} />
       </section>
