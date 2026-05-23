@@ -13,7 +13,7 @@ export default async function TemplatesPage() {
   const ctx = await getActiveWorkspace();
   if (!ctx) {
     return (
-      <main className="mx-auto w-full max-w-6xl px-8 py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <p className="text-pl-fg-dim">No workspace yet. Sign in to continue.</p>
       </main>
     );
@@ -42,14 +42,14 @@ export default async function TemplatesPage() {
   const community = (communityData ?? []) as TemplateRow[];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-8 py-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-pl-border px-3 py-1 text-xs text-pl-fg-dim">
             <Layers className="h-3.5 w-3.5 text-[var(--pl-accent)]" strokeWidth={1.75} />
             Extraction templates
           </p>
-          <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+          <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
             Templates
           </h1>
           <p className="mt-2 max-w-2xl text-pl-fg-dim">

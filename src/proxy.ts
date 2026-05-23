@@ -8,6 +8,7 @@ const isProtectedRoute = createRouteMatcher([
   "/chats(.*)",
   "/integrations(.*)",
   "/settings(.*)",
+  "/more(.*)",
 ]);
 
 const isApiRoute = createRouteMatcher([

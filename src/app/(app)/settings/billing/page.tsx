@@ -6,12 +6,12 @@ export default async function BillingPage() {
   const current = ctx ? PLANS[ctx.workspace.plan] : null;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-8 py-10">
-      <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
         Billing
       </h1>
       <p className="mt-2 text-pl-fg-dim">
-        Manage your Paperline plan and usage.
+        Manage your Paperline plan, page allowance, and template limits.
       </p>
 
       <div className="mt-8 rounded-2xl border border-pl-border bg-pl-surface p-6">

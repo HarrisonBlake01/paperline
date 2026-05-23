@@ -11,7 +11,7 @@ export default async function DocumentsPage() {
   const ctx = await getActiveWorkspace();
   if (!ctx) {
     return (
-      <main className="mx-auto w-full max-w-5xl px-8 py-10">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <p className="text-pl-fg-dim">No workspace yet. Sign in to continue.</p>
       </main>
     );
@@ -26,9 +26,9 @@ export default async function DocumentsPage() {
     .limit(100);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-8 py-10">
-      <div className="flex items-baseline justify-between">
-        <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+        <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
           Documents
         </h1>
         <Link
@@ -44,8 +44,8 @@ export default async function DocumentsPage() {
           No documents yet. Upload your first one from the dashboard.
         </div>
       ) : (
-        <div className="mt-8 overflow-hidden rounded-2xl border border-pl-border bg-pl-surface">
-          <table className="w-full text-sm">
+        <div className="mt-8 overflow-x-auto rounded-2xl border border-pl-border bg-pl-surface">
+          <table className="min-w-[760px] w-full text-sm">
             <thead className="border-b border-pl-border text-left text-[11px] uppercase tracking-wider text-pl-fg-dim">
               <tr>
                 <th className="px-4 py-3">Name</th>
@@ -71,11 +71,11 @@ export default async function DocumentsPage() {
                         <FileText className="h-4 w-4 text-pl-fg-dim" strokeWidth={1.5} />
                         {d.filename}
                       </Link>
-                      {d.status === "failed" ? (
-                        <p className="mt-1 text-xs text-red-300">
-                          {explainDocumentFailure(d.error_message, d.mime_type)?.title ?? "Processing failed"}
-                        </p>
-                      ) : null}
+                      <FailureSummary
+                        errorMessage={d.error_message}
+                        mimeType={d.mime_type}
+                        status={d.status}
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-3 text-pl-fg-dim">{d.doc_type ?? "—"}</td>
@@ -98,6 +98,26 @@ export default async function DocumentsPage() {
         </div>
       )}
     </main>
+  );
+}
+
+function FailureSummary({
+  errorMessage,
+  mimeType,
+  status,
+}: {
+  errorMessage: string | null;
+  mimeType: string | null;
+  status: string;
+}) {
+  if (status !== "failed") return null;
+  const failure = explainDocumentFailure(errorMessage, mimeType);
+  return (
+    <p className="mt-1 max-w-md text-xs text-red-300">
+      {failure
+        ? `${failure.title}. Open for next steps.`
+        : "Processing failed. Open for details and retry options."}
+    </p>
   );
 }
 

@@ -8,7 +8,7 @@ export default async function ChatsPage() {
   const ctx = await getActiveWorkspace();
   if (!ctx) {
     return (
-      <main className="mx-auto w-full max-w-5xl px-8 py-10">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <p className="text-pl-fg-dim">No workspace yet. Sign in to continue.</p>
       </main>
     );
@@ -23,9 +23,9 @@ export default async function ChatsPage() {
     .limit(100);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-8 py-10">
-      <div className="flex items-baseline justify-between">
-        <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+        <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
           Chats
         </h1>
         <Link
@@ -48,8 +48,8 @@ export default async function ChatsPage() {
                 href={`/chats/${c.id}`}
                 className="block px-4 py-3 text-sm hover:bg-pl-surface-2"
               >
-                <div className="font-medium">{c.title ?? "Untitled chat"}</div>
-                <div className="font-mono text-xs text-pl-fg-dim">
+                <div className="truncate font-medium">{c.title ?? "Untitled chat"}</div>
+                <div className="mt-1 truncate font-mono text-xs text-pl-fg-dim">
                   {new Date(c.created_at).toLocaleString()}
                 </div>
               </Link>

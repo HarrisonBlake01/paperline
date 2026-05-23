@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { UploadDropzone } from "@/components/upload-dropzone";
@@ -9,7 +9,6 @@ import { getPlan } from "@/lib/plans";
 import { formatBytes } from "@/lib/utils";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
   const user = await currentUser();
   const ctx = await getActiveWorkspace();
   const sb = createServiceClient();
@@ -40,12 +39,11 @@ export default async function DashboardPage() {
     : 0;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-8 py-10">
-      <div className="flex items-baseline justify-between">
-        <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+        <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
           Welcome{user?.firstName ? `, ${user.firstName}` : ""}.
         </h1>
-        <span className="font-mono text-xs text-pl-fg-dim">{userId}</span>
       </div>
       <p className="mt-2 text-pl-fg-dim">
         Drop a document below to extract structured data and chat with it.
@@ -84,20 +82,22 @@ export default async function DashboardPage() {
                 <Link
                   key={doc.id}
                   href={`/documents/${doc.id}`}
-                  className="flex items-center justify-between gap-4 border-b border-pl-border/60 px-4 py-3 text-sm last:border-0 hover:bg-pl-surface-2"
+                  className="flex flex-col gap-3 border-b border-pl-border/60 px-4 py-3 text-sm last:border-0 hover:bg-pl-surface-2 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <FileText className="h-4 w-4 shrink-0 text-pl-fg-dim" strokeWidth={1.5} />
                     <div className="min-w-0">
                       <div className="truncate font-medium">{doc.filename}</div>
                       <div className="mt-0.5 truncate text-xs text-pl-fg-dim">
-                        {failure?.title ?? `${doc.doc_type ?? "unclassified"} · ${formatBytes(doc.size_bytes)}`}
+                        {failure
+                          ? `${failure.title} · open for next steps`
+                          : `${doc.doc_type ?? "unclassified"} · ${formatBytes(doc.size_bytes)}`}
                       </div>
                     </div>
                   </div>
-                  <div className="shrink-0 text-right">
+                  <div className="shrink-0 text-left sm:text-right">
                     <StatusPill status={doc.status} />
-                    <div className="mt-1 font-mono text-[11px] text-pl-fg-dim">
+                    <div className="mt-1 truncate font-mono text-[11px] text-pl-fg-dim">
                       {new Date(doc.created_at).toLocaleDateString()}
                     </div>
                   </div>

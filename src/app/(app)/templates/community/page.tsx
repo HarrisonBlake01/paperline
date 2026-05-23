@@ -11,7 +11,7 @@ export default async function CommunityTemplatesPage() {
   const ctx = await getActiveWorkspace();
   if (!ctx) {
     return (
-      <main className="mx-auto w-full max-w-6xl px-8 py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         <p className="text-pl-fg-dim">No workspace yet. Sign in to continue.</p>
       </main>
     );
@@ -28,7 +28,7 @@ export default async function CommunityTemplatesPage() {
   const templates = (data ?? []) as TemplateRow[];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-8 py-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
       <Link
         href="/templates"
         className="inline-flex items-center gap-2 text-sm text-pl-fg-dim hover:text-pl-fg"
@@ -37,14 +37,14 @@ export default async function CommunityTemplatesPage() {
         Back to templates
       </Link>
 
-      <div className="mt-6 rounded-3xl border border-pl-border bg-pl-surface p-7 md:p-8">
+      <div className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 sm:p-7 md:p-8">
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-pl-border px-3 py-1 text-xs text-pl-fg-dim">
           <Globe2 className="h-3.5 w-3.5 text-[var(--pl-accent)]" strokeWidth={1.75} />
           Community library
         </p>
         <div className="grid gap-5 md:grid-cols-[1fr_auto] md:items-end">
           <div>
-            <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+            <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
               Find a template that matches your document.
             </h1>
             <p className="mt-3 max-w-2xl text-pl-fg-dim">

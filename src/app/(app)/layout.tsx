@@ -4,6 +4,7 @@ import {
   FileText,
   LayoutDashboard,
   Layers,
+  Menu,
   MessageSquare,
   Plug,
   Settings,
@@ -21,10 +22,16 @@ const NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
+const MOBILE_NAV = NAV.filter(({ href }) =>
+  ["/dashboard", "/documents", "/templates", "/chats"].includes(
+    href,
+  ),
+).concat([{ href: "/more", label: "More", icon: Menu }]);
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-screen grid-cols-[clamp(220px,22vw,260px)_1fr]">
-      <aside className="sticky top-0 flex h-screen min-w-0 flex-col overflow-hidden border-r border-pl-border bg-pl-surface">
+    <div className="min-h-screen lg:grid lg:grid-cols-[clamp(220px,22vw,260px)_1fr]">
+      <aside className="sticky top-0 hidden h-screen min-w-0 flex-col overflow-hidden border-r border-pl-border bg-pl-surface lg:flex">
         <Link
           href="/dashboard"
           className="flex items-center gap-2.5 px-5 py-5 font-[var(--font-display)] text-xl font-semibold tracking-tight hover:opacity-90"
@@ -53,7 +60,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </aside>
-      <div className="flex min-w-0 flex-col">{children}</div>
+
+      <div className="flex min-w-0 flex-col pb-20 lg:pb-0">
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-pl-border bg-pl-bg/95 px-4 py-3 backdrop-blur lg:hidden">
+          <Link
+            href="/dashboard"
+            className="flex min-w-0 items-center gap-2 font-[var(--font-display)] text-lg font-semibold tracking-tight"
+          >
+            <PaperlineMark className="h-6 w-6 shrink-0 text-[var(--pl-accent)]" />
+            <span className="truncate">paperline</span>
+          </Link>
+          <UserButton />
+        </header>
+
+        {children}
+
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-pl-border bg-pl-bg/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 backdrop-blur lg:hidden">
+          <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+            {MOBILE_NAV.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex min-w-0 flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[11px] text-pl-fg-dim hover:bg-pl-surface hover:text-pl-fg"
+              >
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={1.6} />
+                <span className="w-full truncate text-center">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </div>
     </div>
   );
 }

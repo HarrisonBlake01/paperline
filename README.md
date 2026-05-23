@@ -20,6 +20,16 @@ For recruiters and technical reviewers, the core signal is end-to-end product en
 
 ## Current product capabilities
 
+### Demo workflow
+
+The mentor demo path is intentionally simple: sign in, upload an important document, wait for Paperline to process it, review the extracted text/details, run an extraction template, then save the same kind of review as a repeatable workflow. The app is tuned for general users first, so the interface should explain what happened and what to do next without exposing model/provider internals.
+
+### Security and privacy posture
+
+**Designed for sensitive documents.** Paperline treats uploaded files as private workspace data and avoids public-by-default access patterns. Server routes should enforce Clerk authentication, workspace ownership checks, and private Supabase access for documents, extractions, workflows, templates, and API keys.
+
+Paperline is built with HIPAA-like/legal-document-grade care as an engineering standard for this demo, but it does **not** claim formal HIPAA, SOC 2, or legal compliance certification yet. See [`SECURITY.md`](./SECURITY.md) for the current security posture and pre-deployment checklist.
+
 - Upload and process documents through a server-side pipeline
 - Parse PDFs, DOCX, text, and image/scanned inputs with OCR fallback
 - Classify document type and chunk extracted text for search/chat

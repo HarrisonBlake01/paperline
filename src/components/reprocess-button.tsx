@@ -19,10 +19,11 @@ export function ReprocessButton({ documentId }: { documentId: string }) {
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
+        detail?: unknown;
       };
       if (!res.ok || !body.ok) {
         toast.error("Re-process failed", {
-          description: errorDescription(body.error),
+          description: errorDescription(body.detail ?? body.error),
         });
         return;
       }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
+import { processDocument } from "@/lib/pipeline";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { checkQuota } from "@/lib/auth/usage";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -129,17 +130,12 @@ export async function POST(req: Request) {
     });
   }
 
-  // Kick off processing asynchronously (fire-and-forget). When Inngest is
-  // wired up, replace this with a typed event emit.
-  void fetch(
-    new URL(`/api/documents/${id}/process`, process.env.NEXT_PUBLIC_APP_URL).toString(),
-    {
-      method: "POST",
-      headers: { "x-internal-trigger": "1" },
-    },
-  ).catch((error) => {
-    console.error("[documents.upload] async process trigger failed", {
+  // Kick off processing asynchronously on the server. This avoids trusting a
+  // public "internal" HTTP header while keeping the upload response fast.
+  void processDocument({ documentId: id }).catch((error) => {
+    console.error("[documents.upload] async processing failed", {
       documentId: id,
+      workspaceId: ctx.workspace.id,
       detail: error instanceof Error ? error.message : String(error),
     });
   });

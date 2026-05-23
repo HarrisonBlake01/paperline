@@ -108,7 +108,6 @@ export async function POST(
     return NextResponse.json({
       extraction_id: extInsert.id,
       result: run.result,
-      cost_cents: run.costCents,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

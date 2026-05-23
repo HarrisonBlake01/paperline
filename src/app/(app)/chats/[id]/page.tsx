@@ -60,8 +60,8 @@ export default async function ChatPage({
   }));
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-8 py-10">
-      <div className="flex items-baseline justify-between gap-4">
+    <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
           <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight">
             {chat.title ?? "Chat"}

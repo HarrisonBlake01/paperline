@@ -50,10 +50,10 @@ export default async function DocumentDetailPage({
   const templateNames = new Map(templateRows.map((template) => [template.id, template.name]));
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-8 py-10">
-      <div className="flex items-baseline justify-between gap-4">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
-          <h1 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">
+          <h1 className="break-words font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
             {doc.filename}
           </h1>
           <p className="mt-2 text-sm text-pl-fg-dim">
@@ -92,8 +92,25 @@ export default async function DocumentDetailPage({
               <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm">
                 <div className="font-medium text-red-300">{failure.title}</div>
                 <p className="mt-1 text-red-200/90">{failure.guidance}</p>
+                <div className="mt-4 rounded-lg border border-red-400/20 bg-red-950/20 p-3">
+                  <div className="text-xs font-medium uppercase tracking-wider text-red-200/80">
+                    What to try next
+                  </div>
+                  <ul className="mt-2 space-y-1 text-xs text-red-100/85">
+                    {failure.nextSteps.map((step) => (
+                      <li key={step}>• {step}</li>
+                    ))}
+                  </ul>
+                </div>
                 {doc.error_message ? (
-                  <p className="mt-3 font-mono text-xs text-red-200/80">Raw error: {doc.error_message}</p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-xs text-red-200/80">
+                      Show technical detail
+                    </summary>
+                    <p className="mt-2 break-words font-mono text-xs text-red-200/80">
+                      {doc.error_message}
+                    </p>
+                  </details>
                 ) : null}
               </div>
             ) : null}
@@ -129,9 +146,9 @@ export default async function DocumentDetailPage({
               {extractions?.length ? (
                 extractions.map((ex) => (
                   <div key={ex.id} className="rounded-xl border border-pl-border p-3 text-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <span>{templateNames.get(ex.template_id) ?? "Template"} · {ex.status}</span>
-                      <span className="font-mono text-xs text-pl-fg-dim">{ex.model ?? "—"}</span>
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                      <span className="min-w-0 truncate">{templateNames.get(ex.template_id) ?? "Template"} · {ex.status}</span>
+                      <span className="max-w-full truncate font-mono text-xs text-pl-fg-dim sm:max-w-40">{ex.model ?? "—"}</span>
                     </div>
                     {ex.result ? (
                       <pre className="mt-3 overflow-auto whitespace-pre-wrap text-xs text-pl-fg-dim">{JSON.stringify(ex.result, null, 2)}</pre>
