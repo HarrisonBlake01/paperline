@@ -122,26 +122,42 @@ export default function HomePage() {
           {/* Hero product mock */}
           <div id="sample" className="rounded-2xl border border-pl-border bg-pl-surface p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
             <div className="grid gap-2 rounded-xl bg-pl-bg p-2">
-              <div className="flex h-64 flex-col justify-between rounded-lg border border-pl-border bg-[var(--pl-surface-2)] p-5 text-xs text-pl-fg-dim">
-                <div className="flex items-center justify-between">
-                  <span>MSA_Acme_Corp_v2.pdf</span>
-                  <span>page 12 of 45</span>
+              <div className="rounded-lg border border-pl-border bg-[var(--pl-surface-2)] p-5 text-xs text-pl-fg-dim">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Uploaded document</div>
+                    <div className="mt-1 text-sm text-pl-fg">Sample contract.pdf</div>
+                  </div>
+                  <span className="rounded-full border border-pl-border px-2.5 py-1 text-[11px]">Page 12 of 45</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-2 w-5/6 rounded-full bg-pl-border" />
-                  <div className="h-2 w-full rounded-full bg-pl-border" />
-                  <div className="h-2 w-3/4 rounded-full bg-pl-border" />
+
+                <div className="mt-5 rounded-xl border border-pl-border bg-pl-bg p-4">
+                  <div className="mb-3 flex items-center justify-between text-[11px] uppercase tracking-wider">
+                    <span>Original text</span>
+                    <span className="text-[var(--pl-accent-2)]">Source found</span>
+                  </div>
+                  <p className="leading-relaxed text-pl-fg">
+                    “The initial term shall begin on January 14, 2026 and continue for twelve months...”
+                  </p>
                 </div>
-                <div className="rounded-lg border border-[var(--pl-accent)]/30 bg-[var(--pl-accent)]/10 p-3 text-pl-fg">
-                  “The initial term shall begin on January 14, 2026 and continue for twelve months...”
+
+                <div className="mt-4 flex items-center gap-2 rounded-xl border border-[var(--pl-accent)]/30 bg-[var(--pl-accent)]/10 p-3 text-pl-fg">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--pl-accent-2)]" strokeWidth={1.75} />
+                  <span>Paperline reads the document and pulls out the key details below.</span>
                 </div>
               </div>
               <div className="rounded-lg border border-pl-border bg-pl-surface p-4">
-                <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">Extract · Contract</div>
-                <div className="mt-3 space-y-3 text-sm">
-                  <Field label="Parties" value="Acme Corp · Globex LLC" confidence={97} />
-                  <Field label="Effective date" value="Jan 14, 2026" confidence={94} />
-                  <Field label="Initial term" value="12 months, auto-renew" confidence={88} />
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">AI summary</div>
+                    <div className="mt-1 font-medium">Key contract details</div>
+                  </div>
+                  <span className="rounded-full bg-[var(--pl-accent)] px-2.5 py-1 text-[11px] font-medium text-white">Ready to review</span>
+                </div>
+                <div className="mt-4 space-y-3 text-sm">
+                  <Field label="Who is involved" value="Acme Corp and Globex LLC" confidence={97} />
+                  <Field label="Start date" value="January 14, 2026" confidence={94} />
+                  <Field label="Contract length" value="12 months, then auto-renews" confidence={88} />
                   <Field label="Governing law" value="State of Delaware" confidence={92} />
                 </div>
               </div>
@@ -392,9 +408,9 @@ function TrustItem({ icon, title, body }: { icon: React.ReactNode; title: string
 function Field({ label, value, confidence }: { label: string; value: string; confidence: number }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-baseline justify-between gap-3">
         <span className="text-[11px] uppercase tracking-wider text-pl-fg-dim">{label}</span>
-        <span className="font-mono text-[11px] text-pl-fg-dim">{confidence}%</span>
+        <span className="font-mono text-[11px] text-pl-fg-dim">{confidence}% confident</span>
       </div>
       <div className="mt-1">{value}</div>
       <div className="mt-1 h-[2px] w-full overflow-hidden rounded-full bg-[var(--pl-surface-2)]">
