@@ -259,11 +259,7 @@ export default function HomePage() {
             return (
               <div
                 key={id}
-                className={`rounded-2xl border p-6 ${
-                  plan.highlight
-                    ? "border-[var(--pl-accent)]/60 bg-pl-surface ring-1 ring-[var(--pl-accent)]/30"
-                    : "border-pl-border bg-pl-surface"
-                }`}
+                className="rounded-2xl border border-[var(--pl-accent)]/60 bg-pl-surface p-6 ring-1 ring-[var(--pl-accent)]/30"
               >
                 <div className="text-sm uppercase tracking-wider text-pl-fg-dim">{plan.name}</div>
                 <div className="mt-3 flex items-baseline gap-1">
@@ -283,11 +279,7 @@ export default function HomePage() {
                 </ul>
                 <Link
                   href={plan.id === "free" ? "/sign-up" : `/sign-up?plan=${plan.id}`}
-                  className={`mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium ${
-                    plan.highlight
-                      ? "bg-[var(--pl-accent)] text-white hover:opacity-90"
-                      : "border border-pl-border hover:bg-pl-surface-2"
-                  }`}
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[var(--pl-accent)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
                 >
                   {plan.id === "free" ? "Start free" : `Choose ${plan.name}`}
                 </Link>
