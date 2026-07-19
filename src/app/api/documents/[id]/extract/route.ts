@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 import { extractStructured } from "@/lib/ai/extract";
 import { recordUsage } from "@/lib/auth/usage";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 import type { TemplateRow } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -24,7 +26,19 @@ export async function POST(
     if (e instanceof Response) return e;
     throw e;
   }
-  const { id: documentId } = await params;
+  const rateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "document_extract",
+    limit: 30,
+    windowSeconds: 600,
+  });
+  if (rateLimited) return rateLimited;
+
+  const { id: rawDocumentId } = await params;
+  const documentId = parseUuidParam(rawDocumentId);
+  if (!documentId) {
+    return NextResponse.json({ error: "invalid_document_id" }, { status: 400 });
+  }
 
   const body = Body.safeParse(await req.json().catch(() => ({})));
   if (!body.success) {
@@ -74,7 +88,7 @@ export async function POST(
     .single();
   if (insErr || !extInsert) {
     return NextResponse.json(
-      { error: "db_insert_failed", detail: insErr?.message },
+      { error: "db_insert_failed" },
       { status: 500 },
     );
   }
@@ -110,11 +124,16 @@ export async function POST(
       result: run.result,
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
     await sb
       .from("extractions")
-      .update({ status: "failed", error_message: message })
+      .update({ status: "failed", error_message: "extraction_failed" })
       .eq("id", extInsert.id);
-    return NextResponse.json({ error: "extraction_failed", detail: message }, { status: 500 });
+    console.error("[documents.extract] extraction failed", {
+      documentId,
+      workspaceId: ctx.workspace.id,
+      extractionId: extInsert.id,
+      errorType: e instanceof Error ? e.name : "UnknownError",
+    });
+    return NextResponse.json({ error: "extraction_failed" }, { status: 500 });
   }
 }

@@ -73,11 +73,11 @@ export async function extractTextFromImageDataUrl(dataUrl: string): Promise<stri
     } catch (err) {
       lastErr = err;
       const wait = 250 * attempt;
-      console.warn(
-        `[ocr] attempt ${attempt} failed, retrying in ${wait}ms: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
+      console.warn("[ocr] provider attempt failed", {
+        attempt,
+        retryInMs: wait,
+        errorType: err instanceof Error ? err.name : "UnknownError",
+      });
       await new Promise((r) => setTimeout(r, wait));
     }
   }

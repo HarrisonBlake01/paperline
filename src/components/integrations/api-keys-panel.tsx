@@ -100,8 +100,8 @@ export function ApiKeysPanel({
             </h2>
           </div>
           <p className="mt-2 max-w-2xl text-sm text-pl-fg-dim">
-            Create scoped credentials for future upload, extraction, and webhook
-            automation. Keys are shown once.
+            Manage hashed credentials reserved for planned API automation. Keys
+            are shown once; no customer API currently consumes them.
           </p>
         </div>
         <span
@@ -128,6 +128,7 @@ export function ApiKeysPanel({
 
       <form onSubmit={createKey} className="mt-5 flex flex-col gap-3 sm:flex-row">
         <input
+          aria-label="API key name"
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Production sync"

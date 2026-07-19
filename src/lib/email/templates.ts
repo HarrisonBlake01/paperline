@@ -32,7 +32,7 @@ export function baseEmailHtml(opts: {
       ${opts.note ? `<p style="margin-top:24px;color:#A1A1AA;font-size:13px;line-height:1.6;">${opts.note}</p>` : ""}
     </div>
     <p style="max-width:560px;margin:16px auto 0;color:#71717A;font-size:12px;line-height:1.5;">
-      Paperline is a ShadowProductions product.
+      Paperline is an Olvera Productions product.
     </p>
   </div>`;
 }

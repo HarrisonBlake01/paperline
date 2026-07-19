@@ -1,0 +1,48 @@
+{
+  "jobId": "ops-job-northstar-2026-06",
+  "summary": "Northstar Supply Co. uploaded an invoice and MSA. Paperline extracted payment fields, contract terms, and a human-review auto-renewal clause with page-level citations.",
+  "extractedFields": [
+    {
+      "label": "Invoice total",
+      "value": "$2,850.00",
+      "confidence": "98%",
+      "citation": "INV-1048-Atlas-OCR.pdf · p.1",
+      "quote": "Amount due: $2,850.00. Payment due by February 15, 2026."
+    },
+    {
+      "label": "Contract term",
+      "value": "12 months with auto-renewal",
+      "confidence": "93%",
+      "citation": "Northstar-MSA-2026.pdf · p.12",
+      "quote": "The initial term shall be twelve months and renew automatically unless cancelled 30 days before renewal."
+    }
+  ],
+  "recommendedActions": [
+    {
+      "title": "Approve invoice for payment",
+      "state": "Approval required",
+      "approvalBoundary": "No external spend until a human approves."
+    },
+    {
+      "title": "Create renewal reminder",
+      "state": "Ready to schedule",
+      "approvalBoundary": "Human can approve calendar/task creation."
+    },
+    {
+      "title": "Ask vendor to clarify auto-renewal",
+      "state": "Draft ready",
+      "approvalBoundary": "Draft only; no email sent without approval."
+    }
+  ],
+  "stripePreview": {
+    "mode": "Stripe test mode",
+    "usage": "20 pages processed",
+    "estimatedCharge": "$6.00 usage preview",
+    "approvalState": "Waiting for human approval"
+  },
+  "secureRuntimePath": [
+    "Hermes Agent runs the operations workflow.",
+    "NVIDIA NemoClaw/OpenShell is the planned enterprise direction for sandboxing, credential brokering, network policy, and auditability.",
+    "Paperline keeps cited source snippets available for every recommendation."
+  ]
+}

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 import { recordUsage } from "@/lib/auth/usage";
 import { generateTemplateFromDocument } from "@/lib/ai/template";
 import { getPlan } from "@/lib/plans";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -24,7 +26,19 @@ export async function POST(
     if (e instanceof Response) return e;
     throw e;
   }
-  const { id: documentId } = await params;
+  const rateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "template_generate",
+    limit: 10,
+    windowSeconds: 3600,
+  });
+  if (rateLimited) return rateLimited;
+
+  const { id: rawDocumentId } = await params;
+  const documentId = parseUuidParam(rawDocumentId);
+  if (!documentId) {
+    return NextResponse.json({ error: "invalid_document_id" }, { status: 400 });
+  }
 
   const plan = getPlan(ctx.workspace.plan);
   if (!plan.customTemplates || plan.aiTemplateGenerationsPerMonth === 0) {
@@ -92,7 +106,7 @@ export async function POST(
 
   if (error || !template) {
     return NextResponse.json(
-      { error: "template_create_failed", detail: error?.message },
+      { error: "template_create_failed" },
       { status: 500 },
     );
   }

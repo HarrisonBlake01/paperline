@@ -1,10 +1,58 @@
+export type DocumentFailureCode =
+  | "no_readable_text"
+  | "unsupported_document_type"
+  | "ai_configuration_error"
+  | "ai_capacity_error"
+  | "protected_document"
+  | "processing_failed";
+
+export function getDocumentFailureCode(
+  errorMessage: string | null | undefined,
+): DocumentFailureCode {
+  const message = (errorMessage ?? "").toLowerCase();
+  if (message === "no_readable_text" || message.includes("no readable text")) {
+    return "no_readable_text";
+  }
+  if (
+    message === "unsupported_document_type" ||
+    message.includes("unsupported document type")
+  ) {
+    return "unsupported_document_type";
+  }
+  if (
+    message === "ai_configuration_error" ||
+    message.includes("incorrect api key") ||
+    message.includes("missing openai_api_key") ||
+    message.includes("401")
+  ) {
+    return "ai_configuration_error";
+  }
+  if (
+    message === "ai_capacity_error" ||
+    message.includes("quota") ||
+    message.includes("429") ||
+    message.includes("rate limit")
+  ) {
+    return "ai_capacity_error";
+  }
+  if (
+    message === "protected_document" ||
+    message.includes("password") ||
+    message.includes("encrypted")
+  ) {
+    return "protected_document";
+  }
+  return "processing_failed";
+}
+
 export function explainDocumentFailure(
   errorMessage: string | null | undefined,
   mimeType?: string | null,
 ): { title: string; guidance: string; nextSteps: string[] } | null {
   if (!errorMessage) return null;
+  const code = getDocumentFailureCode(errorMessage);
 
-  if (errorMessage.includes("No readable text could be extracted")) {
+  if (code === "no_readable_text") {
     return {
       title: "No readable text found",
       guidance:
@@ -19,7 +67,7 @@ export function explainDocumentFailure(
     };
   }
 
-  if (errorMessage.includes("Unsupported document type")) {
+  if (code === "unsupported_document_type") {
     return {
       title: "File type not supported",
       guidance:
@@ -31,44 +79,31 @@ export function explainDocumentFailure(
     };
   }
 
-  if (
-    errorMessage.includes("Incorrect API key") ||
-    errorMessage.includes("Missing OPENAI_API_KEY") ||
-    errorMessage.includes("401")
-  ) {
+  if (code === "ai_configuration_error") {
     return {
       title: "AI configuration issue",
       guidance:
-        "The OpenAI key for this environment needs attention before processing can finish.",
+        "The document-processing service is temporarily unavailable. No document content was lost.",
       nextSteps: [
-        "Check OPENAI_API_KEY in the active environment.",
-        "Restart the dev server after changing env values.",
-        "Click Re-process once the key is fixed.",
+        "Try Re-process again in a few minutes.",
+        "Contact the Paperline owner if the issue continues.",
       ],
     };
   }
 
-  if (
-    errorMessage.includes("quota") ||
-    errorMessage.includes("429") ||
-    errorMessage.includes("rate limit")
-  ) {
+  if (code === "ai_capacity_error") {
     return {
       title: "AI usage limit reached",
       guidance:
-        "The AI provider rejected the request because of quota or rate limits.",
+        "Document processing is temporarily at capacity.",
       nextSteps: [
-        "Check provider billing and usage limits.",
-        "Wait briefly if this is a rate limit.",
-        "Click Re-process after capacity is available.",
+        "Wait briefly, then click Re-process.",
+        "Contact the Paperline owner if the issue continues.",
       ],
     };
   }
 
-  if (
-    errorMessage.includes("password") ||
-    errorMessage.includes("encrypted")
-  ) {
+  if (code === "protected_document") {
     return {
       title: "Protected document",
       guidance:
@@ -83,11 +118,11 @@ export function explainDocumentFailure(
   return {
     title: "Processing failed",
     guidance:
-      "Try re-processing the document or uploading a cleaner version. If it keeps failing, the raw error below should help diagnose it.",
+      "Try re-processing the document or uploading a cleaner version. Paperline keeps provider and parser details private.",
     nextSteps: [
       "Click Re-process to retry the pipeline.",
       "If it fails again, upload a cleaner or smaller copy.",
-      "Use the raw error when debugging the parser or AI call.",
+      "Contact the Paperline owner if the issue continues.",
     ],
   };
 }

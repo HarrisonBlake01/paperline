@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: "%s · Paperline",
   },
   description:
-    "Paperline turns PDFs, contracts, invoices, and reports into structured data and instant answers. A ShadowProductions product.",
+    "Paperline turns PDFs, contracts, invoices, and reports into structured data and instant answers. An Olvera Productions product.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://paperline.io",
   ),

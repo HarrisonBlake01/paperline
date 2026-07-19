@@ -24,6 +24,7 @@ import { embedTexts } from "@/lib/ai/embed";
 import { classifyDocument } from "@/lib/ai/classify";
 import { getBasicUser } from "@/lib/auth/clerk-users";
 import { sendDocumentReadyEmail, sendUsageWarningEmail } from "@/lib/email/send";
+import { getDocumentFailureCode } from "@/lib/documents/failure";
 import type { DocType } from "@/lib/types";
 
 export interface ProcessOptions {
@@ -34,6 +35,13 @@ export interface ProcessOptions {
   forceDocType?: DocType;
 }
 
+export class DocumentProcessConflictError extends Error {
+  constructor() {
+    super("Document is not eligible for processing.");
+    this.name = "DocumentProcessConflictError";
+  }
+}
+
 function unsupportedDocumentMessage(mimeType: string): string {
   return `Unsupported document type for processing: ${mimeType}`;
 }
@@ -41,18 +49,17 @@ function unsupportedDocumentMessage(mimeType: string): string {
 export async function processDocument(opts: ProcessOptions): Promise<void> {
   const sb = createServiceClient();
 
-  // Load doc
+  // Atomically claim queued/failed work so concurrent requests cannot duplicate
+  // parser, OCR, embedding, email, or usage side effects.
   const { data: doc, error: docErr } = await sb
     .from("documents")
-    .select("*")
-    .eq("id", opts.documentId)
-    .single();
-  if (docErr || !doc) throw new Error(`Document not found: ${opts.documentId}`);
-
-  await sb
-    .from("documents")
     .update({ status: "processing", error_message: null })
-    .eq("id", doc.id);
+    .eq("id", opts.documentId)
+    .in("status", ["queued", "failed"])
+    .select("*")
+    .maybeSingle();
+  if (docErr) throw docErr;
+  if (!doc) throw new DocumentProcessConflictError();
 
   try {
     // Download from storage
@@ -146,7 +153,8 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
         text_content: parsed.text.slice(0, 200_000),
         doc_type: docType,
       })
-      .eq("id", doc.id);
+      .eq("id", doc.id)
+      .eq("status", "processing");
 
     await recordUsage({
       workspaceId: doc.workspace_id,
@@ -208,15 +216,18 @@ export async function processDocument(opts: ProcessOptions): Promise<void> {
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
+    const failureCode = getDocumentFailureCode(message);
     console.error("[pipeline.processDocument] failed", {
       documentId: doc.id,
       mimeType: doc.mime_type,
-      detail: message,
+      errorType: e instanceof Error ? e.name : "UnknownError",
+      failureCode,
     });
     await sb
       .from("documents")
-      .update({ status: "failed", error_message: message })
-      .eq("id", doc.id);
+      .update({ status: "failed", error_message: failureCode })
+      .eq("id", doc.id)
+      .eq("status", "processing");
     throw e;
   }
 }

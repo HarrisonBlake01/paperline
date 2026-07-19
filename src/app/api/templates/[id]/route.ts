@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 import { TemplateCreateInput, normalizeTemplateInput } from "@/lib/templates/validation";
 
@@ -12,14 +13,13 @@ async function requireEditableTemplate(id: string) {
     .from("templates")
     .select("*")
     .eq("id", id)
+    .eq("workspace_id", ctx.workspace.id)
+    .eq("is_builtin", false)
     .maybeSingle();
 
   if (error) throw error;
   if (!template) {
     return { ctx, sb, response: NextResponse.json({ error: "template_not_found" }, { status: 404 }) };
-  }
-  if (template.is_builtin || template.workspace_id !== ctx.workspace.id) {
-    return { ctx, sb, response: NextResponse.json({ error: "forbidden" }, { status: 403 }) };
   }
   return { ctx, sb, template, response: null };
 }
@@ -30,7 +30,11 @@ export async function PATCH(
 ) {
   let resource;
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = parseUuidParam(rawId);
+    if (!id) {
+      return NextResponse.json({ error: "invalid_template_id" }, { status: 400 });
+    }
     resource = await requireEditableTemplate(id);
   } catch (e) {
     if (e instanceof Response) return e;
@@ -49,9 +53,9 @@ export async function PATCH(
   let normalized;
   try {
     normalized = normalizeTemplateInput(parsed.data);
-  } catch (e) {
+  } catch {
     return NextResponse.json(
-      { error: "invalid_template", detail: e instanceof Error ? e.message : String(e) },
+      { error: "invalid_template" },
       { status: 400 },
     );
   }
@@ -70,7 +74,7 @@ export async function PATCH(
 
   if (error || !data) {
     return NextResponse.json(
-      { error: "template_update_failed", detail: error?.message },
+      { error: "template_update_failed" },
       { status: 500 },
     );
   }
@@ -93,7 +97,11 @@ export async function DELETE(
 ) {
   let resource;
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = parseUuidParam(rawId);
+    if (!id) {
+      return NextResponse.json({ error: "invalid_template_id" }, { status: 400 });
+    }
     resource = await requireEditableTemplate(id);
   } catch (e) {
     if (e instanceof Response) return e;
@@ -104,7 +112,9 @@ export async function DELETE(
   const { error } = await resource.sb
     .from("templates")
     .delete()
-    .eq("id", resource.template.id);
+    .eq("id", resource.template.id)
+    .eq("workspace_id", resource.ctx.workspace.id)
+    .eq("is_builtin", false);
 
   if (error) {
     const isReferenced = error.message.toLowerCase().includes("foreign key");
@@ -113,7 +123,7 @@ export async function DELETE(
         error: isReferenced ? "template_in_use" : "template_delete_failed",
         detail: isReferenced
           ? "This template has extraction history. Edit it instead, or keep it for audit history."
-          : error.message,
+          : "The template could not be deleted.",
       },
       { status: isReferenced ? 409 : 500 },
     );

@@ -11,7 +11,7 @@ Use these settings when importing `HarrisonBlake01/paperline` into Vercel:
 - **Install command:** `pnpm install --frozen-lockfile`
 - **Build command:** `pnpm build`
 - **Output directory:** `.next` (Vercel auto-detects this)
-- **Node version:** 20.x or newer
+- **Node version:** 22.x (pinned in `package.json`)
 - **Production domain:** `paperline.io`
 
 `vercel.json` pins the framework/build/install settings so the dashboard and CLI stay consistent.
@@ -36,7 +36,7 @@ Add these before testing the full SaaS flow:
 
 ```text
 NEXT_PUBLIC_APP_NAME=Paperline
-NEXT_PUBLIC_BRAND_OWNER=ShadowProductions
+NEXT_PUBLIC_BRAND_OWNER=Olvera Productions
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/dashboard
@@ -53,6 +53,7 @@ PAPERLINE_OCR_CONCURRENCY=3
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+PAPERLINE_ALLOW_LIVE_STRIPE=false
 STRIPE_PRICE_PRO_MONTHLY=
 STRIPE_PRICE_TEAM_MONTHLY=
 RESEND_API_KEY=

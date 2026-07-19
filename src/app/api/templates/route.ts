@@ -25,9 +25,9 @@ export async function POST(req: Request) {
   let normalized;
   try {
     normalized = normalizeTemplateInput(parsed.data);
-  } catch (e) {
+  } catch {
     return NextResponse.json(
-      { error: "invalid_template", detail: e instanceof Error ? e.message : String(e) },
+      { error: "invalid_template" },
       { status: 400 },
     );
   }
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   if (error || !data) {
     return NextResponse.json(
-      { error: "template_create_failed", detail: error?.message },
+      { error: "template_create_failed" },
       { status: 500 },
     );
   }

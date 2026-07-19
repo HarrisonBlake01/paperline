@@ -6,7 +6,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getActiveWorkspace, isAdmin } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/plans";
 
@@ -36,20 +36,23 @@ export default async function SettingsPage() {
     );
   }
 
+  const canViewAdminData = isAdmin(ctx.role);
   const sb = createServiceClient();
-  const [{ data: membersData }, { data: auditData }] = await Promise.all([
-    sb
-      .from("workspace_members")
-      .select("user_id,role,joined_at")
-      .eq("workspace_id", ctx.workspace.id)
-      .order("joined_at", { ascending: true }),
-    sb
-      .from("audit_logs")
-      .select("id,actor_user_id,action,target_type,created_at")
-      .eq("workspace_id", ctx.workspace.id)
-      .order("created_at", { ascending: false })
-      .limit(6),
-  ]);
+  const [{ data: membersData }, { data: auditData }] = canViewAdminData
+    ? await Promise.all([
+        sb
+          .from("workspace_members")
+          .select("user_id,role,joined_at")
+          .eq("workspace_id", ctx.workspace.id)
+          .order("joined_at", { ascending: true }),
+        sb
+          .from("audit_logs")
+          .select("id,actor_user_id,action,target_type,created_at")
+          .eq("workspace_id", ctx.workspace.id)
+          .order("created_at", { ascending: false })
+          .limit(6),
+      ])
+    : [{ data: [] }, { data: [] }];
 
   const members = (membersData ?? []) as MemberRow[];
   const auditRows = (auditData ?? []) as AuditRow[];
@@ -94,7 +97,10 @@ export default async function SettingsPage() {
               label="Pages"
               value={`${ctx.workspace.pages_used_this_period} / ${formatLimit(ctx.workspace.pages_limit)}`}
             />
-            <Info label="Members" value={members.length.toString()} />
+            <Info
+              label="Members"
+              value={canViewAdminData ? members.length.toString() : "Restricted"}
+            />
           </div>
         </section>
 
@@ -125,6 +131,11 @@ export default async function SettingsPage() {
               Members
             </h2>
           </div>
+          {!canViewAdminData ? (
+            <p className="rounded-xl border border-dashed border-pl-border bg-pl-bg p-5 text-sm text-pl-fg-dim">
+              Member identities are available only to workspace owners and admins.
+            </p>
+          ) : (
           <div className="space-y-3">
             {members.map((member) => (
               <div
@@ -145,6 +156,7 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
+          )}
         </section>
 
         <section className="rounded-2xl border border-pl-border bg-pl-surface p-6">
@@ -154,7 +166,11 @@ export default async function SettingsPage() {
               Recent activity
             </h2>
           </div>
-          {!auditRows.length ? (
+          {!canViewAdminData ? (
+            <div className="rounded-xl border border-dashed border-pl-border bg-pl-bg p-6 text-sm text-pl-fg-dim">
+              Audit activity is available only to workspace owners and admins.
+            </div>
+          ) : !auditRows.length ? (
             <div className="rounded-xl border border-dashed border-pl-border bg-pl-bg p-6 text-sm text-pl-fg-dim">
               Activity will appear here as documents, templates, and billing
               events move through the workspace.

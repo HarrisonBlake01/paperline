@@ -60,11 +60,11 @@ export async function POST(req: Request) {
   try {
     ctx = await provisionPersonalWorkspace(data.id);
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "unknown_error";
-    return NextResponse.json(
-      { error: "provision_workspace_failed", detail },
-      { status: 500 },
-    );
+    console.error("[webhooks.clerk] workspace provisioning failed", {
+      eventId: svixId,
+      errorType: error instanceof Error ? error.name : "UnknownError",
+    });
+    return NextResponse.json({ error: "provision_workspace_failed" }, { status: 500 });
   }
 
   if (!ctx) {

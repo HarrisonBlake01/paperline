@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
   if (error || !data) {
     return NextResponse.json(
-      { error: "api_key_create_failed", detail: error?.message },
+      { error: "api_key_create_failed" },
       { status: 500 },
     );
   }
@@ -118,8 +118,8 @@ export async function DELETE(req: Request) {
 
   if (error || !data) {
     return NextResponse.json(
-      { error: "api_key_revoke_failed", detail: error?.message },
-      { status: 500 },
+      { error: "api_key_not_found" },
+      { status: 404 },
     );
   }
 

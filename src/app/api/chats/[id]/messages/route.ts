@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 import { chatWithDocuments } from "@/lib/ai/chat";
 import { recordUsage } from "@/lib/auth/usage";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -24,7 +26,19 @@ export async function POST(
     throw e;
   }
 
-  const { id: chatId } = await params;
+  const rateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "chat_message",
+    limit: 60,
+    windowSeconds: 600,
+  });
+  if (rateLimited) return rateLimited;
+
+  const { id: rawChatId } = await params;
+  const chatId = parseUuidParam(rawChatId);
+  if (!chatId) {
+    return NextResponse.json({ error: "invalid_chat_id" }, { status: 400 });
+  }
   const body = Body.safeParse(await req.json().catch(() => ({})));
   if (!body.success) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
@@ -93,7 +107,11 @@ export async function POST(
 
     return NextResponse.json({ message: assistantMsg });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: "chat_failed", detail: message }, { status: 500 });
+    console.error("[chats.messages] chat completion failed", {
+      chatId,
+      workspaceId: ctx.workspace.id,
+      errorType: e instanceof Error ? e.name : "UnknownError",
+    });
+    return NextResponse.json({ error: "chat_failed" }, { status: 500 });
   }
 }

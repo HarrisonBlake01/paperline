@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
-import { checkEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const env = checkEnv();
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
-      ok: env.ok,
+      ok: true,
       service: "paperline",
       now: new Date().toISOString(),
-      env_missing: env.ok ? [] : env.missing,
+      status: "alive",
+      dependencies_checked: false,
+      note: "Liveness only; this endpoint does not assert document-processing readiness.",
     },
-    { status: env.ok ? 200 : 503 },
+    { status: 200 },
   );
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }

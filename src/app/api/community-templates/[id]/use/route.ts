@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -15,7 +16,11 @@ export async function POST(
     if (e instanceof Response) return e;
     throw e;
   }
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = parseUuidParam(rawId);
+  if (!id) {
+    return NextResponse.json({ error: "invalid_template_id" }, { status: 400 });
+  }
   const sb = createServiceClient();
 
   const { data: source, error: readErr } = await sb
@@ -48,7 +53,7 @@ export async function POST(
 
   if (copyErr || !copy) {
     return NextResponse.json(
-      { error: "template_copy_failed", detail: copyErr?.message },
+      { error: "template_copy_failed" },
       { status: 500 },
     );
   }

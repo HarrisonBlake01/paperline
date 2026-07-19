@@ -4,18 +4,19 @@ import { processDocument } from "@/lib/pipeline";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { checkQuota } from "@/lib/auth/usage";
 import { createServiceClient } from "@/lib/supabase/server";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
+import {
+  ALLOWED_UPLOAD_MIME_TYPES,
+  MAX_UPLOAD_BYTES,
+  sanitizeUploadFilename,
+  validateUploadContent,
+} from "@/lib/security/upload";
+import { z } from "zod";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const ALLOWED_MIME = new Set([
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
-  "text/plain",
-  "image/png",
-  "image/jpeg",
-]);
-const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+const OptionalFolderId = z.string().uuid().nullable();
 
 export async function POST(req: Request) {
   let ctx;
@@ -26,6 +27,14 @@ export async function POST(req: Request) {
     console.error("[documents.upload] workspace resolution failed", e);
     throw e;
   }
+
+  const rateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "document_upload",
+    limit: 10,
+    windowSeconds: 600,
+  });
+  if (rateLimited) return rateLimited;
 
   // Cheap upfront quota guard (real page count is known after parsing)
   const quota = checkQuota(ctx.workspace, 1);
@@ -45,32 +54,60 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "missing_file" }, { status: 400 });
   }
-  if (!ALLOWED_MIME.has(file.type)) {
+  if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type)) {
     return NextResponse.json(
       { error: "unsupported_type", mime: file.type },
       { status: 415 },
     );
   }
-  if (file.size > MAX_BYTES) {
+  if (file.size > MAX_UPLOAD_BYTES) {
     return NextResponse.json(
-      { error: "file_too_large", maxBytes: MAX_BYTES },
+      { error: "file_too_large", maxBytes: MAX_UPLOAD_BYTES },
       { status: 413 },
     );
   }
 
-  const folderId = (form.get("folder_id") as string | null) || null;
+  const parsedFolderId = OptionalFolderId.safeParse(
+    (form.get("folder_id") as string | null) || null,
+  );
+  if (!parsedFolderId.success) {
+    return NextResponse.json({ error: "invalid_folder_id" }, { status: 400 });
+  }
+  const folderId = parsedFolderId.data;
 
   const sb = createServiceClient();
+  if (folderId) {
+    const { data: folder } = await sb
+      .from("folders")
+      .select("id")
+      .eq("id", folderId)
+      .eq("workspace_id", ctx.workspace.id)
+      .maybeSingle();
+    if (!folder) {
+      return NextResponse.json({ error: "folder_not_found" }, { status: 404 });
+    }
+  }
+
   const bucket = process.env.SUPABASE_BUCKET_DOCUMENTS ?? "documents";
   const id = randomUUID();
-  const safeName = file.name.replace(/[^A-Za-z0-9._-]/g, "_");
-  const storagePath = `${ctx.workspace.id}/${id}/${safeName}`;
+  const { displayName, storageName } = sanitizeUploadFilename(file.name);
+  const storagePath = `${ctx.workspace.id}/${id}/${storageName}`;
 
-  // Upload to Supabase Storage
   const arr = await file.arrayBuffer();
+  const buffer = Buffer.from(arr);
+  const contentError = validateUploadContent({
+    declaredMime: file.type,
+    buffer,
+  });
+  if (contentError) {
+    const status = contentError === "file_too_large" ? 413 : 415;
+    return NextResponse.json({ error: contentError }, { status });
+  }
+
+  // Upload to the private Supabase Storage bucket only after content checks.
   const { error: upErr } = await sb.storage
     .from(bucket)
-    .upload(storagePath, Buffer.from(arr), {
+    .upload(storagePath, buffer, {
       contentType: file.type,
       upsert: false,
     });
@@ -78,10 +115,10 @@ export async function POST(req: Request) {
     console.error("[documents.upload] storage upload failed", {
       bucket,
       storagePath,
-      detail: upErr.message,
+      providerCode: upErr.name,
     });
     return NextResponse.json(
-      { error: "storage_upload_failed", detail: upErr.message },
+      { error: "storage_upload_failed" },
       { status: 500 },
     );
   }
@@ -93,7 +130,7 @@ export async function POST(req: Request) {
       workspace_id: ctx.workspace.id,
       folder_id: folderId,
       uploader_id: ctx.userId,
-      filename: file.name,
+      filename: displayName,
       storage_path: storagePath,
       mime_type: file.type,
       size_bytes: file.size,
@@ -102,6 +139,8 @@ export async function POST(req: Request) {
     .select()
     .single();
   if (insErr) {
+    // Avoid leaving an orphaned private object if the metadata insert fails.
+    await sb.storage.from(bucket).remove([storagePath]);
     console.error("[documents.upload] document insert failed", {
       workspaceId: ctx.workspace.id,
       userId: ctx.userId,
@@ -109,7 +148,7 @@ export async function POST(req: Request) {
       detail: insErr.message,
     });
     return NextResponse.json(
-      { error: "db_insert_failed", detail: insErr.message },
+      { error: "db_insert_failed" },
       { status: 500 },
     );
   }
@@ -120,7 +159,7 @@ export async function POST(req: Request) {
     action: "document.uploaded",
     target_type: "document",
     target_id: id,
-    metadata: { filename: file.name, size_bytes: file.size },
+    metadata: { filename: displayName, size_bytes: file.size },
   });
   if (auditErr) {
     console.error("[documents.upload] audit log insert failed", {
@@ -130,15 +169,27 @@ export async function POST(req: Request) {
     });
   }
 
-  // Kick off processing asynchronously on the server. This avoids trusting a
-  // public "internal" HTTP header while keeping the upload response fast.
-  void processDocument({ documentId: id }).catch((error) => {
-    console.error("[documents.upload] async processing failed", {
+  // Process within the tracked request so serverless shutdown cannot abandon a
+  // floating promise. A durable background queue remains the scale-up path.
+  try {
+    await processDocument({ documentId: id });
+  } catch (error) {
+    console.error("[documents.upload] processing completed with failure", {
       documentId: id,
       workspaceId: ctx.workspace.id,
-      detail: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.name : "UnknownError",
     });
-  });
+  }
 
-  return NextResponse.json({ document: doc });
+  const { data: finalDocument } = await sb
+    .from("documents")
+    .select("*")
+    .eq("id", id)
+    .eq("workspace_id", ctx.workspace.id)
+    .single();
+
+  return NextResponse.json(
+    { document: finalDocument ?? doc },
+    { status: 201 },
+  );
 }

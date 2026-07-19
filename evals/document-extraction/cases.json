@@ -1,0 +1,78 @@
+[
+  {
+    "id": "synthetic-invoice-001",
+    "document": "INVOICE\nNorthstar Office Supply\nInvoice: INV-1007\nIssued: July 2, 2026\nItems: Ergonomic chair; Monitor arm\nTotal: $1,250.50\nPaid: No\nNo purchase order was supplied.",
+    "schema": {
+      "fields": [
+        { "name": "vendor_name", "type": "text", "required": true },
+        { "name": "invoice_number", "type": "text", "required": true },
+        { "name": "issue_date", "type": "date", "required": true },
+        { "name": "total_amount", "type": "currency", "required": true },
+        { "name": "paid", "type": "boolean", "required": true },
+        { "name": "line_items", "type": "list", "required": true },
+        { "name": "purchase_order", "type": "text" }
+      ]
+    },
+    "expected": {
+      "fields": {
+        "vendor_name": { "value": "Northstar Office Supply", "confidence": 100 },
+        "invoice_number": { "value": "INV-1007", "confidence": 100 },
+        "issue_date": { "value": "2026-07-02", "confidence": 100 },
+        "total_amount": { "value": 1250.5, "confidence": 100 },
+        "paid": { "value": false, "confidence": 100 },
+        "line_items": { "value": ["Ergonomic chair", "Monitor arm"], "confidence": 100 },
+        "purchase_order": { "value": null, "confidence": 0 }
+      }
+    }
+  },
+  {
+    "id": "synthetic-contract-001",
+    "document": "SERVICE AGREEMENT\nParties: Cedar Labs LLC and Blue Finch Studio\nEffective date: March 1, 2026\nInitial term: 12 months\nAutomatic renewal: Yes\nGoverning law: Oregon\nTermination notice: 30 days\nThe renewal date is not stated.",
+    "schema": {
+      "fields": [
+        { "name": "parties", "type": "list", "required": true },
+        { "name": "effective_date", "type": "date", "required": true },
+        { "name": "term_months", "type": "number", "required": true },
+        { "name": "auto_renew", "type": "boolean", "required": true },
+        { "name": "governing_law", "type": "text", "required": true },
+        { "name": "termination_notice_days", "type": "number" },
+        { "name": "renewal_date", "type": "date" }
+      ]
+    },
+    "expected": {
+      "fields": {
+        "parties": { "value": ["Cedar Labs LLC", "Blue Finch Studio"], "confidence": 100 },
+        "effective_date": { "value": "2026-03-01", "confidence": 100 },
+        "term_months": { "value": 12, "confidence": 100 },
+        "auto_renew": { "value": true, "confidence": 100 },
+        "governing_law": { "value": "Oregon", "confidence": 100 },
+        "termination_notice_days": { "value": 30, "confidence": 100 },
+        "renewal_date": { "value": null, "confidence": 0 }
+      }
+    }
+  },
+  {
+    "id": "synthetic-intake-001",
+    "document": "CONTRACTOR INTAKE\nApplicant: Rowan Example\nExperience: 5 years\nRequested rate: $42.50/hour\nRemote work accepted: yes\nSkills: TypeScript, SQL, Accessibility\nNo start date has been agreed.",
+    "schema": {
+      "fields": [
+        { "name": "applicant_name", "type": "text", "required": true },
+        { "name": "years_experience", "type": "number", "required": true },
+        { "name": "requested_hourly_rate", "type": "currency", "required": true },
+        { "name": "remote_accepted", "type": "boolean", "required": true },
+        { "name": "skills", "type": "list", "required": true },
+        { "name": "start_date", "type": "date" }
+      ]
+    },
+    "expected": {
+      "fields": {
+        "applicant_name": { "value": "Rowan Example", "confidence": 100 },
+        "years_experience": { "value": 5, "confidence": 100 },
+        "requested_hourly_rate": { "value": 42.5, "confidence": 100 },
+        "remote_accepted": { "value": true, "confidence": 100 },
+        "skills": { "value": ["TypeScript", "SQL", "Accessibility"], "confidence": 100 },
+        "start_date": { "value": null, "confidence": 0 }
+      }
+    }
+  }
+]

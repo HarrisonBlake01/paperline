@@ -33,3 +33,4 @@ scripts/samples/
 # local agent / supabase state
 .learnings/
 supabase/.temp/
+.env*.local

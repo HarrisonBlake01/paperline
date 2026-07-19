@@ -102,16 +102,7 @@ export default async function DocumentDetailPage({
                     ))}
                   </ul>
                 </div>
-                {doc.error_message ? (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-xs text-red-200/80">
-                      Show technical detail
-                    </summary>
-                    <p className="mt-2 break-words font-mono text-xs text-red-200/80">
-                      {doc.error_message}
-                    </p>
-                  </details>
-                ) : null}
+
               </div>
             ) : null}
             <dl className="mt-4 space-y-3 text-sm">
@@ -153,7 +144,9 @@ export default async function DocumentDetailPage({
                     {ex.result ? (
                       <pre className="mt-3 overflow-auto whitespace-pre-wrap text-xs text-pl-fg-dim">{JSON.stringify(ex.result, null, 2)}</pre>
                     ) : ex.error_message ? (
-                      <p className="mt-3 text-xs text-red-400">{ex.error_message}</p>
+                      <p className="mt-3 text-xs text-red-400">
+                        Extraction failed. Retry the extraction or contact the Paperline owner if it continues.
+                      </p>
                     ) : null}
                   </div>
                 ))

@@ -16,7 +16,7 @@ GitHub repository:
 https://github.com/HarrisonBlake01/paperline
 ```
 
-Paperline is an AI document intelligence SaaS under ShadowProductions. It helps general users upload important documents, extract and save important data, and create reusable workflows/templates through a polished, simple business interface.
+Paperline is an AI document intelligence SaaS under Olvera Productions. It helps general users upload important documents, extract and save important data, and create reusable workflows/templates through a polished, simple business interface.
 
 ## Target State
 
@@ -86,7 +86,7 @@ The most important flow is:
 
 ## Security, Privacy, and Accessibility Standard
 
-Build toward strong privacy/security for sensitive documents, with HIPAA-like/legal-document-grade handling as a design standard, while avoiding false formal compliance claims.
+Build toward strong privacy/security for sensitive documents, using threat modeling, private-storage defaults, and tenant-aware access controls while avoiding false formal compliance claims.
 
 Also align meaningfully with 508 accessibility expectations:
 

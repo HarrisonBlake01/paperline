@@ -14,6 +14,7 @@
   --pl-fg:           #F4F4F5;
   --pl-fg-dim:       #A1A1AA;
   --pl-accent:       #5B8DEF;
+  --pl-accent-strong:#335FBD;
   --pl-accent-2:     #E8C28A;
   --pl-success:      #4ADE80;
   --pl-warning:      #FACC15;
@@ -28,6 +29,7 @@
   --pl-fg:           #0F1115;
   --pl-fg-dim:       #52525B;
   --pl-accent:       #1A58B7;
+  --pl-accent-strong:#1A58B7;
   --pl-accent-2:     #76592B;
 }
 

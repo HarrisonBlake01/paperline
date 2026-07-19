@@ -75,7 +75,7 @@ export default function HomePage() {
             <Link href="/sign-in" className="text-sm text-pl-fg-dim hover:text-pl-fg">Sign in</Link>
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--pl-accent)] px-3.5 py-2 text-sm font-medium text-white hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--pl-accent-strong)] px-3.5 py-2 text-sm font-medium text-white hover:opacity-90"
             >
               Start free <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.75} />
             </Link>
@@ -101,7 +101,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--pl-accent)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--pl-accent-strong)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
               >
                 Start free <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
               </Link>
@@ -152,7 +152,7 @@ export default function HomePage() {
                     <div className="text-[11px] uppercase tracking-wider text-pl-fg-dim">AI summary</div>
                     <div className="mt-1 font-medium">Key contract details</div>
                   </div>
-                  <span className="rounded-full bg-[var(--pl-accent)] px-2.5 py-1 text-[11px] font-medium text-white">Ready to review</span>
+                  <span className="rounded-full bg-[var(--pl-accent-strong)] px-2.5 py-1 text-[11px] font-medium text-white">Ready to review</span>
                 </div>
                 <div className="mt-4 space-y-3 text-sm">
                   <Field label="Who is involved" value="Acme Corp and Globex LLC" confidence={97} />
@@ -295,7 +295,7 @@ export default function HomePage() {
                 </ul>
                 <Link
                   href={plan.id === "free" ? "/sign-up" : `/sign-up?plan=${plan.id}`}
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[var(--pl-accent)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[var(--pl-accent-strong)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
                 >
                   {plan.id === "free" ? "Start free" : `Choose ${plan.name}`}
                 </Link>
@@ -305,8 +305,11 @@ export default function HomePage() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm text-pl-fg-dim">
-          Need more? <Link href="/contact" className="text-pl-fg underline-offset-2 hover:underline">Talk to us about Enterprise</Link>{" "}
+          Need more? <Link href="/contact" className="text-pl-fg underline underline-offset-2">Talk to us about Enterprise</Link>{" "}
           for custom volume, SSO, DPA, and dedicated support.
+          <span className="mt-2 block text-xs">
+            Features labeled Planned are launch targets, not currently deployed integrations.
+          </span>
         </div>
       </section>
 
@@ -331,15 +334,15 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-pl-border bg-[var(--pl-accent)] px-8 py-10 text-white md:px-10">
+        <div className="rounded-3xl border border-pl-border bg-[var(--pl-accent-strong)] px-8 py-10 text-white md:px-10">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="font-[var(--font-display)] text-3xl font-semibold tracking-tight">Bring one messy document. See what comes back.</h2>
-              <p className="mt-2 text-sm text-white/75">Start free, upload a file, and test extraction plus cited chat in minutes.</p>
+              <p className="mt-2 text-sm text-white/90">Start free, upload a file, and test extraction plus cited chat in minutes.</p>
             </div>
             <Link
               href="/sign-up"
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-[var(--pl-accent)] hover:opacity-90"
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-[var(--pl-accent-strong)] hover:opacity-90"
             >
               Start free <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
             </Link>
@@ -349,7 +352,7 @@ export default function HomePage() {
 
       <footer className="mt-auto border-t border-pl-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-pl-fg-dim md:flex-row md:items-center">
-          <div>© {new Date().getFullYear()} Paperline · A ShadowProductions product.</div>
+          <div>© {new Date().getFullYear()} Paperline · An Olvera Productions product.</div>
           <div className="flex flex-wrap gap-5">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>

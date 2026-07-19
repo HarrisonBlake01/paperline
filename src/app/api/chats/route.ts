@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     .single();
   if (chatErr || !chat) {
     return NextResponse.json(
-      { error: "create_failed", detail: chatErr?.message },
+      { error: "create_failed" },
       { status: 500 },
     );
   }
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
   if (linkErr) {
     await sb.from("chats").delete().eq("id", chat.id);
     return NextResponse.json(
-      { error: "link_failed", detail: linkErr.message },
+      { error: "link_failed" },
       { status: 500 },
     );
   }

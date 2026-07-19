@@ -2,13 +2,13 @@
 // PDF text extraction.
 // =====================================================================
 // Uses `pdf-parse` for fast text extraction.  When a PDF is image-only
-// (scan), the returned text will be near-empty; we hand off to the OCR
-// path in that case (planned: tesseract.js or AWS Textract).
+// (scan), the returned text will be near-empty; the pipeline hands off to
+// the server-compatible PDF rendering and vision OCR path in pdf-ocr.ts.
 // =====================================================================
 
-import fs from "node:fs";
-import path from "node:path";
-import { PDFParse } from "pdf-parse";
+import { createRequire } from "node:module";
+
+const nodeRequire = createRequire(`${process.cwd()}/package.json`);
 
 export interface ParsedPdf {
   text: string;
@@ -19,24 +19,32 @@ export interface ParsedPdf {
 /**
  * Parse a PDF buffer into per-page text using pdf-parse v2's class API.
  */
-const pdfPackageDir = fs.realpathSync(path.join(process.cwd(), "node_modules", "pdf-parse"));
-const pdfWorkerPath = path.join(pdfPackageDir, "dist", "worker", "pdf.worker.mjs");
-
 export async function parsePdf(buffer: Buffer): Promise<ParsedPdf> {
-  PDFParse.setWorker(pdfWorkerPath);
-  const parser = new PDFParse({ data: new Uint8Array(buffer) });
-  const result = await parser.getText();
-  const pageRecords = (result.pages ?? []).map((p, i) => ({
-    page: p.num ?? i + 1,
-    text: (p.text ?? "").trim(),
-  }));
-  const fullText =
-    result.text ?? pageRecords.map((p) => p.text).join("\n\n");
-  return {
-    text: fullText.trim(),
-    pageCount: result.total ?? pageRecords.length,
-    pages: pageRecords,
+  // Keep native canvas and PDF.js initialization out of route-module startup.
+  // This prevents unrelated requests from crashing if a deployment is missing
+  // an optional native artifact and lets the route return a bounded parse error.
+  const { PDFParse } = await import("pdf-parse");
+  const { getPath } = nodeRequire("pdf-parse/worker") as {
+    getPath: () => string;
   };
+  PDFParse.setWorker(getPath());
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  try {
+    const result = await parser.getText();
+    const pageRecords = (result.pages ?? []).map((p, i) => ({
+      page: p.num ?? i + 1,
+      text: (p.text ?? "").trim(),
+    }));
+    const fullText =
+      result.text ?? pageRecords.map((p) => p.text).join("\n\n");
+    return {
+      text: fullText.trim(),
+      pageCount: result.total ?? pageRecords.length,
+      pages: pageRecords,
+    };
+  } finally {
+    await parser.destroy();
+  }
 }
 
 const TEXT_DENSITY_THRESHOLD = 30; // chars per page

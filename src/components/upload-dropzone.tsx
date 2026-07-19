@@ -98,6 +98,7 @@ export function UploadDropzone({ onUploaded }: { onUploaded?: (doc: UploadedDoc)
       <input
         ref={inputRef}
         type="file"
+        aria-label="Upload documents"
         multiple
         className="hidden"
         accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"

@@ -56,7 +56,6 @@ export async function classifyDocument(text: string): Promise<DocType> {
       `[classifyDocument] start ${JSON.stringify({
         model: MODELS.extraction,
         excerptLength: excerpt.length,
-        excerptPreview: excerpt.slice(0, 200),
       })}`,
     );
   }

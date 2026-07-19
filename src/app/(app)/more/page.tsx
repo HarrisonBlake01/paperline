@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Bot,
   CreditCard,
   FileText,
   Globe2,
@@ -11,6 +12,12 @@ import {
 } from "lucide-react";
 
 const destinations = [
+  {
+    href: "/ops-agent",
+    label: "Ops Agent",
+    description: "Hackathon demo for cited extraction, approvals, Stripe test mode, and safe Hermes operations.",
+    icon: Bot,
+  },
   {
     href: "/workflows",
     label: "Workflows",

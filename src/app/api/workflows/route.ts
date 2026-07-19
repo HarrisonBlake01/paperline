@@ -5,6 +5,7 @@ import { recordUsage } from "@/lib/auth/usage";
 import { extractStructured } from "@/lib/ai/extract";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { TemplateRow } from "@/lib/types";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -23,6 +24,14 @@ export async function POST(req: Request) {
     if (e instanceof Response) return e;
     throw e;
   }
+
+  const rateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "workflow_run",
+    limit: 10,
+    windowSeconds: 600,
+  });
+  if (rateLimited) return rateLimited;
 
   const body = Body.safeParse(await req.json().catch(() => ({})));
   if (!body.success) {
@@ -88,7 +97,7 @@ export async function POST(req: Request) {
 
   if (workflowErr || !workflow) {
     return NextResponse.json(
-      { error: "workflow_create_failed", detail: workflowErr?.message },
+      { error: "workflow_create_failed" },
       { status: 500 },
     );
   }
@@ -110,7 +119,7 @@ export async function POST(req: Request) {
       .update({ status: "failed", failed_count: readyDocs.length })
       .eq("id", workflow.id);
     return NextResponse.json(
-      { error: "workflow_items_create_failed", detail: itemErr?.message },
+      { error: "workflow_items_create_failed" },
       { status: 500 },
     );
   }
@@ -144,7 +153,7 @@ export async function POST(req: Request) {
         .from("workflow_items")
         .update({
           status: "failed",
-          error_message: extractionErr?.message ?? "Could not create extraction.",
+          error_message: "extraction_create_failed",
         })
         .eq("id", item.id);
       continue;
@@ -187,20 +196,25 @@ export async function POST(req: Request) {
 
       succeededCount += 1;
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
       failedCount += 1;
       await sb
         .from("extractions")
-        .update({ status: "failed", error_message: message })
+        .update({ status: "failed", error_message: "extraction_failed" })
         .eq("id", extraction.id);
       await sb
         .from("workflow_items")
         .update({
           status: "failed",
           extraction_id: extraction.id,
-          error_message: message,
+          error_message: "extraction_failed",
         })
         .eq("id", item.id);
+      console.error("[workflows] extraction failed", {
+        workflowId: workflow.id,
+        documentId: doc.id,
+        extractionId: extraction.id,
+        errorType: e instanceof Error ? e.name : "UnknownError",
+      });
     }
   }
 

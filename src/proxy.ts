@@ -29,13 +29,6 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
-  if (
-    req.nextUrl.pathname.match(/^\/api\/documents\/[^/]+\/process$/) &&
-    req.headers.get("x-internal-trigger") === "1"
-  ) {
-    return;
-  }
-
   if (isApiRoute(req) && !isPublicApiRoute(req)) {
     await auth.protect();
   }

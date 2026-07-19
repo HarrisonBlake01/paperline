@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import {
+  Bot,
   FileText,
   LayoutDashboard,
   Layers,
@@ -14,6 +15,7 @@ import { PaperlineMark } from "@/components/paperline-mark";
 
 const NAV = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/ops-agent", label: "Ops Agent", icon: Bot },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/templates", label: "Templates", icon: Layers },
   { href: "/workflows", label: "Workflows", icon: Workflow },

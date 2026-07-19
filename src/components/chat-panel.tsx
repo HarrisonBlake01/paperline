@@ -105,6 +105,7 @@ export function ChatPanel({
       >
         <div className="flex items-end gap-2">
           <textarea
+            aria-label="Question about linked documents"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question about this document..."

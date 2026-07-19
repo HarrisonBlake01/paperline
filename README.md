@@ -2,7 +2,7 @@
 
 **Paperline turns documents into structured, verifiable answers.**
 
-It is an AI document intelligence SaaS built as a ShadowProductions product. Users upload PDFs, DOCX files, scans, reports, contracts, invoices, and other business documents; Paperline parses/OCRs them, extracts structured fields with reusable templates, and lets users chat with the source material using citations.
+It is an AI document intelligence SaaS built as an Olvera Productions product. Users upload PDFs, DOCX files, scans, reports, contracts, invoices, and other business documents; Paperline parses/OCRs them, extracts structured fields with reusable templates, and lets users chat with the source material using citations.
 
 ## Why this project matters
 
@@ -28,7 +28,7 @@ The mentor demo path is intentionally simple: sign in, upload an important docum
 
 **Designed for sensitive documents.** Paperline treats uploaded files as private workspace data and avoids public-by-default access patterns. Server routes should enforce Clerk authentication, workspace ownership checks, and private Supabase access for documents, extractions, workflows, templates, and API keys.
 
-Paperline is built with HIPAA-like/legal-document-grade care as an engineering standard for this demo, but it does **not** claim formal HIPAA, SOC 2, or legal compliance certification yet. See [`SECURITY.md`](./SECURITY.md) for the current security posture and pre-deployment checklist.
+Paperline applies sensitive-document threat modeling, private-storage defaults, and tenant-aware access controls, but it does **not** claim formal HIPAA, SOC 2, or legal compliance certification. See [`SECURITY.md`](./SECURITY.md) for the current security posture and pre-deployment checklist.
 
 - Upload and process documents through a server-side pipeline
 - Parse PDFs, DOCX, text, and image/scanned inputs with OCR fallback
@@ -112,9 +112,9 @@ Pricing source of truth lives in [`src/lib/plans.ts`](./src/lib/plans.ts).
 | Plan | Price | Monthly pages | Seats | Notes |
 | ---- | ----- | ------------- | ----- | ----- |
 | Free | $0 | 25 | 1 | Built-in templates, community library, 1 AI template generation/month |
-| Pro | $29/mo | 1,000 | 3 | Custom templates, integrations, priority support |
-| Team | $99/mo | 10,000 | Unlimited | API access, webhooks, SSO, priority queue |
-| Enterprise | Custom | Custom | Unlimited | DPA/MSA, security review, dedicated support |
+| Pro | $29/mo | 1,000 | 3 | Custom templates; external integrations are planned |
+| Team | $99/mo | 10,000 | Unlimited | API-key management foundation; API, webhooks, and SSO are planned |
+| Enterprise | Custom | Custom | Unlimited | Planned commercial/security options; contact for current scope |
 
 ## Local development
 
@@ -130,9 +130,25 @@ Useful checks:
 
 ```bash
 pnpm test:templates
+pnpm test:extraction-eval
+pnpm test:demo
+pnpm test:security
 pnpm lint
 pnpm build
 ```
+
+## Security, QA, and release evidence
+
+Paperline's release materials separate **Implemented**, **Demo/Simulated**, and **Planned** capabilities. The current evidence package includes:
+
+- [Deployment and employment readiness tracker](./docs/readiness-tracker.md)
+- [Repository-backed threat model](./docs/security/threat-model.md)
+- [Application-security review](./docs/security/security-audit.md)
+- [Risk-based QA strategy and test matrix](./docs/qa/test-strategy.md)
+- [Production release and rollback checklist](./docs/release/production-readiness.md)
+- [Recruiter-facing portfolio package](./docs/portfolio/README.md)
+
+The current working tree is suitable for controlled recruiter/demo review after local gates pass. It is **not yet approved for unrestricted public SaaS launch**; see the readiness tracker for production blockers and claims boundaries.
 
 ## Database setup
 
@@ -157,4 +173,4 @@ The migrations cover schema, RLS helpers/policies, built-in templates, vector se
 
 ## License
 
-Proprietary. © ShadowProductions.
+Proprietary. © Olvera Productions.

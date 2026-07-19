@@ -16,8 +16,22 @@ function planLimit(plan: PlanId): number {
 async function syncSubscription(sub: Stripe.Subscription) {
   const sb = createServiceClient();
   const workspaceId = (sub.metadata?.workspace_id as string | undefined) ?? null;
-  const plan = (sub.metadata?.plan as PlanId | undefined) ?? "pro";
+  const metadataPlan = sub.metadata?.plan;
+  const plan: PlanId | null =
+    metadataPlan === "pro" || metadataPlan === "team" ? metadataPlan : null;
   if (!workspaceId) return;
+  if (!plan) throw new Error("Subscription metadata contains an invalid plan.");
+
+  const customerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+  const { data: workspace } = await sb
+    .from("workspaces")
+    .select("id,stripe_customer_id")
+    .eq("id", workspaceId)
+    .maybeSingle();
+  if (!workspace?.stripe_customer_id || workspace.stripe_customer_id !== customerId) {
+    throw new Error("Subscription customer does not match the target workspace.");
+  }
 
   const active =
     sub.status === "active" ||
@@ -31,7 +45,8 @@ async function syncSubscription(sub: Stripe.Subscription) {
       pages_limit: active ? planLimit(plan) : planLimit("free"),
       stripe_subscription_id: sub.id,
     })
-    .eq("id", workspaceId);
+    .eq("id", workspaceId)
+    .eq("stripe_customer_id", customerId);
 }
 
 export async function POST(req: Request) {
@@ -46,9 +61,8 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(raw, sig, secret);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: "invalid_signature", detail: message }, { status: 400 });
+  } catch {
+    return NextResponse.json({ error: "invalid_signature" }, { status: 400 });
   }
 
   try {
@@ -78,8 +92,12 @@ export async function POST(req: Request) {
         break;
     }
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: "handler_failed", detail: message }, { status: 500 });
+    console.error("[webhooks.stripe] handler failed", {
+      eventId: event.id,
+      eventType: event.type,
+      errorType: e instanceof Error ? e.name : "UnknownError",
+    });
+    return NextResponse.json({ error: "handler_failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

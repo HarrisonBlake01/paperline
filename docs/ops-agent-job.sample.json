@@ -1,0 +1,26 @@
+{
+  "id": "ops-job-northstar-2026-06",
+  "workspace": "Northstar Supply Co.",
+  "status": "ready_for_review",
+  "submittedAt": "2026-06-18T15:42:00.000Z",
+  "documents": [
+    {
+      "name": "Northstar-MSA-2026.pdf",
+      "type": "Master services agreement",
+      "pages": 18,
+      "status": "extracted"
+    },
+    {
+      "name": "INV-1048-Atlas-OCR.pdf",
+      "type": "Vendor invoice",
+      "pages": 2,
+      "status": "extracted"
+    }
+  ],
+  "operator": "Hermes Agent",
+  "guardrails": [
+    "Use cited Paperline extraction output as input context.",
+    "Require human approval before external spend or provisioning.",
+    "Use Stripe test mode for hackathon demo billing/provisioning steps."
+  ]
+}

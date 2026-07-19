@@ -9,7 +9,7 @@ import {
   Plug,
   Webhook,
 } from "lucide-react";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getActiveWorkspace, isAdmin } from "@/lib/auth/workspace";
 import { PLANS } from "@/lib/plans";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ApiKeysPanel } from "@/components/integrations/api-keys-panel";
@@ -38,23 +38,23 @@ const integrations = [
   },
   {
     name: "REST API",
-    description: "Upload files, trigger templates, and retrieve extracted fields programmatically.",
+    description: "Planned API surface for uploads, templates, and structured results.",
     icon: Code2,
-    state: "Team",
+    state: "Planned",
     requiredPlan: "team",
   },
   {
     name: "Webhooks",
-    description: "Send completed extraction events to your internal systems.",
+    description: "Planned outbound notifications for completed extractions.",
     icon: Webhook,
-    state: "Team",
+    state: "Planned",
     requiredPlan: "team",
   },
   {
     name: "API keys",
-    description: "Create scoped credentials for automated document workflows.",
+    description: "Management foundation for future authenticated API automation.",
     icon: KeyRound,
-    state: "Team",
+    state: "Foundation",
     requiredPlan: "team",
   },
 ] as const;
@@ -62,7 +62,8 @@ const integrations = [
 export default async function IntegrationsPage() {
   const ctx = await getActiveWorkspace();
   const plan = PLANS[ctx?.workspace.plan ?? "free"];
-  const apiKeys = ctx
+  const canManage = Boolean(ctx && isAdmin(ctx.role));
+  const apiKeys = ctx && canManage
     ? (await createServiceClient()
         .from("api_keys")
         .select("id,name,prefix,last_used_at,created_at,revoked_at")
@@ -70,7 +71,7 @@ export default async function IntegrationsPage() {
         .is("revoked_at", null)
         .order("created_at", { ascending: false })).data ?? []
     : [];
-  const canManage = ctx?.role === "owner" || ctx?.role === "admin";
+
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
@@ -110,15 +111,15 @@ export default async function IntegrationsPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <MiniStat label="Available now" value="Manual upload" />
-            <MiniStat label="Pro sources" value="Email + drives" />
-            <MiniStat label="Team automation" value="API + webhooks" />
+            <MiniStat label="Planned sources" value="Email + drives" />
+            <MiniStat label="Planned automation" value="API + webhooks" />
           </div>
         </div>
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {integrations.map((integration) => {
-          const available = isAvailable(plan.id, integration.requiredPlan);
+          const available = false;
           const Icon = integration.icon;
           return (
             <article
@@ -172,14 +173,4 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       <div className="mt-2 text-sm font-medium">{value}</div>
     </div>
   );
-}
-
-function isAvailable(currentPlan: string, requiredPlan: "pro" | "team") {
-  const rank: Record<string, number> = {
-    free: 0,
-    pro: 1,
-    team: 2,
-    enterprise: 3,
-  };
-  return rank[currentPlan] >= rank[requiredPlan];
 }
