@@ -22,6 +22,7 @@ Paperline combines:
 - Demo/readiness validation plus a synthetic offline extraction evaluation set
 - Security engineering artifacts: threat model, tenant-integrity migration, upload validation, dependency remediation, browser hardening, and regression checks
 - Risk-based QA evidence across HTTP contracts, browser console, mobile emulation, and automated accessibility audits
+- A local tenant-scoped Streamable HTTP MCP boundary with digest-only scoped credentials, four read-only tools, durable request limits, safe audit metadata, and official-SDK protocol tests
 
 The dedicated Ops Agent demo shows the product story in one surface: invoice and contract inputs → cited fields → recommended actions → human approval boundary → Stripe test-mode usage preview → operator trace → secure-runtime direction.
 
@@ -41,11 +42,19 @@ The Ops Agent can prepare an invoice approval, renewal reminder, vendor clarific
 
 ### Honest capability boundaries
 
-The current repository supports working document, extraction, retrieval, workflow-record, auth, and billing paths. The hackathon Ops Agent actions and $6 preview use synthetic fixtures. Live Hermes execution, persisted approval state machines, Inngest retries/resume, fully instrumented Sentry/PostHog dashboards, and NemoClaw/OpenShell isolation are productionization paths—not claimed as completed integrations.
+The current repository supports working document, extraction, retrieval, workflow-record, auth, billing, protected readiness, and local MCP paths. The hackathon Ops Agent actions and $6 preview use synthetic fixtures. Real direct-Hermes invocation, persisted approval state machines, Inngest retries/resume, fully instrumented Sentry/PostHog dashboards, and NemoClaw/OpenShell isolation remain external verification or productionization work—not claimed as completed integrations.
 
 ### Security and release engineering as product work
 
 I treated tenant isolation, parser boundaries, provider failures, dependency advisories, billing metadata, browser controls, and rollback as part of the product—not a last-minute checklist. The review produced a repository-backed threat model, a prioritized findings ledger, a cross-tenant RLS hardening migration, behavioral upload tests, a safe-by-default Stripe mode, and a release no-go decision where external evidence is still missing.
+
+### Debugging the serverless parser instead of trusting the build
+
+The existing deployed processing path had failed on PDF canvas/DOMMatrix support even though local static gates passed. I separated module import from parser execution, lazy-loaded native PDF dependencies, replaced a macOS-only scanned-PDF renderer, externalized the native packages for Next.js tracing, and added a real text-plus-render runtime gate. The remaining conclusion is deliberately conservative: local parse/render evidence is not Vercel evidence, so representative candidate uploads remain a release blocker.
+
+### One authorization boundary for browser and agents
+
+Rather than add a Hermes-specific service-role backdoor, I built one Paperline MCP boundary that derives the user/workspace from a digest-only credential and rechecks scope, expiry, revocation, membership, role validity, and plan. Every repository query applies that derived workspace. The same endpoint is designed for direct Hermes headers and OpenShell-managed credential replacement, but those integrations remain **Prepared / external verification required** until a real client and approved sandbox pass end to end.
 
 ## Architecture
 
@@ -74,6 +83,9 @@ pnpm test:extraction-eval
 pnpm test:extraction-eval
 pnpm test:demo
 pnpm test:security
+pnpm test:readiness
+pnpm test:parser-runtime
+pnpm test:mcp
 pnpm lint
 pnpm build
 ```
@@ -97,6 +109,7 @@ The original four-command portfolio gate passed on 2026-07-14. On 2026-07-18, th
 3. Persist approval policies and action state transitions.
 4. Wire end-to-end traces, cost/latency dashboards, and alerting.
 5. Apply and negative-test the tenant-integrity migration, then add durable webhook replay and denial-of-wallet controls.
+6. Deploy an approved candidate, apply migrations 0011–0013, and prove direct Hermes plus NemoClaw/OpenShell credential isolation, allowed/denied calls, and revocation.
 
 ## Interview talking points
 

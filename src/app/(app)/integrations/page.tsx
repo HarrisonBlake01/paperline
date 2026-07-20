@@ -4,7 +4,6 @@ import {
   Cloud,
   Code2,
   Inbox,
-  KeyRound,
   Mail,
   Plug,
   Webhook,
@@ -16,57 +15,54 @@ import { ApiKeysPanel } from "@/components/integrations/api-keys-panel";
 
 const integrations = [
   {
+    name: "MCP / API",
+    description:
+      "Connect Paperline document tools to your preferred AI model, agent harness, or MCP-compatible client.",
+    icon: Code2,
+    state: "Available",
+    available: true,
+  },
+  {
     name: "Email inbox",
     description: "Forward attachments to a workspace address and process them automatically.",
     icon: Mail,
     state: "Planned",
-    requiredPlan: "pro",
+    available: false,
   },
   {
     name: "Google Drive",
     description: "Watch folders for new PDFs, DOCX files, scans, and reports.",
     icon: Cloud,
     state: "Planned",
-    requiredPlan: "pro",
+    available: false,
   },
   {
     name: "Dropbox",
     description: "Import signed contracts, vendor bills, and exported packets.",
     icon: Inbox,
     state: "Planned",
-    requiredPlan: "pro",
-  },
-  {
-    name: "REST API",
-    description: "Planned API surface for uploads, templates, and structured results.",
-    icon: Code2,
-    state: "Planned",
-    requiredPlan: "team",
+    available: false,
   },
   {
     name: "Webhooks",
     description: "Planned outbound notifications for completed extractions.",
     icon: Webhook,
     state: "Planned",
-    requiredPlan: "team",
-  },
-  {
-    name: "API keys",
-    description: "Management foundation for future authenticated API automation.",
-    icon: KeyRound,
-    state: "Foundation",
-    requiredPlan: "team",
+    available: false,
   },
 ] as const;
 
 export default async function IntegrationsPage() {
   const ctx = await getActiveWorkspace();
   const plan = PLANS[ctx?.workspace.plan ?? "free"];
+  const appUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "https://paperline.io";
   const canManage = Boolean(ctx && isAdmin(ctx.role));
   const apiKeys = ctx && canManage
     ? (await createServiceClient()
         .from("api_keys")
-        .select("id,name,prefix,last_used_at,created_at,revoked_at")
+        .select("id,name,prefix,scopes,expires_at,last_used_at,created_at,revoked_at")
         .eq("workspace_id", ctx.workspace.id)
         .is("revoked_at", null)
         .order("created_at", { ascending: false })).data ?? []
@@ -79,14 +75,14 @@ export default async function IntegrationsPage() {
         <div>
           <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-pl-border px-3 py-1 text-xs text-pl-fg-dim">
             <Plug className="h-3.5 w-3.5 text-[var(--pl-accent)]" strokeWidth={1.75} />
-            Connected document sources
+            Sources, agents, and automation
           </p>
           <h1 className="font-[var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
             Integrations
           </h1>
           <p className="mt-2 max-w-2xl text-pl-fg-dim">
-            Connect the places where files already arrive, then route them into
-            repeatable extraction and review workflows.
+            Connect document sources or give your preferred AI harness secure,
+            read-only access to Paperline workspace tools.
           </p>
         </div>
         <Link
@@ -101,29 +97,30 @@ export default async function IntegrationsPage() {
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
             <h2 className="font-[var(--font-display)] text-xl font-semibold tracking-tight">
-              Start with uploads. Add sources when volume grows.
+              Upload documents, then use them from the tools you already trust.
             </h2>
             <p className="mt-2 text-sm text-pl-fg-dim">
-              The API, webhooks, and storage connectors are designed around the
-              same pipeline used by manual uploads, so every source keeps the
-              same citations, templates, and workspace boundaries.
+              MCP/API access uses the same citations, templates, and workspace
+              boundaries as the Paperline app. Your agent supplies its own LLM;
+              Paperline supplies authenticated document context.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            <MiniStat label="Available now" value="Manual upload" />
-            <MiniStat label="Planned sources" value="Email + drives" />
-            <MiniStat label="Planned automation" value="API + webhooks" />
+            <MiniStat label="Available now" value="Uploads + MCP/API" />
+            <MiniStat label="AI choice" value="Bring your own LLM" />
+            <MiniStat label="Initial access" value="4 read-only tools" />
           </div>
         </div>
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {integrations.map((integration) => {
-          const available = false;
+          const available = integration.available;
           const Icon = integration.icon;
           return (
             <article
               key={integration.name}
+              id={available ? "mcp-api-card" : undefined}
               className="flex min-h-[240px] flex-col rounded-2xl border border-pl-border bg-pl-surface p-5"
             >
               <div className="flex items-start justify-between gap-3">
@@ -146,10 +143,20 @@ export default async function IntegrationsPage() {
               <p className="mt-2 flex-1 text-sm text-pl-fg-dim">
                 {integration.description}
               </p>
-              <div className="mt-5 flex items-center gap-2 text-xs text-pl-fg-dim">
-                <CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" />
-                Uses existing document pipeline
-              </div>
+              {available ? (
+                <Link
+                  href="#mcp-api"
+                  className="mt-5 inline-flex items-center gap-2 text-xs font-medium text-[var(--pl-accent)] hover:underline"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Configure MCP/API below
+                </Link>
+              ) : (
+                <div className="mt-5 flex items-center gap-2 text-xs text-pl-fg-dim">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" />
+                  Uses existing document pipeline
+                </div>
+              )}
             </article>
           );
         })}
@@ -159,6 +166,7 @@ export default async function IntegrationsPage() {
         apiKeys={apiKeys}
         enabled={plan.apiAccess}
         canManage={canManage}
+        endpoint={`${appUrl}/api/mcp`}
       />
     </main>
   );

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import {
   Bot,
   FileText,
@@ -30,7 +32,10 @@ const MOBILE_NAV = NAV.filter(({ href }) =>
   ),
 ).concat([{ href: "/more", label: "More", icon: Menu }]);
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[clamp(220px,22vw,260px)_1fr]">
       <aside className="sticky top-0 hidden h-screen min-w-0 flex-col overflow-hidden border-r border-pl-border bg-pl-surface lg:flex">

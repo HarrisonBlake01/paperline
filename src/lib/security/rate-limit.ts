@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 
-interface RateLimitOptions {
+export interface RateLimitOptions {
   workspaceId: string;
   action: string;
   limit: number;
@@ -14,9 +14,14 @@ interface RateLimitRow {
   reset_at: string;
 }
 
-export async function enforceWorkspaceRateLimit(
+export type WorkspaceRateLimitResult =
+  | { status: "allowed"; remaining: number; resetAt: string }
+  | { status: "limited"; remaining: 0; resetAt: string; retryAfterSeconds: number }
+  | { status: "unavailable" };
+
+export async function consumeWorkspaceRateLimit(
   options: RateLimitOptions,
-): Promise<NextResponse | null> {
+): Promise<WorkspaceRateLimitResult> {
   const sb = createServiceClient();
   const { data, error } = await sb.rpc("consume_workspace_rate_limit", {
     p_workspace_id: options.workspaceId,
@@ -31,35 +36,55 @@ export async function enforceWorkspaceRateLimit(
       workspaceId: options.workspaceId,
       errorCode: error.code,
     });
-    return NextResponse.json(
-      { error: "request_limit_unavailable" },
-      { status: 503 },
-    );
+    return { status: "unavailable" };
   }
 
   const row = (Array.isArray(data) ? data[0] : data) as RateLimitRow | null;
-  if (!row) {
+  if (!row) return { status: "unavailable" };
+
+  if (row.allowed) {
+    return {
+      status: "allowed",
+      remaining: Math.max(0, row.remaining),
+      resetAt: row.reset_at,
+    };
+  }
+
+  const resetMs = Date.parse(row.reset_at);
+  const retryAfterSeconds = Number.isFinite(resetMs)
+    ? Math.max(1, Math.ceil((resetMs - Date.now()) / 1000))
+    : options.windowSeconds;
+  return {
+    status: "limited",
+    remaining: 0,
+    resetAt: row.reset_at,
+    retryAfterSeconds,
+  };
+}
+
+export async function enforceWorkspaceRateLimit(
+  options: RateLimitOptions,
+): Promise<NextResponse | null> {
+  const result = await consumeWorkspaceRateLimit(options);
+  if (result.status === "unavailable") {
     return NextResponse.json(
       { error: "request_limit_unavailable" },
       { status: 503 },
     );
   }
-
-  if (row.allowed) return null;
-
-  const resetMs = Date.parse(row.reset_at);
-  const retryAfter = Number.isFinite(resetMs)
-    ? Math.max(1, Math.ceil((resetMs - Date.now()) / 1000))
-    : options.windowSeconds;
+  if (result.status === "allowed") return null;
 
   return NextResponse.json(
-    { error: "rate_limit_exceeded", retry_after_seconds: retryAfter },
+    {
+      error: "rate_limit_exceeded",
+      retry_after_seconds: result.retryAfterSeconds,
+    },
     {
       status: 429,
       headers: {
-        "Retry-After": String(retryAfter),
+        "Retry-After": String(result.retryAfterSeconds),
         "X-RateLimit-Limit": String(options.limit),
-        "X-RateLimit-Remaining": String(Math.max(0, row.remaining)),
+        "X-RateLimit-Remaining": "0",
       },
     },
   );

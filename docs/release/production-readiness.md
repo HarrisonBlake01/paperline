@@ -4,6 +4,7 @@
 
 **Current decision: NO-GO for unrestricted public SaaS launch.**  
 **Controlled recruiter/demo preview: GO once final local gates are green.**
+**Hermes/NemoClaw integration: implemented locally; external verification required.**
 
 No production deployment, push, migration, DNS change, webhook change, real Stripe action, or public post is authorized by this document.
 
@@ -20,6 +21,8 @@ Names only—never record values in this file.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `OPENAI_API_KEY`
+- `PAPERLINE_MCP_ALLOWED_HOSTS`
+- `PAPERLINE_READINESS_TOKEN`
 
 ### Required when features are enabled
 
@@ -41,6 +44,7 @@ Names only—never record values in this file.
 - PostHog variables
 - Inngest variables
 - demo workspace variables
+- `PAPERLINE_MCP_ALLOWED_ORIGINS` (normally empty for native clients)
 
 ## Pre-deployment blockers
 
@@ -49,7 +53,7 @@ Names only—never record values in this file.
 - [ ] Replace Clerk development keys with production keys and configure allowed origins/redirects.
 - [ ] Verify `NEXT_PUBLIC_SUPABASE_URL` is the project root, not `/rest/v1`.
 - [ ] Confirm document bucket is private.
-- [ ] Review and apply migrations `0011_security_hardening.sql` and `0012_workspace_rate_limits.sql` in order.
+- [ ] Review and apply migrations `0011_security_hardening.sql`, `0012_workspace_rate_limits.sql`, and `0013_agent_credentials.sql` in order.
 - [ ] Run two-workspace negative RLS/API tests.
 - [ ] Exercise durable per-workspace limits and verify fail-closed, 429, and `Retry-After` behavior.
 - [ ] Stage and validate CSP report-only policy, then enforce it.
@@ -57,7 +61,9 @@ Names only—never record values in this file.
 - [ ] Configure correct Clerk and Stripe production webhook URLs/secrets.
 - [ ] Complete the synthetic signed-in QA matrix.
 - [ ] Deploy to a non-production candidate and run representative PDF, scanned PDF, DOCX, TXT, PNG, and JPEG processing smoke tests.
-- [ ] Add monitored dependency readiness; `/api/health` is liveness-only and must not be used as processing-readiness evidence.
+- [ ] Configure an independent readiness secret and monitor protected `/api/readiness`; `/api/health` remains liveness-only.
+- [ ] Verify direct Hermes discovery/calls/foreign-ID denial/revocation against the candidate.
+- [ ] In an approved NemoClaw sandbox, verify OpenShell policy, allowed/denied calls, raw credential non-disclosure, rotation, and revocation.
 - [ ] Verify retention/deletion, backup/restore, monitoring, alert ownership, and incident procedure.
 - [ ] Run final secret/history scan and review every diff.
 
@@ -73,13 +79,14 @@ pnpm test:demo
 pnpm test:security
 pnpm test:readiness
 pnpm test:parser-runtime
+pnpm test:mcp
 pnpm lint
 pnpm build
 pnpm audit --prod --audit-level=high
 git diff --check
 ```
 
-The build route table must include the real app APIs/pages, `/contact`, legal/status/changelog pages, and `/ops-agent`.
+The build route table must include the real app APIs/pages, `/api/mcp`, `/api/readiness`, `/contact`, legal/status/changelog pages, and `/ops-agent`.
 
 ## Approved-deploy procedure
 
@@ -94,6 +101,8 @@ Only after explicit approval:
 7. Verify by HTTP and browser:
    - `/`, `/contact`, `/terms`, `/privacy`, `/status`, `/changelog`, `/ops-agent`
    - `/api/health` has safe shape and `no-store`
+   - invalid `/api/readiness` credential returns 401; valid candidate monitor credential reports every dependency ready
+   - `/api/mcp` rejects missing/invalid credentials and exposes only approved read-only tools to the real Hermes client
    - `/dashboard` and `/documents` redirect signed-out users to `/sign-in`
    - security headers exist and `X-Powered-By` is absent
    - no JavaScript console errors
@@ -103,7 +112,7 @@ Only after explicit approval:
 ## Rollback
 
 1. Use Vercel's previous known-good deployment/instant rollback for code.
-2. Do not roll back a database migration destructively. Migration 0011 only replaces policies/functions and is intended to be backward-compatible; if it causes authorization failure, restore the prior policies through a new forward migration.
+2. Do not roll back a database migration destructively. Migrations 0011–0013 are additive/forward-managed; if one causes authorization failure, stop dependent code and restore behavior through a reviewed new forward migration.
 3. Disable affected expensive/provider routes or revoke provider keys if cost or credential exposure is suspected.
 4. Rotate compromised credentials at the provider, update Vercel secrets, redeploy, and invalidate affected sessions/API keys.
 5. Preserve logs/audit evidence while excluding document contents and secrets.

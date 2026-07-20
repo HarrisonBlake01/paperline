@@ -12,6 +12,7 @@ Prove the private, workspace-scoped SaaS path works and fails safely. The static
 4. **Browser QA** — desktop and mobile layout, console/network review, auth rendering, legal/contact links.
 5. **Accessibility** — Lighthouse/axe rules plus manual keyboard, focus, labels, headings, announcements, dialogs, and contrast.
 6. **Production smoke test** — only after approved deployment; public alias, immutable URL, logs, headers, auth redirects, and synthetic signed-in journey.
+7. **Agent protocol testing** — official MCP SDK client/transport tests, then real direct Hermes and approved NemoClaw/OpenShell managed-MCP verification.
 
 ## Traceable test matrix
 
@@ -34,6 +35,11 @@ Prove the private, workspace-scoped SaaS path works and fails safely. The static
 | Public routes | local HTTP loop | Desktop/mobile visual review | Pass: `/`, `/ops-agent`, legal, status, changelog, contact |
 | Accessibility | Lighthouse | Keyboard/focus/manual review | Public routes automated pass; signed-in manual pending |
 | Responsive layout | Lighthouse mobile emulation/screenshots | 390px + desktop review | Public landing/Ops pass |
+| Scoped MCP credential | `test:mcp`: format, digest, expiry, scopes, membership, plan | Create/revoke in candidate UI; verify next call fails | Local pass; candidate pending |
+| MCP protocol boundary | SDK initialize/list/call; bad auth/host/origin/type/size/batch/JSON; limiter 429/503 | `hermes mcp test paperline` and real synthetic calls | Local pass; real Hermes pending |
+| MCP tenant isolation | Fake repository asserts credential workspace; foreign UUID nondisclosure | Two-workspace real DB and direct Hermes cases | Contract pass; DB-backed pending |
+| NemoClaw/OpenShell boundary | Documentation/policy assertions | Managed sandbox allowed/denied host/method, credential non-disclosure, rotation | Pending approval |
+| Dependency readiness | Behavioral probe aggregation/auth tests | Candidate `/api/readiness`, monitor and alert delivery | Local pass; candidate pending |
 
 ## Required synthetic signed-in release script
 
@@ -51,6 +57,22 @@ Use a dedicated test workspace and non-sensitive generated files only.
 10. Run Stripe test-mode checkout/portal and signed webhook fixtures; no real charges.
 11. Repeat core routes using a second workspace and guessed IDs; expect 404/403 and no content leakage.
 12. Inspect console, network failures, server logs, and audit events.
+
+## Required agent-integration release script
+
+Use synthetic Paperline data and an isolated Hermes test profile only.
+
+1. Apply migrations 0011–0013 to the approved candidate database in order.
+2. Create a scoped, expiring credential as a workspace admin; prove members cannot manage credentials.
+3. Configure direct Hermes with an environment-variable header, four-tool allowlist, resources/prompts/sampling disabled, and parallel calls disabled.
+4. Run `hermes mcp test paperline`; verify exactly the authorized tools appear.
+5. List synthetic documents, read one summary, retrieve one citation, and inspect untrusted-data labeling.
+6. Request a Workspace B UUID with Workspace A credential; expect stable nondisclosure.
+7. Exhaust the request limit and verify `429`/`Retry-After`; make limiter unavailable in a disposable test and verify `503`.
+8. Revoke/expire/remove creator/downgrade plan and prove immediate failure.
+9. In an approved NemoClaw Hermes sandbox, add the same candidate endpoint with OpenShell provider-held credential.
+10. Verify allowed call, denied host/method, raw credential non-disclosure, rotation, revocation, and safe activity/audit correlation.
+11. Search configs/logs/evidence for bearer token, Authorization header, document text, prompts, and provider payloads.
 
 ## Accessibility results
 
@@ -76,6 +98,9 @@ pnpm test:templates
 pnpm test:extraction-eval
 pnpm test:demo
 pnpm test:security
+pnpm test:readiness
+pnpm test:parser-runtime
+pnpm test:mcp
 pnpm lint
 pnpm build
 pnpm audit --prod --audit-level=high

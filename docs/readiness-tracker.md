@@ -1,6 +1,6 @@
 # Paperline deployment + employment readiness tracker
 
-Status reviewed: 2026-07-18 CDT. This tracker covers the current working tree. It is not proof that uncommitted changes are deployed.
+Status reviewed: 2026-07-19 CDT. This tracker covers the current working tree. It is not proof that local changes are deployed.
 
 ## Status legend
 
@@ -34,9 +34,13 @@ Status reviewed: 2026-07-18 CDT. This tracker covers the current working tree. I
 | QA-03 | Medium | The real signed-in upload→processing→extraction→chat→workflow path has not been re-executed with an approved synthetic account during this pass. | Browser session was signed out; no credentials were fabricated. | Run the signed-in release test matrix with a dedicated synthetic workspace after approval/config review. | **Blocked for production go-live**. |
 | REL-01 | Medium | Live preview still reports Clerk development-key warnings and has not received this working tree. | Browser console and Vercel inspect evidence. | Replace production Clerk keys/allowed origins, verify redirects, then deploy only after approval. | **Blocked for production go-live**. |
 | REL-02 | Medium | `paperline.io` is documented as the intended domain, while the verified public alias is `paperline-xi.vercel.app`. | README, Vercel docs, live HTTP. | Pick the canonical launch domain and align app URL, Clerk URLs, webhook endpoints, email links, DNS, and docs. | **Blocked for canonical-domain launch**. |
+| SEC-16 | Medium | Baseline API keys had no scopes or expiry and were not consumed by an authenticated API. | `api_keys` schema and route inventory. | Added migration 0013, digest uniqueness, constrained scopes, mandatory expiry at MCP auth, current membership/plan checks, and 30-day read-only credentials. Existing keys remain unscoped/inactive. | **Complete locally / external verification required** — 0013 is not remote. |
+| SEC-17 | Medium | Agent clients needed a shared protocol boundary without creating service-role backdoors or trusting model-supplied workspace IDs. | No baseline MCP endpoint; Hermes/NVIDIA architecture review. | Added official SDK stateless Streamable HTTP MCP, host/origin/body/protocol controls, workspace-scoped repository, scope-filtered read-only tools, durable rate limit, safe audit, and deterministic client/HTTP tests. | **Complete locally**; real Hermes and NemoClaw/OpenShell tests are blocked on candidate approval. |
+| REL-04 | Medium | Liveness did not prove database, migration, storage, or PDF runtime readiness. | Existing `/api/health` is intentionally liveness-only. | Added independent bearer-protected `/api/readiness` with bounded named checks and 503 fail-closed semantics. | **Complete locally**; external monitor and candidate check require approval. |
 
 ## Current go/no-go
 
 - **Controlled recruiter/demo preview:** **GO after local final gates remain green.** The existing public alias is useful as prior demo evidence, but it does not include this working tree.
-- **Unrestricted production SaaS launch:** **NO-GO** until SEC-03, SEC-09, SEC-10, SEC-14 deployment verification, QA-03, REL-01, REL-02, and monitored readiness are resolved and independently verified.
+- **Unrestricted production SaaS launch:** **NO-GO** until SEC-03, SEC-09, SEC-10, SEC-14, SEC-16, SEC-17 runtime verification, QA-03, REL-01, REL-02, REL-04 monitoring, and all candidate gates are independently verified.
+- **Hermes / NemoClaw / OpenShell integration:** **Implemented locally / external verification required**. Do not claim deployed integration until a real current Hermes client and approved managed sandbox pass discovery, allowed/denied calls, credential isolation, and revocation.
 - **Production deployment of this tree:** requires explicit approval after final diff review. Deployment is not implied by this tracker.

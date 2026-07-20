@@ -86,6 +86,7 @@ function testUploadValidation() {
 
 function testSecurityInvariants() {
   assert.equal(parseUuidParam("8b825b1e-855d-4d21-af51-429dfcb4b78c"), "8b825b1e-855d-4d21-af51-429dfcb4b78c");
+  assert.equal(parseUuidParam("00000000-0000-0000-0000-000000000001"), "00000000-0000-0000-0000-000000000001");
   assert.equal(parseUuidParam("not-a-uuid"), null);
   assert.equal(getDocumentFailureCode("Incorrect API key supplied"), "ai_configuration_error");
   assert.equal(getDocumentFailureCode("rate limit exceeded"), "ai_capacity_error");
@@ -101,7 +102,20 @@ function testSecurityInvariants() {
 
   const proxy = read("src/proxy.ts");
   assert.doesNotMatch(proxy, /x-internal-trigger/i);
-  assert.match(proxy, /auth\.protect/);
+  assert.doesNotMatch(proxy, /createRouteMatcher/);
+  assert.match(proxy, /clerkMiddleware\(\)/);
+
+  const appLayout = read("src/app/(app)/layout.tsx");
+  assert.match(appLayout, /await auth\(\)/);
+  assert.match(appLayout, /redirect\("\/sign-in"\)/);
+
+  const workspaceAuth = read("src/lib/auth/workspace.ts");
+  assert.match(workspaceAuth, /await auth\(\)/);
+
+  const mcpRoute = read("src/app/api/mcp/route.ts");
+  assert.match(mcpRoute, /handlePaperlineMcpRequest/);
+  const readinessRouteContract = read("src/app/api/readiness/route.ts");
+  assert.match(readinessRouteContract, /PAPERLINE_READINESS_TOKEN/);
 
   const uploadRoute = read("src/app/api/documents/upload/route.ts");
   assert.match(uploadRoute, /validateUploadContent/);
@@ -121,9 +135,59 @@ function testSecurityInvariants() {
     "Referrer-Policy",
     "Permissions-Policy",
     "Cross-Origin-Opener-Policy",
+    "Content-Security-Policy-Report-Only",
   ]) {
     assert.match(config, new RegExp(header));
   }
+  for (const directive of [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "img-src 'self'",
+    "connect-src 'self'",
+    "frame-src",
+    "worker-src 'self'",
+  ]) {
+    assert.match(config, new RegExp(directive.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+
+  const sentryConfigs = [
+    read("src/instrumentation-client.ts"),
+    read("src/sentry.server.config.ts"),
+    read("src/sentry.edge.config.ts"),
+  ];
+  for (const sentryConfig of sentryConfigs) {
+    assert.match(sentryConfig, /sendDefaultPii:\s*false/);
+    assert.match(sentryConfig, /userInfo:\s*false/);
+    assert.match(sentryConfig, /cookies:\s*false/);
+    assert.match(sentryConfig, /httpHeaders:\s*\{\s*request:\s*false,\s*response:\s*false\s*\}/);
+    assert.match(sentryConfig, /httpBodies:\s*\[\]/);
+    assert.match(sentryConfig, /queryParams:\s*false/);
+    assert.match(sentryConfig, /genAI:\s*\{\s*inputs:\s*false,\s*outputs:\s*false\s*\}/);
+    assert.match(sentryConfig, /enableLogs:\s*false/);
+    assert.match(sentryConfig, /tracesSampler:/);
+    assert.match(sentryConfig, /beforeSend:\s*scrubSentryEvent/);
+    assert.match(sentryConfig, /beforeSendTransaction:\s*scrubSentryEvent/);
+    assert.match(sentryConfig, /beforeSendSpan:\s*scrubSentrySpan/);
+    assert.match(sentryConfig, /beforeBreadcrumb:\s*scrubSentryBreadcrumb/);
+    assert.doesNotMatch(sentryConfig, /replayIntegration|enableLogs:\s*true|includeLocalVariables:\s*true/);
+  }
+  assert.match(sentryConfigs[0], /tracePropagationTargets:\s*\[\]/);
+  assert.match(sentryConfigs[0], /replaysSessionSampleRate:\s*0/);
+  assert.match(sentryConfigs[0], /replaysOnErrorSampleRate:\s*0/);
+  const sentryPrivacy = read("src/lib/observability/sentry-privacy.ts");
+  for (const deniedField of ["event.user", "event.extra", "event.contexts", "event.tags"]) {
+    assert.match(sentryPrivacy, new RegExp(`delete ${deniedField.replace(".", "\\.")}`));
+  }
+  assert.match(sentryPrivacy, /event\.request = \{/);
+  assert.match(sentryPrivacy, /event\.message = REDACTED/);
+  assert.match(sentryPrivacy, /delete frame\.context_line/);
+  assert.match(sentryPrivacy, /delete frame\.vars/);
+  assert.match(sentryPrivacy, /span\.data = undefined/);
 
   const health = read("src/app/api/health/route.ts");
   assert.match(health, /dependencies_checked:\s*false/);
@@ -193,6 +257,37 @@ function testSecurityInvariants() {
   assert.match(rateLimitMigration, /security definer/);
   assert.match(rateLimitMigration, /revoke all on function public\.consume_workspace_rate_limit/);
 
+  const agentCredentialMigration = read(
+    "supabase/migrations/0013_agent_credentials.sql",
+  );
+  assert.match(agentCredentialMigration, /scopes text\[\] not null default '\{\}'/);
+  assert.match(agentCredentialMigration, /expires_at timestamptz/);
+  assert.match(agentCredentialMigration, /api_keys_key_hash_unique_idx/);
+  assert.match(agentCredentialMigration, /documents:read/);
+
+  const mcpAuth = read("src/lib/mcp/auth.ts");
+  assert.match(mcpAuth, /revoked_at/);
+  assert.match(mcpAuth, /expiresAt <= Date\.now\(\)/);
+  assert.match(mcpAuth, /workspace_members/);
+  assert.match(mcpAuth, /PLANS[\s\S]*apiAccess/);
+
+  const mcpHttp = read("src/lib/mcp/http.ts");
+  assert.match(mcpHttp, /MCP_MAX_REQUEST_BYTES = 128 \* 1024/);
+  assert.match(mcpHttp, /batch_requests_not_supported/);
+  assert.match(mcpHttp, /PAPERLINE_MCP_ALLOWED_HOSTS/);
+  assert.match(mcpHttp, /consumeWorkspaceRateLimit/);
+  assert.doesNotMatch(mcpHttp, /Access-Control-Allow-Origin.*\*/);
+
+  const mcpServer = read("src/lib/mcp/server.ts");
+  assert.match(mcpServer, /readOnlyHint: true/);
+  assert.match(mcpServer, /untrusted_workspace_data/);
+  assert.doesNotMatch(mcpServer, /shell|raw storage|arbitrary SQL/i);
+
+  const readinessRoute = read("src/app/api/readiness/route.ts");
+  assert.match(readinessRoute, /isReadinessAuthorized/);
+  assert.match(readinessRoute, /status: result\.ready \? 200 : 503/);
+  assert.match(readinessRoute, /Cache-Control[\s\S]*no-store/);
+
   for (const route of [
     "src/app/api/chats/[id]/messages/route.ts",
     "src/app/api/documents/[id]/extract/route.ts",
@@ -210,8 +305,9 @@ function testSecurityInvariants() {
   assert.match(rateLimitHelper, /Retry-After/);
 
   const pkg = JSON.parse(read("package.json")) as {
-    dependencies: { next: string };
+    dependencies: { next: string; "@modelcontextprotocol/sdk": string };
   };
+  assert.equal(pkg.dependencies["@modelcontextprotocol/sdk"], "1.29.0");
   const nextVersion = pkg.dependencies.next.replace(/^[^0-9]*/, "");
   const [major, minor, patch] = nextVersion.split(".").map(Number);
   assert.ok(

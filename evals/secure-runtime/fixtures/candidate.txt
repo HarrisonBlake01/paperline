@@ -1,0 +1,6 @@
+PAPERLINE SYNTHETIC CANDIDATE FIXTURE
+Invoice number: PL-CANDIDATE-001
+Vendor: Synthetic Office Supply
+Total: $42.50
+Due date: 2026-08-15
+This document contains generated test data only.

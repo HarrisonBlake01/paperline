@@ -1,0 +1,18 @@
+{
+  "classification": "synthetic_non_sensitive",
+  "fixtures": {
+    "candidate.txt": "valid text",
+    "prompt-injection.txt": "untrusted instruction data",
+    "text-document.pdf": "text PDF",
+    "scanned-document.pdf": "image-only scanned PDF",
+    "candidate.docx": "valid DOCX",
+    "scan.png": "valid PNG OCR input",
+    "photo.jpg": "valid JPEG OCR input",
+    "empty.txt": "empty-file rejection",
+    "malformed.pdf": "truncated PDF rejection",
+    "signature-mismatch.pdf": "PNG bytes with PDF extension rejection"
+  },
+  "local_only_cases": {
+    "oversized": "Generate at runtime to exceed the configured upload cap; do not commit a large binary."
+  }
+}

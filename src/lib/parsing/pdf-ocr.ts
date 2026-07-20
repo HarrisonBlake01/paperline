@@ -1,11 +1,8 @@
-import { createRequire } from "node:module";
 import {
   OCR_LIMITS,
   extractTextFromImageBuffer,
   runWithConcurrency,
 } from "@/lib/ai/ocr";
-
-const nodeRequire = createRequire(`${process.cwd()}/package.json`);
 
 export interface ParsedOcrPdf {
   text: string;
@@ -25,9 +22,7 @@ export async function renderPdfPages(
   pageLimit = OCR_LIMITS.maxPdfPages,
 ): Promise<{ pages: RenderedPdfPage[]; totalPages: number }> {
   const { PDFParse } = await import("pdf-parse");
-  const { getPath } = nodeRequire("pdf-parse/worker") as {
-    getPath: () => string;
-  };
+  const { getPath } = await import("pdf-parse/worker");
   PDFParse.setWorker(getPath());
   const parser = new PDFParse({ data: new Uint8Array(buffer) });
   try {

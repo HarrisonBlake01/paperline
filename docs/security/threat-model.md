@@ -2,7 +2,7 @@
 
 ## Scope and claims boundary
 
-This model covers the current Next.js/Supabase/Clerk/OpenAI/Stripe design. It is an engineering threat model, not a penetration-test report or compliance certification. The static `/ops-agent` fixture is presentation-only and does not execute live Hermes, Stripe, or NVIDIA operations.
+This model covers the current Next.js/Supabase/Clerk/OpenAI/Stripe design and the locally implemented Paperline MCP boundary. It is an engineering threat model, not a penetration-test report or compliance certification. The static `/ops-agent` fixture remains presentation-only; it is not the MCP implementation and does not execute live Hermes, Stripe, or NVIDIA operations. See [`agent-integration-threat-model.md`](agent-integration-threat-model.md).
 
 ## Assets
 
@@ -13,6 +13,7 @@ This model covers the current Next.js/Supabase/Clerk/OpenAI/Stripe design. It is
 5. Supabase service-role, Clerk, OpenAI, Stripe, Resend, and telemetry credentials.
 6. Stripe customer/subscription IDs and plan/usage state.
 7. Provider prompts, model output, exception data, and application logs.
+8. Agent credential metadata: digest, scopes, expiry, revocation state, and audit fields.
 
 ## Trust boundaries and data flow
 
@@ -27,6 +28,8 @@ flowchart LR
   T -->|Stripe-signed webhook| N
   N -->|transactional metadata| R[Resend]
   N -. optional telemetry .-> M[Sentry / PostHog]
+  H[Direct Hermes] -->|scoped bearer + MCP| N
+  NH[NemoClaw Hermes sandbox] -->|OpenShell managed MCP| N
 ```
 
 The highest-risk boundary is the Next.js server's service-role access: it bypasses RLS, so every route must authenticate, resolve membership, and constrain every object query by the active workspace. RLS remains defense in depth and protection for any future authenticated Supabase client.
@@ -48,6 +51,9 @@ The highest-risk boundary is the Next.js server's service-role access: it bypass
 | Clickjacking/MIME/referrer/browser capability abuse | A05 | frame denial, nosniff, strict referrer, limited permissions policy, COOP. | Stage CSP; verify OAuth popup behavior and production headers after deployment. |
 | Vulnerable dependencies/build chain | A06/A08 | lockfile, pinned Node/pnpm line, patched Next.js, production audit gate. | One transitive moderate PostCSS advisory remains; monitor upstream Next.js resolution. |
 | Data retention/deletion failure | A04/privacy | private workspace model and cascade relationships. | Define retention, account deletion, object cleanup, backup restore, and legal-hold behavior before public launch. |
+| Agent credential replay/stale privilege | API2/A07 | high-entropy digest-only credentials; scopes, expiry, revocation, current membership, and plan checked per request. | Candidate rotation/revocation and synthetic-user propagation tests; OAuth is Planned. |
+| MCP confused deputy/tool poisoning | API1/API4, LLM tool risk | credential-derived workspace; no workspace argument; scope-filtered read-only tools; bounded untrusted-data output; no sampling/resources/prompts. | Real Hermes and two-workspace negative tests; keep consequential tools disabled until approval state machine exists. |
+| Sandbox egress/credential disclosure | A02/A05 | planned native NemoClaw managed-MCP path with OpenShell provider-held credential and endpoint/method policy. | Must be proven in an approved sandbox; current status is external verification required. |
 
 ## Abuse cases to keep in regression testing
 
@@ -60,6 +66,8 @@ The highest-risk boundary is the Next.js server's service-role access: it bypass
 - Stripe event carries an unknown plan or a customer that does not match workspace metadata.
 - Invalid/replayed Clerk and Stripe signatures.
 - API errors contain provider messages, SQL details, document text, or environment names.
+- MCP request has malformed/revoked/expired/unscoped token, foreign UUID, bad Host/Origin, oversized/batched JSON-RPC, or prompt-injection citation.
+- OpenShell sandbox attempts unapproved host/method access or reading the raw Paperline token.
 
 ## Production trust decisions
 

@@ -1,6 +1,6 @@
 # Paperline recruiter deck — claims audit
 
-Verified: 2026-07-14 17:59 CDT
+Verified: 2026-07-19 CDT
 
 This file is the source-of-truth claims ledger for a recruiter-facing Paperline PowerPoint. It separates what is visible on the live Ops Agent page, what is backed by working repository paths, what is synthetic demo data, and what is only a documented productionization direction.
 
@@ -60,6 +60,7 @@ The repository contains implementation paths for:
 - Stripe Checkout and customer-portal routes.
 - Signature-verified Stripe webhook subscription synchronization.
 - Synthetic offline extraction evaluation and deterministic scoring.
+- A locally implemented authenticated Streamable HTTP MCP boundary with four bounded read-only tools, scoped/expiring credentials, tenant binding, rate limits, and official-SDK protocol tests.
 
 Evidence map:
 
@@ -75,6 +76,10 @@ Evidence map:
 - `src/app/api/webhooks/stripe/route.ts`
 - `supabase/migrations/0001_init.sql`
 - `supabase/migrations/0002_rls.sql`
+- `src/app/api/mcp/route.ts`
+- `src/lib/mcp/`
+- `scripts/validate-mcp.ts`
+- `supabase/migrations/0013_agent_credentials.sql`
 
 Presentation rule: say **the repository includes these paths** or **Paperline is built around these capabilities**. Do not imply that the static Ops Agent page executes all of them live during the demo.
 
@@ -121,15 +126,21 @@ Official source-backed points:
 - OpenShell explicitly lists **Hermes Agent via NemoClaw** as a supported path.
 - OpenShell provides logs and runtime monitoring, but the recruiter deck should not turn this into a claim that Paperline currently has complete production audit tracing through OpenShell.
 
+### Current Paperline implementation status
+
+Paperline now contains an authenticated remote Streamable HTTP MCP endpoint, scoped/expiring credential model, four read-only document/template tools, and deterministic official-SDK tests. This supports the claim **implemented locally**.
+
+It does **not** yet support the claim that Paperline is integrated with direct Hermes or NemoClaw/OpenShell. The remote database stops at migration 0010, the public deployment predates the MCP code, and no real Hermes client or managed sandbox has completed discovery, allowed/denied calls, credential isolation, and revocation against an approved candidate.
+
 ### Credible deck wording
 
 Use:
 
-> **Validated secure-runtime direction — not yet integrated:** Paperline identifies NVIDIA NemoClaw/OpenShell as a productionization path for running Hermes in a policy-governed sandbox with controlled network access and managed credential/inference handling. Official NVIDIA documentation explicitly supports Hermes through NemoClaw.
+> **Implemented locally, runtime verification pending:** Paperline now has one tenant-scoped, read-only Streamable HTTP MCP boundary intended for direct Hermes and NemoClaw/OpenShell-managed Hermes. Official NVIDIA documentation supports the managed Hermes path, but Paperline has not yet completed candidate deployment, OpenShell policy, credential-isolation, allowed/denied-call, or revocation evidence.
 
 Short slide label:
 
-> NVIDIA NemoClaw/OpenShell — validated architecture path, not a completed Paperline integration.
+> NVIDIA NemoClaw/OpenShell — prepared integration path; approved sandbox verification pending.
 
 Do not say:
 
@@ -159,5 +170,7 @@ The build generated `/ops-agent` successfully.
 - Any assertion that the Ops Agent route runs live Hermes jobs.
 - Any assertion that the route performs real billing, payment, provisioning, reminders, or outbound emails.
 - Any assertion that Inngest orchestration, Sentry/PostHog dashboards, persisted approval state machines, or NemoClaw/OpenShell isolation are fully wired.
+- Any assertion that the current public deployment, a real Hermes client, or a NemoClaw/OpenShell sandbox has used the local Paperline MCP implementation.
+- Any assertion that Paperline is listed in or reviewed for a Nous MCP catalog.
 - Any HIPAA, SOC 2, legal, security certification, or regulatory-compliance claim.
 - Any invented recruiter quote, user testimonial, customer logo, benchmark comparison, or competitor ranking.

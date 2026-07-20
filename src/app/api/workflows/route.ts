@@ -6,13 +6,14 @@ import { extractStructured } from "@/lib/ai/extract";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { TemplateRow } from "@/lib/types";
 import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
+import { databaseIdSchema } from "@/lib/http/params";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const Body = z.object({
   name: z.string().trim().min(1).max(120).optional(),
-  template_id: z.string().uuid(),
+  template_id: databaseIdSchema,
   document_ids: z.array(z.string().uuid()).min(1).max(25),
 });
 

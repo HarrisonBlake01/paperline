@@ -11,7 +11,8 @@ Paperline is built around these safeguards:
 - Supabase Row Level Security policies in the database migrations.
 - Supabase Storage paths scoped by workspace and document IDs.
 - Service-role Supabase usage limited to server-side code.
-- API keys are generated once, stored as SHA-256 hashes, and only prefixes are retained for display.
+- Agent credentials are generated once, stored as SHA-256 digests of 256-bit random secrets, scoped to one workspace/user, expire after 30 days, and retain only non-secret metadata for display.
+- The local remote-MCP boundary rechecks credential scope, expiry, revocation, membership, role validity, plan, host/origin policy, and durable workspace rate limits before dispatching bounded read-only tools.
 - `.env`, `.env.local`, and environment-specific local files are ignored by git.
 - Uploaded documents are treated as private workspace data.
 - Upload content is checked against bounded file signatures/content rules before parsing.
@@ -84,9 +85,10 @@ Before live deployment:
 - [ ] Confirm storage buckets are private and served only through authorized server-side paths.
 - [ ] Review logging for document content, keys, prompts, and raw provider errors.
 - [ ] Add production incident response and deletion/retention documentation.
-- [ ] Apply and negative-test migrations `0011_security_hardening.sql` and `0012_workspace_rate_limits.sql`.
+- [ ] Apply and negative-test migrations `0011_security_hardening.sql`, `0012_workspace_rate_limits.sql`, and `0013_agent_credentials.sql` in order.
+- [ ] Verify real direct-Hermes discovery/calls/revocation and approved NemoClaw/OpenShell policy, credential isolation, and denied calls before claiming integration.
 - [ ] Verify per-workspace rate limits plus atomic page/token usage reservations for OCR and AI operations.
 - [ ] Stage a production-domain CSP in report-only mode, then enforce after review.
 - [ ] Verify production Clerk keys, canonical domain, redirects, and webhook endpoints.
 
-See [`docs/security/threat-model.md`](./docs/security/threat-model.md), [`docs/security/security-audit.md`](./docs/security/security-audit.md), and [`docs/release/production-readiness.md`](./docs/release/production-readiness.md) for the current evidence and go/no-go decision.
+See [`docs/security/threat-model.md`](./docs/security/threat-model.md), [`docs/security/agent-integration-threat-model.md`](./docs/security/agent-integration-threat-model.md), [`docs/security/security-audit.md`](./docs/security/security-audit.md), and [`docs/release/production-readiness.md`](./docs/release/production-readiness.md) for the current evidence and go/no-go decision.

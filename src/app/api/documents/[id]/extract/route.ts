@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireWorkspace } from "@/lib/auth/workspace";
-import { parseUuidParam } from "@/lib/http/params";
+import { databaseIdSchema, parseUuidParam } from "@/lib/http/params";
 import { createServiceClient } from "@/lib/supabase/server";
 import { extractStructured } from "@/lib/ai/extract";
 import { recordUsage } from "@/lib/auth/usage";
@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 const Body = z.object({
-  template_id: z.string().uuid(),
+  template_id: databaseIdSchema,
 });
 
 export async function POST(

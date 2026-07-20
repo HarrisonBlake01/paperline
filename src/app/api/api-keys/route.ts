@@ -4,6 +4,7 @@ import { z } from "zod";
 import { isAdmin, requireWorkspace } from "@/lib/auth/workspace";
 import { PLANS } from "@/lib/plans";
 import { createServiceClient } from "@/lib/supabase/server";
+import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -20,8 +21,11 @@ function hashApiKey(apiKey: string) {
 }
 
 function createApiKey() {
-  return `pl_test_${randomBytes(32).toString("base64url")}`;
+  return `pl_mcp_${randomBytes(32).toString("base64url")}`;
 }
+
+const DEFAULT_AGENT_SCOPES = ["documents:read", "templates:read"] as const;
+const AGENT_CREDENTIAL_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 
 export async function POST(req: Request) {
   let ctx;
@@ -38,10 +42,18 @@ export async function POST(req: Request) {
 
   if (!PLANS[ctx.workspace.plan].apiAccess) {
     return NextResponse.json(
-      { error: "plan_required", detail: "API keys require the Team plan." },
+      { error: "plan_required", detail: "MCP/API access is unavailable for this workspace plan." },
       { status: 402 },
     );
   }
+
+  const createRateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "agent_credential_create",
+    limit: 10,
+    windowSeconds: 3600,
+  });
+  if (createRateLimited) return createRateLimited;
 
   const body = CreateBody.safeParse(await req.json().catch(() => ({})));
   if (!body.success) {
@@ -53,6 +65,9 @@ export async function POST(req: Request) {
 
   const apiKey = createApiKey();
   const prefix = apiKey.slice(0, 14);
+  const expiresAt = new Date(
+    Date.now() + AGENT_CREDENTIAL_LIFETIME_MS,
+  ).toISOString();
   const sb = createServiceClient();
   const { data, error } = await sb
     .from("api_keys")
@@ -62,8 +77,10 @@ export async function POST(req: Request) {
       prefix,
       key_hash: hashApiKey(apiKey),
       created_by: ctx.userId,
+      scopes: [...DEFAULT_AGENT_SCOPES],
+      expires_at: expiresAt,
     })
-    .select("id,name,prefix,created_at,last_used_at,revoked_at")
+    .select("id,name,prefix,scopes,expires_at,created_at,last_used_at,revoked_at")
     .single();
 
   if (error || !data) {
@@ -79,7 +96,11 @@ export async function POST(req: Request) {
     action: "api_key.created",
     target_type: "api_key",
     target_id: data.id,
-    metadata: { prefix },
+    metadata: {
+      prefix,
+      scopes: [...DEFAULT_AGENT_SCOPES],
+      expires_at: expiresAt,
+    },
   });
 
   return NextResponse.json({ api_key: apiKey, record: data });
@@ -97,6 +118,14 @@ export async function DELETE(req: Request) {
   if (!isAdmin(ctx.role)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
+
+  const revokeRateLimited = await enforceWorkspaceRateLimit({
+    workspaceId: ctx.workspace.id,
+    action: "agent_credential_revoke",
+    limit: 30,
+    windowSeconds: 600,
+  });
+  if (revokeRateLimited) return revokeRateLimited;
 
   const body = DeleteBody.safeParse(await req.json().catch(() => ({})));
   if (!body.success) {

@@ -6,10 +6,6 @@
 // the server-compatible PDF rendering and vision OCR path in pdf-ocr.ts.
 // =====================================================================
 
-import { createRequire } from "node:module";
-
-const nodeRequire = createRequire(`${process.cwd()}/package.json`);
-
 export interface ParsedPdf {
   text: string;
   pageCount: number;
@@ -24,9 +20,7 @@ export async function parsePdf(buffer: Buffer): Promise<ParsedPdf> {
   // This prevents unrelated requests from crashing if a deployment is missing
   // an optional native artifact and lets the route return a bounded parse error.
   const { PDFParse } = await import("pdf-parse");
-  const { getPath } = nodeRequire("pdf-parse/worker") as {
-    getPath: () => string;
-  };
+  const { getPath } = await import("pdf-parse/worker");
   PDFParse.setWorker(getPath());
   const parser = new PDFParse({ data: new Uint8Array(buffer) });
   try {

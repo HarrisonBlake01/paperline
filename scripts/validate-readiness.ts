@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import {
+  isReadinessAuthorized,
+  READINESS_CHECKS,
+  runReadinessChecks,
+  type ReadinessProbes,
+} from "../src/lib/readiness";
 
 const root = process.cwd();
 const required = [
@@ -10,7 +16,14 @@ const required = [
   "docs/security/threat-model.md",
   "docs/security/security-audit.md",
   "docs/qa/test-strategy.md",
+  "docs/qa/secure-runtime-test-matrix.md",
   "docs/release/production-readiness.md",
+  "docs/release/environment-matrix.md",
+  "docs/release/secure-runtime-runbook.md",
+  "docs/runtime/runtime-findings.md",
+  "docs/integrations/paperline-mcp.md",
+  "docs/security/agent-integration-threat-model.md",
+  "docs/portfolio/presentation-claims-audit.md",
   "docs/portfolio/README.md",
   "docs/portfolio/case-study.md",
   "docs/portfolio/architecture.md",
@@ -18,7 +31,9 @@ const required = [
   "src/app/contact/page.tsx",
   "supabase/migrations/0011_security_hardening.sql",
   "supabase/migrations/0012_workspace_rate_limits.sql",
+  "supabase/migrations/0013_agent_credentials.sql",
   "scripts/validate-parser-runtime.ts",
+  "scripts/validate-mcp.ts",
 ];
 
 for (const relativePath of required) {
@@ -66,5 +81,88 @@ const architecture = fs.readFileSync(
 );
 assert.match(architecture, /```mermaid/);
 assert.match(architecture, /0011_security_hardening\.sql/);
+assert.match(architecture, /Paperline MCP/);
 
-console.log(`✓ Readiness artifacts validated (${required.length} required files)`);
+const integration = fs.readFileSync(
+  path.join(root, "docs/integrations/paperline-mcp.md"),
+  "utf8",
+);
+assert.match(
+  integration,
+  /Implemented and verified in the isolated candidate \/ production publication not approved/,
+);
+assert.match(integration, /hermes mcp test paperline/);
+assert.match(integration, /nemoclaw <sandbox> mcp add paperline/);
+assert.doesNotMatch(integration, /Nous[- ]reviewed integration/i);
+
+const integrationsPage = fs.readFileSync(
+  path.join(root, "src/app/(app)/integrations/page.tsx"),
+  "utf8",
+);
+const accessPanel = fs.readFileSync(
+  path.join(root, "src/components/integrations/api-keys-panel.tsx"),
+  "utf8",
+);
+assert.match(integrationsPage, /name: "MCP \/ API"/);
+assert.match(integrationsPage, /available: true/);
+assert.match(accessPanel, /Bring your own LLM/);
+assert.match(accessPanel, /Included on Free/);
+assert.match(accessPanel, /Streamable HTTP/);
+
+const nextConfig = fs.readFileSync(path.join(root, "next.config.ts"), "utf8");
+assert.doesNotMatch(nextConfig, /outputFileTracingIncludes/);
+
+const readinessImplementation = fs.readFileSync(
+  path.join(root, "src/lib/readiness.ts"),
+  "utf8",
+);
+assert.match(readinessImplementation, /import\("@napi-rs\/canvas"\)/);
+assert.match(readinessImplementation, /import\("pdf-parse\/worker"\)/);
+
+for (const parserPath of [
+  "src/lib/parsing/pdf.ts",
+  "src/lib/parsing/pdf-ocr.ts",
+]) {
+  assert.match(
+    fs.readFileSync(path.join(root, parserPath), "utf8"),
+    /import\("pdf-parse\/worker"\)/,
+  );
+}
+
+async function testReadinessBehavior() {
+  const token = "r".repeat(48);
+  assert.equal(isReadinessAuthorized(`Bearer ${token}`, token), true);
+  assert.equal(isReadinessAuthorized(`Bearer ${"x".repeat(48)}`, token), false);
+  assert.equal(isReadinessAuthorized(null, token), false);
+  assert.equal(isReadinessAuthorized(`Bearer ${token}`, "short"), false);
+
+  const passing = Object.fromEntries(
+    READINESS_CHECKS.map((name) => [name, async () => undefined]),
+  ) as ReadinessProbes;
+  assert.deepEqual(await runReadinessChecks(passing), {
+    ready: true,
+    checks: READINESS_CHECKS.map((name) => ({ name, ok: true })),
+  });
+
+  const failing = {
+    ...passing,
+    database: async () => {
+      throw new Error("synthetic failure");
+    },
+  };
+  const failed = await runReadinessChecks(failing);
+  assert.equal(failed.ready, false);
+  assert.deepEqual(
+    failed.checks.find((check) => check.name === "database"),
+    { name: "database", ok: false },
+  );
+}
+
+void testReadinessBehavior()
+  .then(() => {
+    console.log(`✓ Readiness artifacts validated (${required.length} required files)`);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
