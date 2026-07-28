@@ -81,7 +81,7 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 ## G. Final local post-fix evidence — 2026-07-27
 
 - Candidate basis: local `main` HEAD `2d29bcce3131f38165b9da36e000dacea2e92f7a` plus intentionally unstaged tracked and untracked/non-ignored files. Staged file count: `0`.
-- Exact application-candidate manifest, excluding both self-referential 2026-07-27 release ledgers: `d628625dfcab9c7b40877154c9c4558c33957065da9b2aa7063440a0f4127ec8`; file count: `274`. The manifest is path-plus-file-SHA-256 framed with NUL separators and then SHA-256 hashed.
+- Exact application-candidate manifest, excluding both self-referential 2026-07-27 release ledgers: `8b151f2d13b615914a8c847c9654569aa2dbb8ae432e4d803de7c8aab978bfb4`; file count: `274`. The manifest is path-plus-file-SHA-256 framed with NUL separators and then SHA-256 hashed.
 - `.env.local` was moved out before the clean gate and restored by a shell trap. CI placeholders were scoped only to `next build`; `PAPERLINE_ALLOW_LIVE_STRIPE=false`.
 - `pnpm install --frozen-lockfile` — passed; lockfile already current.
 - `pnpm test:templates` — passed; live Supabase check skipped because provider variables were intentionally absent.
@@ -108,6 +108,7 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 - Follow-up adversarial review confirmed four Medium pre-commit findings. All were corrected locally: credential backups are excluded from Vercel and moved outside the repository; Git-triggered Vercel deployment is disabled project-wide; durable orphaned-Storage cleanup migration `0018` plus bounded reconciliation/tests were added; and hosted CI now runs explicit TypeScript, pinned Actionlint, and changed/new-file final-newline gates.
 - Final marker: `PAPERLINE_FINAL_CORRECTED_LOCAL_GATE_PASS`. Production build compiled in `7.2s`, TypeScript completed in `4.8s`, generated `22/22` static pages, and `pnpm audit --prod --audit-level=high` reported no known vulnerabilities.
 - Exact-candidate Gitleaks scanned approximately `24.04 MB` with no leaks; Git-history Gitleaks scanned `22` commits / approximately `1.77 MB` with no leaks.
+- Hosted GitHub Actions run [`30354886674`](https://github.com/HarrisonBlake01/paperline/actions/runs/30354886674) passed on substantive candidate SHA `6622c2303e942a6536afdb316d7298d1d7885d3f`: both **Secret scan** and **Test, lint, build, and audit** completed successfully. The first secret-job attempt hit a Docker Hub connection reset; the approved failed-job rerun passed without changing the SHA.
 
 ### Remaining local-to-production blocker
 
