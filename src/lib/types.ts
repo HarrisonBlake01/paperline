@@ -2,7 +2,7 @@
 // Shared domain types. These mirror DB rows but stay UI-friendly.
 // =====================================================================
 
-export type DocStatus = "queued" | "processing" | "ready" | "failed";
+export type DocStatus = "queued" | "processing" | "ready" | "failed" | "deleting";
 export type DocType =
   | "invoice"
   | "receipt"
@@ -22,6 +22,7 @@ export type DocType =
   | "other";
 export type ExtractionStatus = "queued" | "processing" | "succeeded" | "failed";
 export type Role = "owner" | "admin" | "member";
+export type WorkspaceLifecycleState = "active" | "billing" | "deleting";
 
 export interface Workspace {
   id: string;
@@ -32,6 +33,10 @@ export interface Workspace {
   pages_limit: number;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  lifecycle_state: WorkspaceLifecycleState;
+  lifecycle_state_changed_at: string;
+  lifecycle_operation_token: string | null;
+  lifecycle_operation_phase: "preflight" | "destructive" | null;
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +53,8 @@ export interface DocumentRow {
   page_count: number | null;
   doc_type: DocType | null;
   status: DocStatus;
+  deletion_token: string | null;
+  deletion_started_at: string | null;
   error_message: string | null;
   text_content: string | null;
   metadata: Record<string, unknown>;

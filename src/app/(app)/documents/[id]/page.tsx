@@ -5,6 +5,7 @@ import { explainDocumentFailure } from "@/lib/documents/failure";
 import { ReprocessButton } from "@/components/reprocess-button";
 import { ChatWithDocButton } from "@/components/chat-with-doc-button";
 import { RunExtractionForm } from "@/components/run-extraction-form";
+import { DeleteDocumentButton } from "@/components/delete-document-button";
 import type { TemplateRow } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -61,12 +62,13 @@ export default async function DocumentDetailPage({
             {doc.page_count ? ` · ${doc.page_count} pages` : ""}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <ChatWithDocButton
             documentId={doc.id}
             disabled={doc.status !== "ready"}
           />
           <ReprocessButton documentId={doc.id} />
+          <DeleteDocumentButton documentId={doc.id} filename={doc.filename} />
         </div>
       </div>
 

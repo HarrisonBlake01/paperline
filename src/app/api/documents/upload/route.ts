@@ -6,6 +6,11 @@ import { checkQuota } from "@/lib/auth/usage";
 import { createServiceClient } from "@/lib/supabase/server";
 import { enforceWorkspaceRateLimit } from "@/lib/security/rate-limit";
 import {
+  clearStorageCleanupJob,
+  reconcileStorageCleanupJobs,
+  registerStorageCleanupJob,
+} from "@/lib/storage/cleanup";
+import {
   ALLOWED_UPLOAD_MIME_TYPES,
   MAX_UPLOAD_BYTES,
   sanitizeUploadFilename,
@@ -76,6 +81,18 @@ export async function POST(req: Request) {
   const folderId = parsedFolderId.data;
 
   const sb = createServiceClient();
+  const cleanupSweep = await reconcileStorageCleanupJobs({
+    client: sb,
+    workspaceId: ctx.workspace.id,
+  });
+  if (cleanupSweep.error || cleanupSweep.failed > 0) {
+    console.error("[documents.upload] storage cleanup reconciliation incomplete", {
+      workspaceId: ctx.workspace.id,
+      failed: cleanupSweep.failed,
+      errorType: cleanupSweep.error?.code ?? "StorageCleanupPending",
+    });
+  }
+
   if (folderId) {
     const { data: folder } = await sb
       .from("folders")
@@ -104,8 +121,51 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: contentError }, { status });
   }
 
-  // Upload to the private Supabase Storage bucket only after content checks.
-  const { error: upErr } = await sb.storage
+  const uploadLeaseToken = randomUUID();
+  const { data: uploadLeaseClaimed, error: uploadLeaseError } = await sb.rpc(
+    "begin_workspace_upload",
+    {
+      p_workspace_id: ctx.workspace.id,
+      p_token: uploadLeaseToken,
+      p_lease_seconds: 600,
+    },
+  );
+  if (uploadLeaseError) {
+    console.error("[documents.upload] upload lease claim failed", {
+      workspaceId: ctx.workspace.id,
+      errorType: uploadLeaseError.code,
+    });
+    return NextResponse.json({ error: "upload_unavailable" }, { status: 503 });
+  }
+  if (uploadLeaseClaimed !== true) {
+    return NextResponse.json(
+      { error: "workspace_operation_in_progress" },
+      { status: 409 },
+    );
+  }
+
+  try {
+    // Register a durable tombstone before creating the object. If metadata is
+    // committed, reconciliation clears the tombstone without deleting storage;
+    // if metadata fails, a later bounded sweep retries object removal.
+    const { data: cleanupJob, error: cleanupJobError } =
+      await registerStorageCleanupJob({
+        client: sb,
+        workspaceId: ctx.workspace.id,
+        documentId: id,
+        bucket,
+        storagePath,
+      });
+    if (cleanupJobError || !cleanupJob) {
+      console.error("[documents.upload] cleanup job registration failed", {
+        workspaceId: ctx.workspace.id,
+        errorType: cleanupJobError?.code ?? "StorageCleanupRegistrationFailed",
+      });
+      return NextResponse.json({ error: "upload_unavailable" }, { status: 503 });
+    }
+
+    // Upload to the private Supabase Storage bucket only after content checks.
+    const { error: upErr } = await sb.storage
     .from(bucket)
     .upload(storagePath, buffer, {
       contentType: file.type,
@@ -140,17 +200,45 @@ export async function POST(req: Request) {
     .single();
   if (insErr) {
     // Avoid leaving an orphaned private object if the metadata insert fails.
-    await sb.storage.from(bucket).remove([storagePath]);
+    const { error: cleanupError } = await sb.storage
+      .from(bucket)
+      .remove([storagePath]);
+    if (!cleanupError) {
+      const { error: cleanupJobClearError } = await clearStorageCleanupJob(
+        sb,
+        cleanupJob.id,
+      );
+      if (cleanupJobClearError) {
+        console.error("[documents.upload] orphan cleanup job clear failed", {
+          workspaceId: ctx.workspace.id,
+          documentId: id,
+          errorType: cleanupJobClearError.code,
+        });
+      }
+    }
     console.error("[documents.upload] document insert failed", {
       workspaceId: ctx.workspace.id,
       userId: ctx.userId,
       storagePath,
       detail: insErr.message,
+      cleanupFailed: Boolean(cleanupError),
     });
     return NextResponse.json(
-      { error: "db_insert_failed" },
-      { status: 500 },
+      { error: cleanupError ? "storage_cleanup_pending" : "db_insert_failed" },
+      { status: cleanupError ? 503 : 500 },
     );
+  }
+
+  const { error: cleanupClearError } = await clearStorageCleanupJob(
+    sb,
+    cleanupJob.id,
+  );
+  if (cleanupClearError) {
+    console.error("[documents.upload] committed cleanup job clear failed", {
+      workspaceId: ctx.workspace.id,
+      documentId: id,
+      errorType: cleanupClearError.code,
+    });
   }
 
   const { error: auditErr } = await sb.from("audit_logs").insert({
@@ -192,4 +280,19 @@ export async function POST(req: Request) {
     { document: finalDocument ?? doc },
     { status: 201 },
   );
+  } finally {
+    const { data: released, error: releaseError } = await sb.rpc(
+      "end_workspace_upload",
+      {
+        p_workspace_id: ctx.workspace.id,
+        p_token: uploadLeaseToken,
+      },
+    );
+    if (releaseError || released !== true) {
+      console.error("[documents.upload] upload lease release failed", {
+        workspaceId: ctx.workspace.id,
+        errorType: releaseError?.code ?? "UploadLeaseLost",
+      });
+    }
+  }
 }

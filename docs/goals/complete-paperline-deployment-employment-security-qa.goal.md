@@ -1,5 +1,7 @@
 /goal Complete Paperline as a secure, production-deployment-ready, recruiter-ready flagship project through evidence-driven cybersecurity engineering and end-to-end QA.
 
+> **Historical/superseded for active execution:** commercial launch is on hold. Use [`complete-paperline-recruiter-portfolio-deployment.goal.md`](./complete-paperline-recruiter-portfolio-deployment.goal.md) as the standing goal for the recruiter site and GitHub preparation. Do not execute this file's commercial-launch work unless Harrison explicitly resumes it.
+
 You are continuing work in the Paperline repository at:
 
 `/Users/openclaw-server/.openclaw/workspace/paperline/app`

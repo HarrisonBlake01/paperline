@@ -32,6 +32,12 @@ const required = [
   "supabase/migrations/0011_security_hardening.sql",
   "supabase/migrations/0012_workspace_rate_limits.sql",
   "supabase/migrations/0013_agent_credentials.sql",
+  "supabase/migrations/0014_workspace_lifecycle.sql",
+  "supabase/migrations/0015_workspace_operation_fencing.sql",
+  "supabase/migrations/0016_workspace_billing_claim.sql",
+  "supabase/migrations/0017_lifecycle_checkout_recovery.sql",
+  "supabase/migrations/0018_storage_cleanup_jobs.sql",
+  "src/lib/storage/cleanup.ts",
   "scripts/validate-parser-runtime.ts",
   "scripts/validate-mcp.ts",
 ];

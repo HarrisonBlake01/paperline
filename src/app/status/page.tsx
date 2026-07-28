@@ -28,7 +28,7 @@ export default function StatusPage() {
           Status
         </h1>
         <p className="mt-4 text-sm text-pl-fg-dim">
-          Informational preview only; no automated uptime feed is connected.
+          Paperline is monitored through independent liveness and dependency-readiness checks. Verified incident updates will be posted here when needed.
         </p>
 
         <section className="mt-8 rounded-3xl border border-pl-border bg-pl-surface p-6">

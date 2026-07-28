@@ -9,6 +9,7 @@ import {
 import { getActiveWorkspace, isAdmin } from "@/lib/auth/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { PLANS } from "@/lib/plans";
+import { DeleteWorkspacePanel } from "@/components/settings/delete-workspace-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -195,6 +196,15 @@ export default async function SettingsPage() {
           )}
         </section>
       </div>
+
+      {ctx.role === "owner" ? (
+        <DeleteWorkspacePanel
+          workspaceId={ctx.workspace.id}
+          workspaceName={ctx.workspace.name}
+          memberCount={members.length}
+          hasActiveSubscription={Boolean(ctx.workspace.stripe_subscription_id)}
+        />
+      ) : null}
     </main>
   );
 }

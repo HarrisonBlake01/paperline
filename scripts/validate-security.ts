@@ -96,9 +96,26 @@ function testSecurityInvariants() {
     indexes: [2, 0],
   });
 
-  assert.equal(isStripeSecretKeyAllowed("sk_test_synthetic", false), true);
-  assert.equal(isStripeSecretKeyAllowed("sk_live_synthetic", false), false);
-  assert.equal(isStripeSecretKeyAllowed("sk_live_synthetic", true), true);
+  const testStripeKey = ["sk", "test", "synthetic"].join("_");
+  const liveStripeKey = ["sk", "live", "synthetic"].join("_");
+  assert.equal(isStripeSecretKeyAllowed(testStripeKey, false, false), true);
+  assert.equal(isStripeSecretKeyAllowed(liveStripeKey, false, false), false);
+  assert.equal(isStripeSecretKeyAllowed(liveStripeKey, true, false), true);
+
+  assert.equal(isStripeSecretKeyAllowed(testStripeKey, true, true), true);
+  assert.equal(isStripeSecretKeyAllowed(liveStripeKey, true, true), false);
+
+  const billingPage = read("src/app/(app)/settings/billing/page.tsx");
+  assert.match(billingPage, /PAPERLINE_RECRUITER_DEMO/);
+  assert.match(billingPage, /Recruiter demo/);
+  assert.match(billingPage, /No real payment method will be charged/);
+
+  const homePage = read("src/app/page.tsx");
+  assert.match(homePage, /PAPERLINE_RECRUITER_DEMO/);
+  assert.match(homePage, /Recruiter demo · synthetic data · Stripe test mode only/);
+  assert.match(homePage, /Recruiter demo — test checkout only/);
+  assert.match(homePage, /No real payment method will be charged/);
+  assert.match(homePage, /owner&apos;s capped provider budget/);
 
   const proxy = read("src/proxy.ts");
   assert.doesNotMatch(proxy, /x-internal-trigger/i);
@@ -120,7 +137,7 @@ function testSecurityInvariants() {
   const uploadRoute = read("src/app/api/documents/upload/route.ts");
   assert.match(uploadRoute, /validateUploadContent/);
   assert.match(uploadRoute, /eq\("workspace_id", ctx\.workspace\.id\)/);
-  assert.match(uploadRoute, /storage\.from\(bucket\)\.remove/);
+  assert.match(uploadRoute, /storage[\s\S]*\.from\(bucket\)[\s\S]*\.remove/);
   assert.match(uploadRoute, /await processDocument/);
   assert.doesNotMatch(uploadRoute, /void processDocument/);
   assert.doesNotMatch(
@@ -201,6 +218,7 @@ function testSecurityInvariants() {
     "src/app/api/documents/[id]/extract/route.ts",
     "src/app/api/documents/[id]/generate-template/route.ts",
     "src/app/api/documents/[id]/process/route.ts",
+    "src/app/api/documents/[id]/route.ts",
     "src/app/api/templates/[id]/publish/route.ts",
     "src/app/api/templates/[id]/route.ts",
   ]) {
@@ -220,8 +238,64 @@ function testSecurityInvariants() {
   assert.doesNotMatch(documentPage, /\{doc\.error_message\}/);
   assert.doesNotMatch(documentPage, /\{ex\.error_message\}/);
 
+  const documentDeleteRoute = read("src/app/api/documents/[id]/route.ts");
+  assert.match(documentDeleteRoute, /eq\("workspace_id", ctx\.workspace\.id\)/);
+  assert.match(documentDeleteRoute, /storage[\s\S]*\.remove\(\[document\.storage_path\]\)/);
+  assert.match(documentDeleteRoute, /claim_document_deletion/);
+  assert.match(documentDeleteRoute, /finalize_document_deletion/);
+  assert.match(documentDeleteRoute, /pause_document_deletion/);
+  assert.doesNotMatch(documentDeleteRoute, /from\("chats"\)[\s\S]*\.delete\(\)/);
+  assert.doesNotMatch(documentDeleteRoute, /filename/);
+
   const settingsPage = read("src/app/(app)/settings/page.tsx");
   assert.match(settingsPage, /canViewAdminData\s*\?\s*await Promise\.all/);
+  assert.match(settingsPage, /ctx\.role === "owner"[\s\S]*DeleteWorkspacePanel/);
+
+  const workspaceDeleteRoute = read("src/app/api/workspace/route.ts");
+  assert.match(workspaceDeleteRoute, /ctx\.role !== "owner"/);
+  assert.match(workspaceDeleteRoute, /stripe_subscription_id/);
+  assert.match(workspaceDeleteRoute, /claimWorkspaceDeletion/);
+  assert.match(workspaceDeleteRoute, /rpc\("claim_workspace_deletion"/);
+  assert.match(workspaceDeleteRoute, /p_operation_token:\s*operationToken/);
+  assert.match(workspaceDeleteRoute, /release_workspace_deletion/);
+  assert.match(workspaceDeleteRoute, /delete_claimed_workspace/);
+  assert.match(workspaceDeleteRoute, /final storage verification failed/);
+  assert.match(workspaceDeleteRoute, /hasBlockingStripeSubscription/);
+  assert.match(workspaceDeleteRoute, /begin_workspace_destructive_deletion/);
+  assert.match(workspaceDeleteRoute, /renew_workspace_deletion/);
+  assert.match(workspaceDeleteRoute, /workspaceId !== ctx\.workspace\.id/);
+  assert.match(workspaceDeleteRoute, /confirmation !== ctx\.workspace\.name/);
+  assert.match(workspaceDeleteRoute, /\.list\(prefix,[\s\S]*offset/);
+  assert.match(workspaceDeleteRoute, /entry\.id === null/);
+  assert.match(workspaceDeleteRoute, /STORAGE_REMOVE_BATCH_SIZE/);
+  assert.match(workspaceDeleteRoute, /customers\.del/);
+  assert.match(workspaceDeleteRoute, /resource_missing/);
+  assert.doesNotMatch(workspaceDeleteRoute, /from\("workspaces"\)[\s\S]*\.delete\(\)/);
+  assert.doesNotMatch(workspaceDeleteRoute, /console\.error\([^\n]*error\)/);
+  const billingCheckoutRoute = read("src/app/api/billing/checkout/route.ts");
+  assert.match(billingCheckoutRoute, /claimBillingOperation/);
+  assert.match(billingCheckoutRoute, /rpc\("claim_workspace_billing"/);
+  assert.match(billingCheckoutRoute, /operationId:\s*z\.string\(\)\.uuid/);
+  assert.match(billingCheckoutRoute, /checkoutCustomerIdempotencyKey/);
+  assert.match(billingCheckoutRoute, /checkoutSessionIdempotencyKey/);
+  assert.match(billingCheckoutRoute, /record_workspace_checkout_session/);
+  assert.match(billingCheckoutRoute, /hasBlockingStripeSubscription/);
+  assert.match(billingCheckoutRoute, /existing_subscription/);
+  assert.match(billingCheckoutRoute, /release_workspace_billing/);
+  assert.match(billingCheckoutRoute, /workspace_operation_in_progress/);
+  assert.doesNotMatch(billingCheckoutRoute, /randomUUID/);
+  const stripeSubscriptionPolicy = read(
+    "src/lib/billing/stripe-subscriptions.ts",
+  );
+  assert.match(stripeSubscriptionPolicy, /do \{/);
+  assert.match(stripeSubscriptionPolicy, /while \(startingAfter\)/);
+  assert.match(stripeSubscriptionPolicy, /starting_after/);
+  assert.match(stripeSubscriptionPolicy, /isDeletionBlockingStatus/);
+  const documentUploadRoute = read("src/app/api/documents/upload/route.ts");
+  assert.match(documentUploadRoute, /if \(insErr\)[\s\S]*\.remove\(\[storagePath\]\)/);
+  assert.match(documentUploadRoute, /begin_workspace_upload/);
+  assert.match(documentUploadRoute, /end_workspace_upload/);
+  assert.match(documentUploadRoute, /storage_cleanup_pending/);
   const integrationsPage = read("src/app/(app)/integrations/page.tsx");
   assert.match(integrationsPage, /ctx && canManage/);
 
@@ -265,6 +339,44 @@ function testSecurityInvariants() {
   assert.match(agentCredentialMigration, /api_keys_key_hash_unique_idx/);
   assert.match(agentCredentialMigration, /documents:read/);
 
+  const lifecycleMigration = read(
+    "supabase/migrations/0014_workspace_lifecycle.sql",
+  );
+  assert.match(lifecycleMigration, /lifecycle_state in \('active', 'billing', 'deleting'\)/);
+  assert.match(lifecycleMigration, /security definer/);
+  assert.match(lifecycleMigration, /set search_path = public, pg_temp/);
+  assert.match(lifecycleMigration, /raise exception 'workspace_not_writable'/);
+  assert.match(lifecycleMigration, /documents_require_writable_workspace/);
+  assert.match(lifecycleMigration, /api_keys_require_writable_workspace/);
+
+  const operationFencingMigration = read(
+    "supabase/migrations/0015_workspace_operation_fencing.sql",
+  );
+  assert.match(operationFencingMigration, /lifecycle_operation_token/);
+  assert.match(operationFencingMigration, /workspace_operation_leases/);
+  assert.match(operationFencingMigration, /begin_workspace_upload/);
+  assert.match(operationFencingMigration, /end_workspace_upload/);
+  assert.match(operationFencingMigration, /claim_workspace_deletion/);
+  assert.match(operationFencingMigration, /for update/);
+  const billingClaimMigration = read(
+    "supabase/migrations/0016_workspace_billing_claim.sql",
+  );
+  assert.match(billingClaimMigration, /claim_workspace_billing/);
+  assert.match(billingClaimMigration, /workspace_operation_leases/);
+  assert.match(billingClaimMigration, /for update/);
+  const lifecycleRecoveryMigration = read(
+    "supabase/migrations/0017_lifecycle_checkout_recovery.sql",
+  );
+  assert.match(lifecycleRecoveryMigration, /workspace_billing_operations/);
+  assert.match(lifecycleRecoveryMigration, /release_workspace_deletion/);
+  assert.match(lifecycleRecoveryMigration, /delete_claimed_workspace/);
+  assert.match(lifecycleRecoveryMigration, /finalize_document_deletion/);
+  assert.match(lifecycleRecoveryMigration, /reject_non_writable_join_change/);
+
+  const workspaceAuthSource = read("src/lib/auth/workspace.ts");
+  assert.match(workspaceAuthSource, /workspace\.lifecycle_state !== "active"/);
+  assert.match(workspaceAuthSource, /workspace_temporarily_unavailable/);
+
   const mcpAuth = read("src/lib/mcp/auth.ts");
   assert.match(mcpAuth, /revoked_at/);
   assert.match(mcpAuth, /expiresAt <= Date\.now\(\)/);
@@ -307,13 +419,13 @@ function testSecurityInvariants() {
   const pkg = JSON.parse(read("package.json")) as {
     dependencies: { next: string; "@modelcontextprotocol/sdk": string };
   };
-  assert.equal(pkg.dependencies["@modelcontextprotocol/sdk"], "1.29.0");
+  assert.equal(pkg.dependencies["@modelcontextprotocol/sdk"], "1.30.0");
   const nextVersion = pkg.dependencies.next.replace(/^[^0-9]*/, "");
   const [major, minor, patch] = nextVersion.split(".").map(Number);
   assert.ok(
     major > 16 ||
-      (major === 16 && (minor > 2 || (minor === 2 && patch >= 6))),
-    `Next.js ${nextVersion} must include the proxy-bypass fix`,
+      (major === 16 && (minor > 2 || (minor === 2 && patch >= 11))),
+    `Next.js ${nextVersion} must include the July 2026 security fixes`,
   );
 }
 

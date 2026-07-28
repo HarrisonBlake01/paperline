@@ -1,12 +1,12 @@
 # Paperline secure runtime candidate and rollback runbook
 
-Status: prepared; no migration or deployment is authorized by this document.
+Status: candidate verified; production deployment, DNS, aliases, and publication remain separately approval-gated.
 
 ## Safety rules
 
 - Candidate before production.
 - One approved target at a time with recorded project/deployment IDs.
-- Migration order is `0011` → `0012` → `0013`; never deploy dependent code first.
+- Migration order is `0011` → `0012` → `0013` → `0014` → `0015` → `0016`; never deploy dependent code first.
 - PostgreSQL migrations are forward-fixed; do not destructively rewrite migration history.
 - Stripe remains test mode and outbound email/paid/public actions remain disabled unless separately approved.
 - Stop on target ambiguity, identity mismatch, migration error, unexpected tenant data, Critical/High finding, secret exposure, or rollback uncertainty.
@@ -74,7 +74,8 @@ After approval only:
 4. Test RLS/foreign relationships with synthetic Workspace A/B.
 5. Apply `0012`; prove allowed, exhausted `429`, `Retry-After`, fail-closed `503`, and concurrent atomic consumption.
 6. Apply `0013`; prove old unscoped keys cannot authenticate, new key digest/scopes/expiry are present, unique digest enforced, and revocation works.
-7. Capture final migration list and schema evidence without row/document/secret data.
+7. Apply `0014`–`0016` in order; prove lifecycle write rejection, upload/deletion fencing, billing ownership, lease expiry, owner-token release, and concurrent billing/upload/deletion exclusion.
+8. Capture final migration list and schema evidence without row/document/secret data.
 
 If migration fails: stop code deployment, preserve exact error, assess forward fix. Do not reset or roll back production data destructively.
 
@@ -137,21 +138,32 @@ Paperline does not currently require NemoClaw/OpenShell for direct MCP. First pr
 Use three small layers rather than one large observability rollout:
 
 1. Vercel deployment/function logs for build and serverless runtime evidence.
-2. Sentry for scrubbed application errors. Paperline's SDK configuration disables PII, identity, cookies, HTTP headers/bodies, query parameters, GenAI content, logs, local variables, trace propagation, and replay. Error, transaction, span, and breadcrumb hooks remove raw messages, source context, identifiers, and span data. Tracing is limited to 5% outside development and excludes health/readiness. A real local SDK-envelope test verified synthetic document, prompt, token, authorization, cookie, and query values were absent. The external candidate Sentry project and DSN still require user-held Sentry OAuth/MCP authentication.
-3. The current candidate uses the independent Hermes script-only watchdog `3c505d37f12c` every 10 minutes for public `/api/health` plus bearer-protected `/api/readiness`. Healthy checks produce no delivery; failures return a bounded alert to the owner channel. A synthetic delivery completed successfully. Before production, move or duplicate this check into a separately hosted uptime provider so monitoring does not depend on the operator Mac.
+2. Sentry project `olvera-productions/paperline-candidate` receives scrubbed application errors. Paperline's SDK configuration disables PII, identity, cookies, HTTP headers/bodies, query parameters, GenAI content, logs, local variables, trace propagation, and replay. Error, transaction, span, and breadcrumb hooks remove raw messages, source context, identifiers, and span data. Tracing is limited to 5% outside development and excludes health/readiness. Local envelope validation and a real deployed candidate receipt both replaced the synthetic message with `[Filtered]`; Sentry recorded one event, zero impacted users, no probe values, and no request body, authorization, cookie, prompt, or document content. The temporary trigger route was removed and its synthetic issue resolved. Source-map upload remains optional and is currently disabled because no Sentry build auth token is configured.
+3. The current candidate uses the independent Hermes script-only watchdog `3c505d37f12c` every 10 minutes for public `/api/health` plus bearer-protected `/api/readiness`. Healthy checks produce no delivery; failures return a bounded alert to the owner channel. A synthetic delivery completed successfully, and the watchdog was moved to the final Sentry-enabled candidate deployment and rerun successfully. Before sustained production use, move or duplicate this check into a separately hosted uptime provider so monitoring does not depend on the operator Mac.
 
 Alert owner: Harrison Olvera. Initial triage is Vercel deployment/function evidence, followed by the named readiness checks. If tenant/auth integrity is uncertain, disable candidate traffic and redeploy the last known-good immutable artifact before forward-fixing.
 
 PostHog can be added later for opt-in product analytics after privacy and retention review; it is not the primary incident monitor.
 
+## Backup and recovery evidence
+
+- Supabase project `yvouofuylmzrknratgyw` reported `ACTIVE_HEALTHY` in `us-west-2`.
+- `supabase backups list` returned eight consecutive completed daily physical database backups through 2026-07-20. PITR is disabled; the practical database recovery point is therefore the latest daily backup, with up to roughly 24 hours of data loss between snapshots.
+- Supabase's current provider documentation states that database backups do not contain Storage objects. A restore can recover database rows and object metadata but cannot resurrect document blobs deleted after the selected backup.
+- A candidate export drill copied all 14 private Storage objects (2,452,056 bytes) into a mode-restricted temporary directory, proving the current CLI export path. The export was deleted after verification; it was not retained as an off-site production backup.
+- A logical `supabase db dump` drill could not run because the installed CLI requires Docker for its bundled `pg_dump` path and Docker was not running. Provider-managed physical backups remain verified; a recurring logical/off-site backup requires either a controlled PostgreSQL client or a separately approved backup runner.
+- Supabase restore is deliberately not executed against the shared candidate because it replaces project state and causes downtime. Restore procedure: choose the latest completed backup before the incident, announce downtime, restore in the Supabase dashboard/API, reset custom-role passwords if applicable, verify migration parity and readiness, then reconcile Storage separately.
+- Vercel Instant Rollback is a production-domain pointer change to a previously production-aliased deployment. It does not roll back environment variables, databases, Storage, or external providers. `vercel rollback status paperline-candidate` reported no rollback in progress; preview-only deployments are not eligible until one has been promoted to production.
+- Forward fix remains the database default: keep additive migrations in place, disable the affected application path if needed, add a new corrective migration or code deployment, and re-run readiness plus tenant negatives.
+
 ## Retention recommendation
 
 - Keep active-workspace documents and derived text/chunks until the user deletes them; source and derived records share one lifecycle.
-- Purge deleted document storage and derived rows within 24 hours after a successful deletion request.
-- Give workspace deletion a 30-day recovery window, then purge workspace documents and derived data.
+- Delete document storage and derived rows during the successful deletion request; retries tolerate an already-missing object.
+- Workspace deletion is immediate and permanent after owner-only typed confirmation. Do not promise a 30-day recovery window: database backups do not include Storage blobs, so a database restore alone cannot recover a deleted workspace.
 - Keep security/audit metadata for 90 days without document contents or prompts.
 - Keep revoked credential metadata for 90 days; never retain plaintext credentials.
-- Keep application logs for 30 days and provider/platform backups for the shortest supported recovery window, targeted at 7–30 days.
+- Keep provider/platform backups for the shortest supported recovery window and document actual plan retention before publishing a duration. Current candidate evidence is daily database snapshots with PITR disabled and no retained off-site Storage backup.
 - Publish these periods only after the deletion jobs, backup behavior, and support process have been implemented and verified.
 
 ## Rollback triggers
@@ -183,7 +195,10 @@ PostHog can be added later for opt-in product analytics after privacy and retent
 - `0011`: do not drop tenant-integrity constraints/policies to restore broken code; update code or add corrected policy in a new migration.
 - `0012`: older code ignores the additive table/function. If the function is faulty, stop dependent code and add a new corrected function migration.
 - `0013`: older code ignores additive columns. Existing keys remain unscoped. If credential auth is faulty, disable `/api/mcp`, revoke candidate keys, and forward-fix.
+- `0014`: keep lifecycle columns and write-rejection triggers; disable workspace deletion and forward-fix any incorrect writable-state transition.
+- `0015`: keep operation-token/lease structures; disable new uploads or deletion while repairing lease acquisition/release in a new migration and code deployment.
+- `0016`: keep the billing claim function; disable paid checkout and forward-fix claim semantics rather than dropping lifecycle fencing.
 
 ## Final decision
 
-Production remains **NO-GO** until candidate identity, migrations, parser, readiness, two-tenant auth, signed-in E2E, direct Hermes, NemoClaw/OpenShell, monitoring, canonical domain, production Clerk configuration, CSP, secret scans, rollback, and residual-risk review are evidenced and explicitly approved.
+Production remains **NO-GO** until monitoring, canonical domain, production Clerk configuration, production environment values, CSP disposition, secret scans, rollback, backup residual-risk acceptance, and a final release review are evidenced and explicitly approved. NemoClaw/OpenShell is an enterprise follow-up; direct Hermes is the launch requirement and is already candidate-verified.

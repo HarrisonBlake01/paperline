@@ -63,10 +63,20 @@ export async function getActiveWorkspace(
  */
 export async function requireWorkspace(
   preferredWorkspaceId?: string,
+  options: { allowNonActive?: boolean } = {},
 ): Promise<WorkspaceContext> {
   const ctx = await getActiveWorkspace(preferredWorkspaceId);
   if (!ctx) {
     throw new Response("Unauthorized", { status: 401 });
+  }
+  if (!options.allowNonActive && ctx.workspace.lifecycle_state !== "active") {
+    throw new Response(
+      JSON.stringify({ error: "workspace_temporarily_unavailable" }),
+      {
+        status: 409,
+        headers: { "content-type": "application/json" },
+      },
+    );
   }
   return ctx;
 }

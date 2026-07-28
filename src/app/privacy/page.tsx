@@ -48,7 +48,7 @@ const sections = [
     title: "Retention and deletion",
     body: [
       "Paperline keeps account, workspace, billing, logs, and document data for as long as needed to provide the service, meet legal or security obligations, resolve disputes, and maintain backups.",
-      "Where supported, you may delete documents or request account/workspace deletion. Backup and log copies may persist for a limited period before automatic deletion.",
+      "You may permanently delete individual documents and, if you are the workspace owner, permanently delete the workspace through the product. Provider database backups may retain historical database records for a limited recovery window, but those backups do not restore deleted document files from private Storage.",
     ],
   },
   {
@@ -85,9 +85,9 @@ export default function PrivacyPage() {
         <h1 className="mt-3 font-[var(--font-display)] text-4xl font-semibold tracking-tight sm:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-4 text-sm text-pl-fg-dim">Last updated: June 22, 2026</p>
+        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 20, 2026</p>
         <p className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm leading-7 text-pl-fg-dim">
-          This starter privacy policy explains how Paperline, an Olvera Productions product, handles account data, documents, and product usage information. It should be reviewed by qualified counsel before final public launch.
+          This Privacy Policy explains how Paperline, an Olvera Productions product, handles account data, documents, and product usage information.
         </p>
 
         <div className="mt-10 space-y-8">
@@ -104,6 +104,14 @@ export default function PrivacyPage() {
             </section>
           ))}
         </div>
+
+        <p className="mt-10 text-sm text-pl-fg-dim">
+          Privacy questions or data requests? Contact{" "}
+          <a className="text-[var(--pl-accent)] hover:underline" href="mailto:harrison@olveraproductions.com">
+            harrison@olveraproductions.com
+          </a>
+          .
+        </p>
       </div>
     </main>
   );

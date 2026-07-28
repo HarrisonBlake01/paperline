@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { DocumentProcessConflictError, processDocument } from "@/lib/pipeline";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { parseUuidParam } from "@/lib/http/params";
@@ -45,24 +46,58 @@ export async function POST(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  const processingLeaseToken = randomUUID();
+  const { data: processingLeaseClaimed, error: processingLeaseError } =
+    await sb.rpc("begin_workspace_upload", {
+      p_workspace_id: ctx.workspace.id,
+      p_token: processingLeaseToken,
+      p_lease_seconds: 600,
+    });
+  if (processingLeaseError) {
+    return NextResponse.json({ error: "processing_unavailable" }, { status: 503 });
+  }
+  if (processingLeaseClaimed !== true) {
+    return NextResponse.json(
+      { error: "workspace_operation_in_progress" },
+      { status: 409 },
+    );
+  }
+
   try {
-    await processDocument({ documentId: id });
-    return NextResponse.json({ ok: true });
-  } catch (e) {
-    if (e instanceof DocumentProcessConflictError) {
+    try {
+      await processDocument({ documentId: id });
+      return NextResponse.json({ ok: true });
+    } catch (e) {
+      if (e instanceof DocumentProcessConflictError) {
+        return NextResponse.json(
+          { ok: false, error: "document_not_processable" },
+          { status: 409 },
+        );
+      }
+      console.error("[documents.process] failed", {
+        documentId: id,
+        workspaceId: ctx.workspace.id,
+        errorType: e instanceof Error ? e.name : "UnknownError",
+      });
       return NextResponse.json(
-        { ok: false, error: "document_not_processable" },
-        { status: 409 },
+        { ok: false, error: "processing_failed" },
+        { status: 500 },
       );
     }
-    console.error("[documents.process] failed", {
-      documentId: id,
-      workspaceId: ctx.workspace.id,
-      errorType: e instanceof Error ? e.name : "UnknownError",
-    });
-    return NextResponse.json(
-      { ok: false, error: "processing_failed" },
-      { status: 500 },
+  } finally {
+    const { data: released, error: releaseError } = await sb.rpc(
+      "end_workspace_upload",
+      {
+        p_workspace_id: ctx.workspace.id,
+        p_token: processingLeaseToken,
+      },
     );
+    if (releaseError || released !== true) {
+      console.error("[documents.process] processing lease release failed", {
+        documentId: id,
+        workspaceId: ctx.workspace.id,
+        errorType: releaseError?.code ?? "ProcessingLeaseLost",
+      });
+    }
   }
 }

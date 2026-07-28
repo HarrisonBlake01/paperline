@@ -41,5 +41,5 @@ Values are intentionally omitted. Configure through approved platform secret sto
 - In direct Hermes, the plaintext credential belongs in `~/.hermes/.env` and is referenced from config.
 - In NemoClaw mode, the plaintext credential belongs in the OpenShell provider store and must not appear under `/sandbox/.hermes`.
 - Never copy production secrets into local `.env.local`, test fixtures, screenshots, CI output, or release evidence.
-- Candidate code that calls migrations `0011`–`0013` must never target a database that stops at `0010`.
-- Production uses `https://paperline.io`; candidate configuration must use its immutable candidate origin until launch approval.
+- Current recruiter code through migration `0018` must never target a database whose migration identity, backup state, legacy lifecycle rows, and application compatibility have not been proven first.
+- The stable recruiter project uses `https://paperline-xi.vercel.app`; immutable staging uses its assigned deployment origin until alias approval. Future commercial `https://paperline.io` requires a separate project/provider stack and remains frozen.

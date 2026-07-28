@@ -12,7 +12,7 @@ const entries = [
     title: "Legal and ownership cleanup",
     items: [
       "Updated Paperline ownership language to Olvera Productions.",
-      "Added Terms of Service and Privacy Policy starter pages.",
+      "Published Terms of Service and Privacy Policy pages.",
       "Added lightweight Status and Changelog pages so footer links resolve cleanly.",
     ],
   },

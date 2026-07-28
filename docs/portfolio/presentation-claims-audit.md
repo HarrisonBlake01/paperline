@@ -1,6 +1,6 @@
 # Paperline recruiter deck — claims audit
 
-Verified: 2026-07-19 CDT
+Verified locally: 2026-07-28 CDT. Deployed claims retain their individually dated evidence until the recruiter candidate is published.
 
 This file is the source-of-truth claims ledger for a recruiter-facing Paperline PowerPoint. It separates what is visible on the live Ops Agent page, what is backed by working repository paths, what is synthetic demo data, and what is only a documented productionization direction.
 
@@ -130,7 +130,7 @@ Official source-backed points:
 
 Paperline now contains an authenticated remote Streamable HTTP MCP endpoint, scoped/expiring credential model, four read-only document/template tools, and deterministic official-SDK tests. This supports the claim **implemented locally**.
 
-It does **not** yet support the claim that Paperline is integrated with direct Hermes or NemoClaw/OpenShell. The remote database stops at migration 0010, the public deployment predates the MCP code, and no real Hermes client or managed sandbox has completed discovery, allowed/denied calls, credential isolation, and revocation against an approved candidate.
+It does **not** yet support the claim that Paperline is integrated with direct Hermes or NemoClaw/OpenShell. The recorded remote database is through migration 0016 while corrective lifecycle migration 0017 and durable Storage-cleanup queue migration 0018 remain local; the public deployment predates the current MCP/lifecycle candidate, and no real Hermes client or managed sandbox has completed discovery, allowed/denied calls, credential isolation, and revocation against an approved immutable recruiter candidate.
 
 ### Credible deck wording
 

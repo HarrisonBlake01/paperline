@@ -1,0 +1,18 @@
+# Private generated recruiter package; never upload with local Vercel CLI deployments.
+docs/portfolio/private-recruiter-case-study/
+
+# Local credentials and environment backups. Vercel runtime values must come
+# from the approved project environment, never from the CLI upload bundle.
+.env*
+.vercel/
+.hermes/
+.openclaw/
+
+# Local-only agent and Supabase CLI state.
+.learnings/
+supabase/.temp/
+
+# Workstation artifacts.
+.DS_Store
+**/.DS_Store
+*.log

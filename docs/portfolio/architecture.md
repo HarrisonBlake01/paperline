@@ -34,13 +34,14 @@ flowchart LR
     WH[Signed Stripe webhook handler]:::implemented
     MCP[Paperline MCP<br/>authenticated Streamable HTTP<br/>four read-only tools]:::implemented
     READY[Protected dependency readiness]:::implemented
+    LIFE[Token-fenced document/workspace lifecycle<br/>and durable checkout operations]:::implemented
   end
 
   subgraph DATA[Supabase data boundary]
     STORE[Private document storage]:::implemented
     DB[(Postgres<br/>documents, templates, extractions,<br/>workflows, usage, audit logs)]:::implemented
     VEC[(pgvector document chunks)]:::implemented
-    RLS[Workspace/RPC/credential migrations<br/>0011–0013 local; remote stops at 0010]:::prepared
+    RLS[Workspace/RPC/credential/lifecycle migrations<br/>0011–0016 remote; 0017–0018 candidate pending]:::prepared
   end
 
   subgraph AI[AI processing boundary]
@@ -87,6 +88,7 @@ flowchart LR
   CHAT --> LLM
   API --> WF --> EXTRACT
   API --> BILL --> STRIPE
+  API --> LIFE --> DB
   STRIPE --> WH --> DB
   PIPE --> EMAIL
   RLS -. protects tenant tables .-> DB
@@ -122,7 +124,7 @@ flowchart LR
 - **Auditability:** processing and workflow completion write audit rows; this is a useful foundation, not a claim of complete end-to-end compliance logging.
 - **Compliance:** the project makes no HIPAA, SOC 2, or legal certification claim.
 - **Agent boundary:** the MCP credential supplies identity and workspace server-side; document/template text is untrusted data. No model argument can select a workspace or authorize a new capability.
-- **Release state:** migrations 0011–0013 are repository-backed but not applied remotely; the release checklist remains NO-GO until they are applied and negative-tested in an approved candidate.
+- **Release state:** the recorded remote schema is through migration 0016. Corrective lifecycle migration 0017 and durable Storage-cleanup queue migration 0018 remain recruiter-candidate gates until the exact target passes identity, backup, legacy-state, ordered application, read-back, and negative tests.
 
 ## Repository evidence map
 
@@ -132,7 +134,7 @@ flowchart LR
 - Batch workflow execution: `src/app/api/workflows/route.ts`
 - Auth/workspace boundary: `src/lib/auth/workspace.ts`
 - Billing and provisioning: `src/app/api/billing/checkout/route.ts`, `src/app/api/billing/portal/route.ts`, `src/app/api/webhooks/stripe/route.ts`
-- Tenant schema, RLS, limiter, and agent credentials: `supabase/migrations/0001_init.sql`, `supabase/migrations/0002_rls.sql`, `supabase/migrations/0011_security_hardening.sql`, `supabase/migrations/0012_workspace_rate_limits.sql`, `supabase/migrations/0013_agent_credentials.sql`
+- Tenant schema, RLS, limiter, agent credentials, lifecycle, billing fencing, and durable orphan cleanup: `supabase/migrations/0001_init.sql`, `supabase/migrations/0002_rls.sql`, `supabase/migrations/0011_security_hardening.sql` through `supabase/migrations/0018_storage_cleanup_jobs.sql`
 - Paperline MCP: `src/app/api/mcp/route.ts`, `src/lib/mcp/`, `scripts/validate-mcp.ts`
 - Dependency readiness: `src/app/api/readiness/route.ts`, `src/lib/readiness.ts`
 - Upload/file boundary: `src/lib/security/upload.ts`, `src/app/api/documents/upload/route.ts`

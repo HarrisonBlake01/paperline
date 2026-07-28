@@ -21,7 +21,7 @@ function getResend() {
 }
 
 function getFromAddress() {
-  return process.env.EMAIL_FROM || "Paperline <hello@paperline.io>";
+  return process.env.EMAIL_FROM || "Paperline <harrison@olveraproductions.com>";
 }
 
 export async function sendEmail(opts: {

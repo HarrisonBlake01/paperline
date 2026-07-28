@@ -34,3 +34,6 @@ scripts/samples/
 .learnings/
 supabase/.temp/
 .env*.local
+
+# Private generated recruiter-review package (never publish with app source)
+docs/portfolio/private-recruiter-case-study/

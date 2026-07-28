@@ -18,6 +18,10 @@ For recruiters and technical reviewers, the core signal is end-to-end product en
 - Community template publishing, voting, copying, and starter seeded examples
 - Production-minded Next.js 16 App Router implementation with TypeScript and Tailwind v4
 
+**Harrison Olvera’s contribution:** product architecture, full-stack implementation, AI/document pipeline, tenant and lifecycle hardening, Stripe state reconciliation, security/QA evidence, CI, and release engineering. Paperline is the product; the Ops Agent route is a supporting synthetic demonstration.
+
+The stable recruiter/demo environment is `https://paperline-xi.vercel.app`. It uses synthetic/test data and Stripe test mode. The future commercial `paperline.io` environment is deliberately separate and remains on hold.
+
 ## Current product capabilities
 
 ### Demo workflow
@@ -41,6 +45,8 @@ Paperline applies sensitive-document threat modeling, private-storage defaults, 
 - Create Stripe checkout sessions and customer portal sessions
 - Sync subscription state from Stripe webhooks
 - Auto-provision personal workspaces from Clerk users/webhooks
+
+The codebase also contains locally verified, token-fenced document/workspace deletion and durable Stripe Checkout reconciliation. Candidate-runtime verification remains required before those paths are presented as deployed evidence.
 
 ## Starter template scenarios
 
@@ -77,6 +83,13 @@ In every case, the goal is the same: transform messy documents into structured f
 | Jobs | Inngest planned/installed for background workflow expansion |
 | Observability | Sentry + PostHog planned/installed |
 | Hosting | Vercel |
+
+Status vocabulary used throughout the evidence package:
+
+- **Implemented locally:** executable source path with deterministic local verification.
+- **Recruiter demo/test:** synthetic fixtures or provider test-mode behavior; no real Stripe charge.
+- **External verification required:** implemented path that still needs named recruiter-environment evidence.
+- **Planned/deferred:** not wired or intentionally held for the future commercial release.
 
 ## Architecture overview
 
@@ -133,6 +146,12 @@ pnpm test:templates
 pnpm test:extraction-eval
 pnpm test:demo
 pnpm test:security
+pnpm test:lifecycle
+pnpm test:lifecycle-db
+pnpm test:readiness
+pnpm test:parser-runtime
+pnpm test:mcp
+pnpm exec tsc --noEmit
 pnpm lint
 pnpm build
 ```
@@ -152,7 +171,7 @@ The current working tree is suitable for controlled recruiter/demo review after 
 
 ## Database setup
 
-1. Create/link a Supabase project.
+1. Create/link an isolated Supabase project.
 2. Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`.
 3. Apply migrations:
 
@@ -161,15 +180,16 @@ pnpm supabase link --project-ref <project-ref>
 pnpm supabase db push
 ```
 
-The migrations cover schema, RLS helpers/policies, built-in templates, vector search RPC, storage bucket bootstrap, service-role grants, expanded document types, AI-template pricing, community templates, and starter community seed data.
+The migrations cover schema, RLS helpers/policies, built-in templates, vector search RPC, storage bucket bootstrap, service-role grants, expanded document types, AI-template pricing, community templates, machine credentials, rate limiting, and lifecycle/billing fencing. Do not apply migrations to a shared or recruiter database without the backup, identity, compatibility, and approval gates in the release checklist.
 
-## Deployment notes
+## Deployment topology and environment matrix
 
-- Vercel project: `paperline`
-- Custom domain: `paperline.io`
-- Supabase project currently linked locally
-- Clerk, Stripe, Resend, OpenAI, Sentry, and PostHog are configured through environment variables
-- Git remote is configured as `https://github.com/HarrisonBlake01/paperline.git`
+- **Recruiter/demo:** Vercel project `paperline`, stable URL `https://paperline-xi.vercel.app`, isolated Clerk/Supabase/OpenAI resources, and Stripe test mode only. Required controls include `PAPERLINE_RECRUITER_DEMO=true`, `PAPERLINE_ALLOW_LIVE_STRIPE=false`, and `NEXT_PUBLIC_APP_URL=https://paperline-xi.vercel.app`.
+- **Git branches:** Git-triggered Vercel deployment is disabled project-wide. `release/**` is for hosted GitHub CI; recruiter deployments are created deliberately from an approved SHA through the staged CLI flow.
+- **Future commercial:** `paperline.io` is reserved for a separate Vercel project and provider stack. It is not attached to the recruiter project and remains **ON HOLD / NO-GO**.
+- **Local development:** `.env.local` only; it is ignored and must not influence CI-equivalent evidence.
+
+See [`docs/vercel-deployment.md`](./docs/vercel-deployment.md) and the [active recruiter deployment goal](./docs/goals/complete-paperline-recruiter-portfolio-deployment.goal.md) for the staged no-alias deployment and approval sequence. Git remote: `https://github.com/HarrisonBlake01/paperline.git`.
 
 ## License
 

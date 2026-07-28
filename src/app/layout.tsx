@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   description:
     "Paperline turns PDFs, contracts, invoices, and reports into structured data and instant answers. An Olvera Productions product.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://paperline.io",
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://paperline-xi.vercel.app",
   ),
   openGraph: {
     title: "Paperline — Turn documents into answers.",

@@ -2,6 +2,8 @@
 
 Paperline is a full-stack AI document-intelligence SaaS that turns uploaded business documents into structured, cited, reviewable outputs while keeping consequential actions behind explicit human approval.
 
+Recruiter deployment target: `https://paperline-xi.vercel.app`. The current public alias is prior-demo evidence until the exact reviewed commit passes hosted CI and recruiter runtime acceptance. Stripe is test mode only; `paperline.io` is reserved for a separate future commercial release and remains frozen.
+
 ## Start here
 
 1. [Case study](./case-study.md) — problem, implementation, decisions, evaluation, limits, and next steps.
@@ -52,6 +54,12 @@ pnpm test:templates
 pnpm test:extraction-eval
 pnpm test:demo
 pnpm test:security
+pnpm test:lifecycle
+pnpm test:lifecycle-db
+pnpm test:readiness
+pnpm test:parser-runtime
+pnpm test:mcp
+pnpm exec tsc --noEmit
 pnpm lint
 pnpm build
 ```

@@ -57,7 +57,7 @@ export default async function IntegrationsPage() {
   const plan = PLANS[ctx?.workspace.plan ?? "free"];
   const appUrl = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "https://paperline.io";
+    : process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "https://paperline-xi.vercel.app";
   const canManage = Boolean(ctx && isAdmin(ctx.role));
   const apiKeys = ctx && canManage
     ? (await createServiceClient()

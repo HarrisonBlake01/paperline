@@ -56,6 +56,8 @@ const faqs = [
 ];
 
 export default function HomePage() {
+  const recruiterDemo = process.env.PAPERLINE_RECRUITER_DEMO === "true";
+
   return (
     <main className="flex flex-col">
       {/* Top nav */}
@@ -91,6 +93,11 @@ export default function HomePage() {
               <Sparkles className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" strokeWidth={1.75} />
               AI document workflows for teams that need receipts
             </p>
+            {recruiterDemo ? (
+              <p className="mb-5 w-fit rounded-full border border-[var(--pl-accent)]/50 bg-[var(--pl-accent)]/10 px-3 py-1 text-xs font-medium text-pl-fg">
+                Recruiter demo · synthetic data · Stripe test mode only
+              </p>
+            ) : null}
             <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.02em] leading-[1.05] md:text-6xl">
               Turn documents into answers you can verify.
             </h1>
@@ -267,6 +274,13 @@ export default function HomePage() {
           <p className="mt-3 text-pl-fg-dim">
             Start free. Pay only for the volume you actually process.
           </p>
+          {recruiterDemo ? (
+            <div className="mt-5 rounded-xl border border-[var(--pl-accent)]/50 bg-[var(--pl-accent)]/10 p-4 text-sm text-pl-fg">
+              <strong>Recruiter demo — test checkout only.</strong>{" "}
+              Synthetic users and Stripe test data are used here. No real payment method will be charged.
+              Server-side AI requests may still consume the owner&apos;s capped provider budget.
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-3">
@@ -305,8 +319,8 @@ export default function HomePage() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm text-pl-fg-dim">
-          Need more? <Link href="/contact" className="text-pl-fg underline underline-offset-2">Talk to us about Enterprise</Link>{" "}
-          for custom volume, SSO, DPA, and dedicated support.
+          Need more? <Link href="/contact" className="text-pl-fg underline underline-offset-2">Discuss future Enterprise requirements</Link>{" "}
+          such as custom volume, identity, and security review.
           <span className="mt-2 block text-xs">
             Features labeled Planned are launch targets, not currently deployed integrations.
           </span>
@@ -354,6 +368,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-pl-fg-dim md:flex-row md:items-center">
           <div>© {new Date().getFullYear()} Paperline · An Olvera Productions product.</div>
           <div className="flex flex-wrap gap-5">
+            <a href="https://olveraproductions.com/support">Support</a>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/changelog">Changelog</Link>

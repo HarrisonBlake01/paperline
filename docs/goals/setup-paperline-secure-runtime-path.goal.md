@@ -1,5 +1,7 @@
 /goal Establish and verify Paperline's secure runtime path as a production-grade, recruiter-ready demonstration of senior application development, application security, QA, and release engineering.
 
+> **Historical/superseded for active execution:** commercial launch is on hold. Use [`complete-paperline-recruiter-portfolio-deployment.goal.md`](./complete-paperline-recruiter-portfolio-deployment.goal.md) as the standing goal for `paperline-xi.vercel.app` and GitHub recruiter preparation. Preserve the engineering evidence here, but do not execute its commercial-launch or broader integration scope unless Harrison explicitly resumes it.
+
 You are continuing work in the Paperline repository at:
 
 `/Users/openclaw-server/.openclaw/workspace/paperline/app`

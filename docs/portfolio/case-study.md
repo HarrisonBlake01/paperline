@@ -19,6 +19,7 @@ Paperline combines:
 - Schema-guided extraction and grounded document chat with page/snippet citations
 - Reusable extraction templates and persisted workflow records
 - Stripe Checkout, customer portal, and signature-verified subscription webhooks
+- Token-fenced, resumable document/workspace deletion and durable Checkout reconciliation with idempotent provider operations
 - Demo/readiness validation plus a synthetic offline extraction evaluation set
 - Security engineering artifacts: threat model, tenant-integrity migration, upload validation, dependency remediation, browser hardening, and regression checks
 - Risk-based QA evidence across HTTP contracts, browser console, mobile emulation, and automated accessibility audits
@@ -90,7 +91,7 @@ pnpm lint
 pnpm build
 ```
 
-The original four-command portfolio gate passed on 2026-07-14. On 2026-07-18, the expanded local gate also passed the new security regression script, lint, and Next.js 16.2.10 production build. Lighthouse accessibility findings on the landing, auth, and Ops Agent routes were remediated to 1.00 for the audited public routes. A Clerk development-key warning remains an explicit production blocker, and the signed-in two-workspace SaaS matrix still requires controlled credentials.
+The original four-command portfolio gate passed on 2026-07-14. On 2026-07-27, the complete recruiter-mode local gate passed against Next.js 16.2.12 with `.env.local` isolated, live Stripe disabled, disposable PostgreSQL migration behavior exercised, production dependencies audited, and exact-candidate/history secret scans clean. Lighthouse accessibility findings on the landing, auth, and Ops Agent routes were remediated to 1.00 for the audited public routes. Candidate Clerk/provider configuration and the signed-in two-workspace SaaS matrix remain explicit deployed-environment gates.
 
 ## Portfolio artifacts
 
@@ -108,8 +109,8 @@ The original four-command portfolio gate passed on 2026-07-14. On 2026-07-18, th
 2. Add durable background execution with retries, idempotency, resume, and dead-letter handling.
 3. Persist approval policies and action state transitions.
 4. Wire end-to-end traces, cost/latency dashboards, and alerting.
-5. Apply and negative-test the tenant-integrity migration, then add durable webhook replay and denial-of-wallet controls.
-6. Deploy an approved candidate, apply migrations 0011–0013, and prove direct Hermes plus NemoClaw/OpenShell credential isolation, allowed/denied calls, and revocation.
+5. Bind the reviewed tree to a release commit, run hosted CI, and apply migrations 0017–0018 in order only to the approved isolated recruiter database after backup and legacy-state preflight.
+6. Prove two-workspace isolation, test-mode billing, direct Hermes credential isolation, allowed/denied calls, revocation, monitoring receipt, and rollback on the immutable recruiter candidate.
 
 ## Interview talking points
 

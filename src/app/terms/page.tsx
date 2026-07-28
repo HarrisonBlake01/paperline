@@ -44,10 +44,11 @@ const sections = [
     ],
   },
   {
-    title: "6. Plans, billing, and test-mode features",
+    title: "6. Plans, billing, and cancellation",
     body: [
-      "Paid plans, usage limits, page allowances, and billing intervals are shown in the product or checkout flow when available. Unless a checkout flow says otherwise, fees are billed in advance and are non-refundable except where required by law.",
-      "Some demo or hackathon flows may use simulated approvals, test-mode billing, or sample data. Those flows are labeled for demonstration and do not represent real charges, real provisioning, or guaranteed production availability.",
+      "Paid plans, usage limits, page allowances, and billing intervals are shown in the product and checkout flow. Subscription fees are billed in advance and renew automatically until canceled.",
+      "You may cancel through the billing portal. Cancellation takes effect at the end of the current paid billing period, and access remains available through that period. Fees are non-refundable except where required by law or expressly stated otherwise at checkout.",
+      "We may change plan features or pricing prospectively. We will provide reasonable notice before a pricing change applies to an existing paid subscription.",
     ],
   },
   {
@@ -91,9 +92,9 @@ export default function TermsPage() {
         <h1 className="mt-3 font-[var(--font-display)] text-4xl font-semibold tracking-tight sm:text-5xl">
           Terms of Service
         </h1>
-        <p className="mt-4 text-sm text-pl-fg-dim">Last updated: June 22, 2026</p>
+        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 20, 2026</p>
         <p className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm leading-7 text-pl-fg-dim">
-          These are practical starter terms for Paperline, an Olvera Productions product. They should be reviewed by qualified counsel before relying on them as final production legal terms.
+          These Terms of Service govern access to and use of Paperline, an Olvera Productions product.
         </p>
 
         <div className="mt-10 space-y-8">
@@ -112,7 +113,11 @@ export default function TermsPage() {
         </div>
 
         <p className="mt-10 text-sm text-pl-fg-dim">
-          Questions about these terms? Contact the Paperline team through your normal Olvera Productions contact channel.
+          Questions about these terms? Contact{" "}
+          <a className="text-[var(--pl-accent)] hover:underline" href="mailto:harrison@olveraproductions.com">
+            harrison@olveraproductions.com
+          </a>
+          .
         </p>
       </div>
     </main>
