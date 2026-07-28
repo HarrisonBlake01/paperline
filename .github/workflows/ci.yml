@@ -22,7 +22,7 @@ jobs:
       PAPERLINE_ALLOW_LIVE_STRIPE: "false"
     steps:
       - name: Check out repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
 
@@ -33,17 +33,15 @@ jobs:
           -w /repo
           docker.io/rhysd/actionlint@sha256:96d4a8c87dbbfb3bdd324f8fdc285fc3df5261e2decc619a4dd7e8ee52bbfd46
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
-        with:
-          version: 10.33.4
-          run_install: false
-
       - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22.x
-          cache: pnpm
+
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.4 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -60,10 +58,17 @@ jobs:
               base="$(git merge-base HEAD origin/main 2>/dev/null || git rev-list --max-parents=0 HEAD)"
             fi
           fi
-          git diff --check "$base"..HEAD
+          # Markdown permits intentional two-space hard breaks, while generated
+          # PDF fixtures are binary. Check code/config whitespace separately.
+          git diff --check "$base"..HEAD -- . \
+            ':(exclude,glob)**/*.md' \
+            ':(exclude,glob)**/*.pdf'
           missing_final_newline=0
           while IFS= read -r -d '' file; do
             [[ -f "$file" && -s "$file" ]] || continue
+            case "$file" in
+              *.pdf) continue ;;
+            esac
             if LC_ALL=C grep -Iq . "$file"; then
               last_byte="$(LC_ALL=C tail -c 1 -- "$file" | od -An -t u1 | tr -d ' ')"
               if [[ "$last_byte" != "10" ]]; then
@@ -127,11 +132,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out complete history
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
 
       - name: Scan Git history and working tree
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          docker run --rm
+          -v "$PWD:/repo"
+          -w /repo
+          docker.io/zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --redact
