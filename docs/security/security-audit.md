@@ -1,13 +1,13 @@
 # Paperline application-security review
 
-Review date: 2026-07-19 CDT
-Scope: current local working tree, current Git history/configuration, and read-only checks of `https://paperline-xi.vercel.app/`.
+Review date: 2026-07-29 CDT
+Scope: reviewed recruiter source, Git history/configuration, and deployed checks of `https://paperline-demo.olveraproductions.com/`.
 
 This is an internal engineering review, not a third-party penetration test or certification.
 
 ## Executive result
 
-The review found and remediated one confirmed High dependency issue and several Medium application-hardening issues. No confirmed direct cross-workspace data disclosure was reproduced. Public production launch remains **NO-GO** because the new RLS and rate-limit migrations are not applied, the repaired parser runtime is not deployed, production auth/domain configuration is unresolved, and the signed-in SaaS path still requires controlled end-to-end verification.
+The review found and remediated one confirmed High dependency issue and several Medium application-hardening issues. No confirmed direct cross-workspace data disclosure was reproduced. The recruiter demo now uses the reviewed Node 22 build, production Clerk authentication, protected dependency readiness, private storage, applied candidate migrations, and test-only billing. This is a **recruiter-viewing GO**, not a commercial production certification; enforced CSP, refreshed production-Clerk two-workspace depth, monitoring, backup, and rollback evidence remain documented follow-ups.
 
 ## Confirmed findings remediated
 

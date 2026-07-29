@@ -2,7 +2,7 @@
 
 Paperline is a full-stack AI document-intelligence SaaS that turns uploaded business documents into structured, cited, reviewable outputs while keeping consequential actions behind explicit human approval.
 
-Recruiter deployment target: `https://paperline-xi.vercel.app`. The current public alias is prior-demo evidence until the exact reviewed commit passes hosted CI and recruiter runtime acceptance. Stripe is test mode only; `paperline.io` is reserved for a separate future commercial release and remains frozen.
+Recruiter demo: `https://paperline-demo.olveraproductions.com`. The reviewed Node 22 release passed hosted CI and is deployed with production Clerk authentication; Stripe remains test mode only. `paperline.io` is reserved for a separate future commercial release and remains frozen.
 
 ## Start here
 

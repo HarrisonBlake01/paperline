@@ -47,7 +47,7 @@
 - Patched a confirmed High Next.js advisory and reduced the production audit from 12 High findings to zero High/Critical findings.
 - Added content-signature upload validation, workspace-scoped folder validation, cross-tenant RLS relationship checks, safe provider errors, Stripe customer binding, and regression checks.
 - Used Lighthouse and browser/HTTP checks to find and fix contrast, landmark, redirect, and response-header issues.
-- Recorded a production **NO-GO** for unresolved rate limiting, CSP rollout, production Clerk/domain setup, RLS application, and signed-in two-workspace QA.
+- Deployed production Clerk authentication and a least-privilege signature-verified user-provisioning webhook; retained explicit follow-ups for enforced CSP, monitoring/backup/rollback evidence, and a refreshed signed-in two-workspace matrix.
 
 **Why:** Security and QA are credible only when findings, fixes, tests, and unresolved blockers are all visible.
 

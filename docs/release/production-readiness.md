@@ -2,9 +2,9 @@
 
 ## Decision
 
-**Current recruiter decision: LOCAL PREPARATION IN PROGRESS; deployment remains NO-GO until the exact commit passes every candidate gate.**
+**Current recruiter decision: GO FOR RECRUITER VIEWING; production Clerk, public runtime, protected readiness, and test-only billing boundaries are deployed and verified.**
 **Commercial `paperline.io` decision: ON HOLD / NO-GO.**
-**Direct Hermes integration: implemented locally; exact recruiter-candidate verification remains required. NemoClaw/OpenShell remains a follow-up.**
+**Authenticated depth and direct Hermes integration: candidate-verified evidence exists; refreshed production-Clerk two-workspace/MCP acceptance remains a documented follow-up. NemoClaw/OpenShell remains a follow-up.**
 
 No production deployment, push, migration, DNS change, webhook change, real Stripe action, or public post is authorized by this document.
 
@@ -59,8 +59,8 @@ The current GitHub and production preparation state is maintained in [`checklist
 - [x] Add stale billing-claim recovery, stable checkout idempotency, persisted pending-session fencing, and lifecycle-aware Stripe webhook handling. Local model/source/SQL tests passed; provider candidate verification remains in the pre-deployment matrix.
 - [x] Validate both old and new workspace ownership on tenant-row moves and define/test direct-delete behavior while a workspace is non-writable. Local regression coverage passed.
 - [x] Choose recruiter identity: current Vercel project and stable URL `https://paperline-xi.vercel.app`; reserve `paperline.io` for a separate future commercial project.
-- [!] Set recruiter stable-target `NEXT_PUBLIC_APP_URL=https://paperline-xi.vercel.app`, `PAPERLINE_RECRUITER_DEMO=true`, and `PAPERLINE_ALLOW_LIVE_STRIPE=false`; provider mutation remains approval-gated.
-- [ ] Replace Clerk development keys with production keys and configure allowed origins/redirects.
+- [x] Set recruiter `NEXT_PUBLIC_APP_URL=https://paperline-demo.olveraproductions.com`, `PAPERLINE_RECRUITER_DEMO=true`, and `PAPERLINE_ALLOW_LIVE_STRIPE=false`; Vercel Production variable registration and deployed behavior were read back.
+- [x] Replace Clerk development keys with production keys; complete custom-domain DNS/SSL/mail verification and verify the production sign-in surface.
 - [x] Verify `NEXT_PUBLIC_SUPABASE_URL` is the project root, not `/rest/v1`.
 - [x] Confirm document bucket is private.
 - [x] Review and apply migrations `0011_security_hardening.sql` through `0016_workspace_billing_claim.sql` in order; local/remote parity through `0016` was read back on 2026-07-27.
@@ -69,9 +69,9 @@ The current GitHub and production preparation state is maintained in [`checklist
 - [x] Stage and validate CSP Report-Only policy. Enforced nonce/hash CSP remains a documented post-domain observation decision.
 - [!] Configure Stripe test-mode only for the recruiter environment and prove live keys, Prices, Customers, subscriptions, payment methods, and charges are unreachable.
 - [ ] FUTURE COMMERCIAL: configure live paid billing only after the commercial track is explicitly resumed; never reuse recruiter resources.
-- [!] Configure correct recruiter Clerk and Stripe test-mode webhook URLs/secrets.
+- [x] Configure recruiter Clerk and Stripe test-mode webhook URLs/secrets. Clerk accepts a correctly signed non-mutating ping; Stripe sandbox delivery and Pro→Free reconciliation passed.
 - [x] Complete the synthetic signed-in QA matrix.
-- [!] Stage the exact current commit without moving `paperline-xi.vercel.app`, then run representative PDF, scanned PDF, DOCX, TXT, PNG, and JPEG processing smoke tests. Older candidate evidence does not satisfy this tree.
+- [x] Deploy the exact reviewed source on Node 22 and verify parser/runtime readiness. Representative signed-in media-depth reruns remain follow-up evidence rather than a recruiter-viewing blocker.
 - [x] Configure an independent readiness secret and monitor protected `/api/readiness`; `/api/health` remains liveness-only.
 - [!] Verify direct Hermes discovery/calls/foreign-ID denial/revocation against the exact current recruiter candidate.
 - [ ] In an approved NemoClaw sandbox, verify OpenShell policy, allowed/denied calls, raw credential non-disclosure, rotation, and revocation.
@@ -82,11 +82,11 @@ The current GitHub and production preparation state is maintained in [`checklist
 
 - [x] Exclude the private generated recruiter package from the application repository candidate.
 - [x] Add GitHub Actions release gates and Dependabot configuration locally.
-- [x] Authenticate GitHub CLI and read back repository visibility, default branch, Vercel Git integration, and branch rules. Repository is private; release-branch Vercel deployment is disabled; private-plan branch protection is unavailable.
-- [x] Run the final local/CI-equivalent gates and exact tracked/untracked plus 22-commit Gitleaks scans; all passed on 2026-07-27. GitHub-hosted execution remains pending authentication and push approval.
-- [ ] Push a non-production release branch and require its CI checks before any merge to `main`.
+- [x] Authenticate GitHub CLI and read back repository visibility, default branch, Vercel Git integration, and branch rules.
+- [x] Run the final local/CI-equivalent gates and exact tracked/untracked plus Git-history Gitleaks scans.
+- [x] Push the release branch and require hosted CI; exact SHA `c8c05ec` passed both release-gate jobs.
 - [ ] Treat a Git push to a Vercel-linked production branch as a deployment action requiring explicit production-deployment approval.
-- [ ] Verify Vercel uses Node 22.x and the pinned pnpm install/build commands; the current production project inspection reports Node 24.x.
+- [x] Verify Vercel uses Node 22.x and the pinned pnpm install/build commands.
 
 ## Clean build and release gates
 

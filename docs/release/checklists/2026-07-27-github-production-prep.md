@@ -1,16 +1,16 @@
 # Paperline GitHub and recruiter deployment preparation — 2026-07-27
 
-Status: **Final corrected local gate and follow-up Medium-finding fixes passed. Commit, push, provider mutation, migration, staged deployment, and recruiter-alias promotion remain approval-gated; commercial DNS remains frozen.**
+Status: **Exact release SHA, hosted CI, Node 22 recruiter deployment, stable-alias promotion, Stripe sandbox lifecycle, and synthetic fixture cleanup are complete. Remaining authenticated runtime acceptance, provider read-back, monitoring, backup, and rollback closure remain gated; commercial DNS remains frozen.**
 
 This checklist supplements the verified candidate ledger in [`2026-07-19-secure-release.md`](./2026-07-19-secure-release.md). The executable pre-deployment test inventory and latest run evidence are maintained in [`2026-07-27-pre-deployment-test-matrix.md`](./2026-07-27-pre-deployment-test-matrix.md). This file records the exact current working tree and the additional GitHub/Vercel production gates.
 
 ## Target identities
 
 - Local repository: `/Users/openclaw-server/.openclaw/workspace/paperline/app`
-- Branch: `main`
-- Local HEAD: `2d29bcc`
+- Branch: `release/recruiter-portfolio-2026-07-28`
+- Local/remote HEAD: `c8c05ece30aab539895172c70e0994cdb723d929`
 - Configured Git remote: `https://github.com/HarrisonBlake01/paperline.git`
-- Last locally recorded `origin/main`: `5f1b69a`
+- Stable recruiter alias `paperline-xi.vercel.app` serves reviewed deployment `dpl_AEot26nPWddDc117PDRs3xNPjWGG`, explicitly bound to release SHA `c8c05ec`, on Node `22.x`.
 - Vercel recruiter/demo project (its stable target is named `production` by Vercel): `harrisonolvera23-7297s-projects/paperline`
 - Vercel project ID: `prj_OfKl0NNnacxQ5pTX3X0QNhNkbrMc`
 - Supabase linked project ref: `yvouofuylmzrknratgyw`
@@ -43,8 +43,8 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 - [x] Authenticate GitHub CLI on this Mac without placing credentials in chat or repository files. Verified active keyring-backed account `HarrisonBlake01`; HTTPS Git credential helper was configured and `git ls-remote` succeeded.
 - [x] Read back repository visibility, default branch, Git integration, and current branch rules after authentication. `HarrisonBlake01/paperline` is private with default branch `main`; remote `main` is `5f1b69a53cff5ee00f7f6ca576da993b7c179397`, while local HEAD is two commits ahead before the dirty candidate changes.
 - [x] **Git deployment policy:** `vercel.json` sets `git.deploymentEnabled=false`, making every branch hosted-GitHub-CI-only. The project has zero Preview variables; no recruiter or future commercial credentials are copied into Preview. Approved recruiter deployments use the staged CLI flow from an exact SHA.
-- [ ] Push a non-production release branch only after the preceding Vercel-Preview policy is verified and the owner explicitly approves branch/commit/push.
-- [ ] Verify the GitHub Actions workflow passes on the pushed branch.
+- [x] Push the approved non-production branch `release/recruiter-portfolio-2026-07-28` after verifying project-wide Vercel Git deployment suppression.
+- [x] Verify GitHub Actions on the exact release SHA — run `30355115629` passed both jobs on `c8c05ec`.
 - [!] Require the release-gate checks on `main` before merge if the repository plan supports branch protection/rulesets. GitHub returned `403`: this private repository's current plan does not support branch protection/rulesets.
 - [!] Verify GitHub secret scanning and Dependabot alerts are enabled where available. Read-back reports vulnerability alerts, Dependabot alerts, and secret scanning are currently disabled.
 - [x] Confirm whether Vercel Git integration treats `main` as the production branch. Vercel is linked to `HarrisonBlake01/paperline`, production branch `main`, with automatic custom-domain assignment enabled. A push to `main` can deploy automatically and therefore requires production-deployment approval, not merely Git-push approval.
@@ -52,13 +52,17 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 
 ## D. Vercel recruiter/demo project reconciliation
 
+Target architecture: exactly two isolated Vercel projects. The existing `paperline` project is recruiter/demo and serves `paperline-xi.vercel.app`. A separate future `paperline-production` project will serve the commercial product and eventually receive `paperline.io`. Generated Vercel aliases are deployment plumbing, not product destinations. The redundant `paperline-candidate` project was removed on 2026-07-29 after user approval/action; its former domain returns `404`.
+
 - [x] Inspect project identity and environment-variable names without printing values.
-- [ ] Change the Vercel project Node.js setting from the currently reported `24.x` to the repository-pinned `22.x`, then read it back.
-- [ ] Pin dashboard install/build settings to `pnpm install --frozen-lockfile` and `pnpm build` if `vercel.json` is not the effective source, then read them back.
-- [ ] Configure the current project for the stable recruiter site at `paperline-xi.vercel.app`: candidate Clerk/Supabase, restricted OpenAI project, readiness secret, Stripe test mode, and `PAPERLINE_RECRUITER_DEMO=true`.
-- [ ] Add/verify recruiter variable names currently absent: `CLERK_WEBHOOK_SECRET`, Stripe test secret/publishable/Price/webhook variables, `PAPERLINE_RECRUITER_DEMO=true`, and `PAPERLINE_ALLOW_LIVE_STRIPE=false`.
-- [ ] Verify `PAPERLINE_MCP_ALLOWED_HOSTS` and `NEXT_PUBLIC_APP_URL` contain the exact recruiter host `paperline-xi.vercel.app`.
+- [x] Change the Vercel project Node.js setting from `24.x` to the repository-pinned `22.x` — explicitly approved and read back on 2026-07-29; exact candidate deployment record also reports Node `22.x`.
+- [x] Verify deterministic install/build commands are effective — candidate build logs show `pnpm install --frozen-lockfile` and `pnpm build` from `vercel.json`, despite null dashboard overrides.
+- [x] Configure production Clerk for `paperline-demo.olveraproductions.com`; Clerk reports DNS, SSL, mail, and OAuth complete, and the deployed sign-in page no longer displays Development mode.
+- [x] Register and deploy the endpoint-specific sensitive `CLERK_WEBHOOK_SECRET`; the production Svix endpoint targets `/api/webhooks/clerk`, subscribes only to `user.created`, and accepts a correctly signed non-mutating `test.ping` with HTTP `200`.
+- [!] Custom-domain redirects and production Clerk behavior confirm `NEXT_PUBLIC_APP_URL` is operating on `paperline-demo.olveraproductions.com`; encrypted Vercel values prevent direct read-back of `PAPERLINE_MCP_ALLOWED_HOSTS`, so exact-host MCP verification remains open.
 - [x] Keep `paperline.io` and `www.paperline.io` detached from the recruiter project. Future product production will use a separately configured Vercel project and provider stack.
+- [x] Remove the redundant `paperline-candidate` project and `paperline-candidate.vercel.app` after preserving evidence — verified on 2026-07-29: only the `paperline` project remains and the former candidate domain returns `404`.
+- [x] Remove any manually attached generated-alias domain entry — the project-domain inventory now contains only `paperline-xi.vercel.app`. Vercel still automatically publishes `paperline-harrisonolvera23-7297s-projects.vercel.app` behind SSO; treat it only as provider plumbing because it is not an attached custom domain and cannot be presented as a Paperline destination.
 - [ ] Configure Cloudflare DNS only after the separate future production deployment passes smoke tests and receives explicit approval.
 
 ## E. Application release blockers from independent review
@@ -123,13 +127,13 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 - [ ] Capture the pre-deploy production deployment/alias for rollback.
 - [ ] Require a clean working tree, recorded reviewed commit SHA/tree, exact candidate manifest, and matching secret-scan evidence before any direct Vercel CLI production deployment. Prefer deploying the protected Git commit rather than a local working tree.
 - [ ] Obtain separate explicit approval for commit, Git push, any Git-triggered Vercel deployment, direct production deployment, domain/alias promotion, and Cloudflare DNS publication.
-- [ ] Create a separate future production Vercel project and one immutable production deployment from the reviewed commit; do not convert or reuse the recruiter project/provider stack.
+- [ ] Create the separate future `paperline-production` Vercel project and one immutable production deployment from the reviewed commit; do not convert or reuse the recruiter project/provider stack.
 - [ ] Verify Ready state, safe logs, `/api/health`, protected `/api/readiness`, signed-out redirects, signed-in upload/parse/extract/cited-chat flow, tenant negatives, four-tool MCP behavior and revocation, Clerk webhook, Sentry receipt, security headers, and rollback eligibility.
 - [ ] Route `paperline.io` only after the immutable deployment passes.
 
 ## Current decision
 
 - **Local GitHub/deployment safeguards:** PREPARED AND LOCALLY VERIFIED; the complete corrected gate, final independent review, exact-candidate secret scan, and history scan pass.
-- **GitHub push:** BLOCKED by explicit branch/commit/push approval and candidate cleanup/review; authentication is now working. No remote workflow exists yet because the local CI file has not been pushed.
-- **Recruiter deployment:** NO-GO pending the pre-deployment matrix's candidate/provider tests, recruiter-database legacy-state preflight/migration approval, authenticated external configuration verification, and the approval gates above. The linked Olvera Productions support destination is deployed and verified publicly.
+- **GitHub release branch:** COMPLETE for the reviewed source. Exact SHA `c8c05ec` passed hosted CI; the final recruiter-documentation commit must receive the same gates before publication.
+- **Recruiter deployment:** GO FOR RECRUITER VIEWING. The Node 22 reviewed source is live at `paperline-demo.olveraproductions.com` with production Clerk, complete domain verification, a least-privilege signed webhook, healthy protected readiness, public/legal surfaces, security headers, and Stripe sandbox lifecycle evidence. Refreshed signed-in two-workspace depth and commercial-operations controls remain explicitly unclaimed.
 - **Commercial canonical-domain launch:** FROZEN / OUT OF SCOPE. `paperline.io` remains detached pending a separate future project, smoke tests, domain attachment, and DNS approval.

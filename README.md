@@ -4,6 +4,8 @@
 
 It is an AI document intelligence SaaS built as an Olvera Productions product. Users upload PDFs, DOCX files, scans, reports, contracts, invoices, and other business documents; Paperline parses/OCRs them, extracts structured fields with reusable templates, and lets users chat with the source material using citations.
 
+**Live recruiter demo:** [paperline-demo.olveraproductions.com](https://paperline-demo.olveraproductions.com) — synthetic/test data, production Clerk authentication, and Stripe test mode only.
+
 ## Why this project matters
 
 Paperline is designed around a practical AI-engineering problem: making LLM output useful in workflows where users need **receipts**, not just summaries. The app combines document parsing, OCR fallback, embeddings, retrieval, schema-guided extraction, billing, auth, and multi-tenant data boundaries into a production-style SaaS foundation.
@@ -20,13 +22,13 @@ For recruiters and technical reviewers, the core signal is end-to-end product en
 
 **Harrison Olvera’s contribution:** product architecture, full-stack implementation, AI/document pipeline, tenant and lifecycle hardening, Stripe state reconciliation, security/QA evidence, CI, and release engineering. Paperline is the product; the Ops Agent route is a supporting synthetic demonstration.
 
-The stable recruiter/demo environment is `https://paperline-xi.vercel.app`. It uses synthetic/test data and Stripe test mode. The future commercial `paperline.io` environment is deliberately separate and remains on hold.
+The recruiter/demo environment is available at `https://paperline-demo.olveraproductions.com` and is backed by the stable `paperline-xi.vercel.app` deployment. It uses synthetic/test data and Stripe test mode. The future commercial `paperline.io` environment is deliberately separate and remains on hold.
 
 ## Current product capabilities
 
 ### Demo workflow
 
-The mentor demo path is intentionally simple: sign in, upload an important document, wait for Paperline to process it, review the extracted text/details, run an extraction template, then save the same kind of review as a repeatable workflow. The app is tuned for general users first, so the interface should explain what happened and what to do next without exposing model/provider internals.
+The recruiter demo path is intentionally simple: sign in, upload an important document, wait for Paperline to process it, review the extracted text/details, run an extraction template, then save the same kind of review as a repeatable workflow. The app is tuned for general users first, so the interface should explain what happened and what to do next without exposing model/provider internals.
 
 ### Security and privacy posture
 
@@ -46,7 +48,7 @@ Paperline applies sensitive-document threat modeling, private-storage defaults, 
 - Sync subscription state from Stripe webhooks
 - Auto-provision personal workspaces from Clerk users/webhooks
 
-The codebase also contains locally verified, token-fenced document/workspace deletion and durable Stripe Checkout reconciliation. Candidate-runtime verification remains required before those paths are presented as deployed evidence.
+The recruiter environment has production Clerk authentication, a signature-verified least-privilege Clerk webhook, protected dependency readiness, and verified Stripe sandbox checkout/cancellation reconciliation. Destructive document/workspace paths remain security-engineering evidence rather than a promise of unrestricted commercial production readiness.
 
 ## Starter template scenarios
 
@@ -167,7 +169,7 @@ Paperline's release materials separate **Implemented**, **Demo/Simulated**, and 
 - [Production release and rollback checklist](./docs/release/production-readiness.md)
 - [Recruiter-facing portfolio package](./docs/portfolio/README.md)
 
-The current working tree is suitable for controlled recruiter/demo review after local gates pass. It is **not yet approved for unrestricted public SaaS launch**; see the readiness tracker for production blockers and claims boundaries.
+The recruiter demo is approved for evaluator viewing. It is **not an unrestricted commercial SaaS launch**; see the readiness tracker for the remaining authenticated depth, monitoring, backup, and rollback evidence.
 
 ## Database setup
 
@@ -184,7 +186,7 @@ The migrations cover schema, RLS helpers/policies, built-in templates, vector se
 
 ## Deployment topology and environment matrix
 
-- **Recruiter/demo:** Vercel project `paperline`, stable URL `https://paperline-xi.vercel.app`, isolated Clerk/Supabase/OpenAI resources, and Stripe test mode only. Required controls include `PAPERLINE_RECRUITER_DEMO=true`, `PAPERLINE_ALLOW_LIVE_STRIPE=false`, and `NEXT_PUBLIC_APP_URL=https://paperline-xi.vercel.app`.
+- **Recruiter/demo:** Vercel project `paperline`, recruiter URL `https://paperline-demo.olveraproductions.com`, established Vercel/Stripe callback host `https://paperline-xi.vercel.app`, isolated Clerk/Supabase/OpenAI resources, and Stripe test mode only. Required controls include `PAPERLINE_RECRUITER_DEMO=true`, `PAPERLINE_ALLOW_LIVE_STRIPE=false`, and `NEXT_PUBLIC_APP_URL=https://paperline-demo.olveraproductions.com`.
 - **Git branches:** Git-triggered Vercel deployment is disabled project-wide. `release/**` is for hosted GitHub CI; recruiter deployments are created deliberately from an approved SHA through the staged CLI flow.
 - **Future commercial:** `paperline.io` is reserved for a separate Vercel project and provider stack. It is not attached to the recruiter project and remains **ON HOLD / NO-GO**.
 - **Local development:** `.env.local` only; it is ignored and must not influence CI-equivalent evidence.
