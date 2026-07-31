@@ -6,7 +6,7 @@ This checklist supplements the verified candidate ledger in [`2026-07-19-secure-
 
 ## Target identities
 
-- Local repository: `/Users/openclaw-server/.openclaw/workspace/paperline/app`
+- Local repository at review time: Paperline repository root
 - Branch: `release/recruiter-portfolio-2026-07-28`
 - Local/remote HEAD: `c8c05ece30aab539895172c70e0994cdb723d929`
 - Configured Git remote: `https://github.com/HarrisonBlake01/paperline.git`

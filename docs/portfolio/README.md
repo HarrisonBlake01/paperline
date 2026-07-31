@@ -1,6 +1,6 @@
 # Paperline flagship portfolio pack
 
-Paperline is a full-stack AI document-intelligence SaaS that turns uploaded business documents into structured, cited, reviewable outputs while keeping consequential actions behind explicit human approval.
+Paperline is a full-stack AI document-intelligence SaaS built by Harrison Olvera. It turns uploaded business documents into structured, cited, reviewable outputs. The separate Ops Agent demo illustrates human-approval boundaries with synthetic fixtures; it does not execute consequential actions.
 
 Recruiter demo: `https://paperline-demo.olveraproductions.com`. The reviewed Node 22 release passed hosted CI and is deployed with production Clerk authentication; Stripe remains test mode only. `paperline.io` is reserved for a separate future commercial release and remains frozen.
 
@@ -9,10 +9,10 @@ Recruiter demo: `https://paperline-demo.olveraproductions.com`. The reviewed Nod
 1. [Case study](./case-study.md) — problem, implementation, decisions, evaluation, limits, and next steps.
 2. [Architecture](./architecture.md) — Mermaid system diagram, trust boundaries, data flow, and repository evidence.
 3. [Interview talking points](./interview-talking-points.md) — recruiter answer, technical deep dives, tradeoffs, and honest boundary language.
-4. [README recommendation](./readme-recommendations.md) — small, ready-to-paste root README improvement.
+4. [README rationale](./readme-recommendations.md) — historical planning note for the current recruiter-facing structure.
 5. [Presentation claims audit](./presentation-claims-audit.md) — verified boundary between live page, repository code, synthetic fixtures, and planned integrations.
 6. [Fable 5 PowerPoint prompt](./fable-5-powerpoint-prompt.md) — full recruiter-deck production brief, slide plan, asset list, and verification requirements.
-7. [Screenshot checklist](./screenshot-checklist.md) — approved internal captures, alt text, and public-sharing checks.
+7. [Screenshot checklist](./screenshot-checklist.md) — tracked recruiter captures, alt text, and publication checks.
 8. [Walkthrough production notes](./walkthrough-production-notes.md) — media specs, story order, and claims guardrails.
 9. [Threat model](../security/threat-model.md) — assets, trust boundaries, abuse cases, and controls.
 10. [Security review](../security/security-audit.md) — confirmed findings, remediations, residual risk, and evidence.

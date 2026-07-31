@@ -3,7 +3,7 @@
 Review date: 2026-07-29 CDT
 Scope: reviewed recruiter source, Git history/configuration, and deployed checks of `https://paperline-demo.olveraproductions.com/`.
 
-This is an internal engineering review, not a third-party penetration test or certification.
+This is a repository-owner engineering review, not an independent third-party penetration test, legal review, or certification. The readiness tracker is the current status ledger; finding sections below preserve the evidence and limitations that applied when each issue was investigated.
 
 ## Executive result
 
@@ -30,7 +30,7 @@ The review found and remediated one confirmed High dependency issue and several 
 - **Evidence:** baseline RLS join policies checked the owning chat/workflow/document but not always the opposite foreign-key row. Helper functions did not pin `search_path`.
 - **Impact:** an authenticated direct Supabase client could attempt cross-tenant relationship poisoning; unsafe definer search paths weaken defense in depth.
 - **Fix:** `supabase/migrations/0011_security_hardening.sql` adds cross-tenant `WITH CHECK` predicates, fixed search paths, and narrowed execute grants.
-- **Verification limitation:** migration has not been applied to production because DB changes require explicit approval.
+- **Verification status:** migrations 0011–0016 were applied to the isolated candidate data plane and a synthetic two-workspace negative matrix passed. Migrations 0017–0018 remain separately approval-gated.
 
 ### SEC-04 — internal error and configuration disclosure (Medium)
 
@@ -80,7 +80,7 @@ The review found and remediated one confirmed High dependency issue and several 
 - **Evidence:** the deployed process route logged missing `@napi-rs/canvas`/`DOMMatrix`; scanned-PDF rendering depended on macOS Swift/AppKit.
 - **Fix:** PDF dependencies are lazy-loaded, native packages are server-externalized, parser instances are destroyed deterministically, and scanned pages render to PNG through `pdf-parse` on the Node runtime.
 - **Regression:** `pnpm test:parser-runtime` parses 11 text pages and renders a real first-page PNG without invoking a paid AI provider.
-- **Verification limitation:** the fix is local and must pass an approved Vercel deployment smoke test.
+- **Verification status:** text and scanned-PDF runtime paths passed on the approved candidate. Broader representative-media reruns remain follow-up evidence for unrestricted scale.
 
 ### SEC-15 — AI trust boundaries and citation integrity (Low/Medium)
 
@@ -93,32 +93,32 @@ The review found and remediated one confirmed High dependency issue and several 
 - **Evidence:** baseline `api_keys` stored high-entropy digests but had no scopes/expiry and no authenticated consumer; schema comment incorrectly implied bcrypt/Argon2 while implementation used SHA-256 over 256 random bits.
 - **Fix:** migration `0013_agent_credentials.sql` adds constrained scopes, expiry, unique digest index, and accurate digest semantics. New `pl_mcp_` credentials are read-only, 30-day, one-time-display secrets. Existing keys remain unscoped and cannot authenticate.
 - **Runtime authorization:** each MCP request rechecks digest, revocation, expiry, known nonempty scopes, creator membership/role validity, and workspace plan.
-- **Limitation:** migration 0013 is not applied remotely.
+- **Verification status:** migration 0013 is applied to the isolated candidate data plane; credential creation, scope, expiry, use, revocation, and cleanup passed there.
 
 ### SEC-17 — agent service-role confused deputy and MCP attack surface (Medium)
 
 - **Evidence:** no baseline MCP boundary existed; adding a generic service-role tool endpoint would create cross-tenant and denial-of-wallet risk.
 - **Fix:** official MCP SDK Streamable HTTP transport, stateless request handling, 128 KiB cap, no batches, production host allowlist, explicit browser-Origin policy, database-backed limiter, credential-derived workspace, workspace predicate on every query, scope-filtered read-only tool registration, bounded untrusted output, safe errors, and per-tool audit.
 - **Regression:** `pnpm test:mcp` uses the real SDK client/in-memory transport and Web Standard HTTP transport for initialization, discovery, calls, foreign IDs, malformed boundaries, and limiter behavior.
-- **Limitation:** no real deployed Hermes or NemoClaw/OpenShell sandbox test has occurred.
+- **Limitation:** direct-Hermes candidate evidence exists, but refreshed acceptance against the current recruiter deployment remains a follow-up. No approved NemoClaw/OpenShell sandbox verification is claimed.
 
 ### REL-04 — dependency readiness ambiguity (Medium availability)
 
 - **Evidence:** liveness can return 200 while database/migrations/storage/parser are unavailable.
 - **Fix:** `/api/health` remains public liveness only; `/api/readiness` is protected by an independent high-entropy bearer and returns bounded named checks for configuration, database, migrations 0012/0013, private storage, and PDF runtime.
-- **Limitation:** external monitoring and candidate behavior require deployment approval.
+- **Verification status:** the recruiter deployment's six protected readiness checks passed. Continuous external monitoring, alert delivery, and failure drills remain follow-ups.
 
 ## Open production risks
 
-1. **Durable rate-limit production state (Medium, launch blocker):** migration 0012 implements atomic per-workspace fixed-window limits and fail-closed route enforcement, but it must be applied and integration-tested. Atomic page/token quota reservation remains a scale follow-up beyond request limiting.
+1. **Usage/cost controls at scale (Medium):** migration 0012's atomic per-workspace request limits and fail-closed behavior passed on the candidate. Atomic page/token quota reservation remains a scale follow-up beyond request limiting.
 2. **CSP (Medium, hardened-launch blocker):** deploy report-only policy with exact Clerk/Supabase/Stripe/telemetry origins, observe, then enforce.
 3. **Webhook replay ledger (Low/Medium):** persist processed Stripe/Clerk event IDs with unique constraints and retention.
 4. **Parser sandboxing/decompression controls (Medium at public scale):** signature checks do not make complex parsers memory-safe.
 5. **Production data lifecycle (Medium):** retention, deletion, backup/restore, incident response, and object cleanup need operational proof.
-6. **RLS production state (Medium):** apply and negative-test migration 0011 before relying on it.
-7. **Parser deployment parity (Medium):** local text/render runtime checks pass, but Vercel must be tested with representative PDF, scanned PDF, DOCX, TXT, PNG, and JPEG files.
-8. **Monitoring runtime (Medium):** `/api/health` is intentionally liveness-only and protected `/api/readiness` now exists locally; configure an independent candidate token, external uptime/error monitor, alert delivery, and failure drill before launch.
-9. **Agent runtime verification (Medium):** direct Hermes and NemoClaw/OpenShell remain external verification required; validate allowed/denied calls, secret isolation, and revocation against an approved candidate.
+6. **RLS release state (Medium):** migrations 0011–0016 and synthetic tenant negatives passed on the candidate; migrations 0017–0018 still require approved ordered application and read-back.
+7. **Parser deployment depth (Medium):** candidate text and scanned-PDF paths passed; refresh the broader PDF, scanned PDF, DOCX, TXT, PNG, and JPEG matrix before claiming unrestricted scale.
+8. **Monitoring runtime (Medium):** `/api/health` is intentionally liveness-only and protected `/api/readiness` passes on the recruiter deployment; continuous uptime/error monitoring, alert delivery, and a failure drill remain open.
+9. **Agent runtime verification (Medium):** direct-Hermes candidate evidence exists, but current-deployment acceptance remains a follow-up; NemoClaw/OpenShell still requires approved allowed/denied-call, secret-isolation, and revocation tests.
 10. **Static bearer maturity (Medium):** current first release is compatible with Hermes headers and OpenShell credential replacement; OAuth 2.1 remains Planned.
 
 ## Secret and supply-chain evidence
@@ -130,4 +130,4 @@ The review found and remediated one confirmed High dependency issue and several 
 - After compatible dependency refresh and Next.js 16.2.10: 0 Critical, 0 High, 1 Moderate, 0 Low.
 - Remaining advisory is transitive PostCSS through Next.js; the High-threshold release gate passes, but the advisory remains monitored.
 
-A repository-history secret scan and staged-diff review must be rerun immediately before push because the working tree contains substantial pre-existing uncommitted work.
+Secret scanning, dependency audit, and diff review are point-in-time evidence and must be rerun against any future publication candidate.

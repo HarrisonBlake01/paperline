@@ -69,7 +69,7 @@ No QR codes were generated (no verified QR tooling installed; prompt allows omit
 
 ## Caveats / recommended human review
 
-- **GitHub link**: `github.com/HarrisonBlake01/paperline` returns 404 to unauthenticated requests — the repo is likely private (or the slug differs). Before sharing the deck, either make the repo public/verify the slug or remove/replace the GitHub link on slide 10 and in the appendix footer.
+- **GitHub link (historical check):** the repository returned 404 to unauthenticated requests when this deck was built. It is now public at `https://github.com/HarrisonBlake01/paperline`; recheck the link whenever regenerating the deck.
 - LibreOffice PDF export renders Helvetica Neue slightly differently from PowerPoint; if pixel-perfect PDF output matters, re-export the PDF from PowerPoint (File → Save As → PDF) after a quick visual check.
 - Not committed/pushed/deployed anywhere, per instructions.
 

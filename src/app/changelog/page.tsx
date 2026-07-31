@@ -8,6 +8,15 @@ export const metadata: Metadata = {
 
 const entries = [
   {
+    date: "July 31, 2026",
+    title: "Recruiter-demo documentation review",
+    items: [
+      "Clarified Harrison Olvera's role and Paperline's sole-proprietor operating status.",
+      "Tightened AI, security, billing, monitoring, and demo claims to match repository and release evidence.",
+      "Kept the public recruiter demo distinct from the deferred commercial release.",
+    ],
+  },
+  {
     date: "June 22, 2026",
     title: "Legal and ownership cleanup",
     items: [

@@ -25,14 +25,14 @@ export const metadata: Metadata = {
     template: "%s · Paperline",
   },
   description:
-    "Paperline turns PDFs, contracts, invoices, and reports into structured data and instant answers. An Olvera Productions product.",
+    "Paperline turns documents into structured fields and cited answers for human review. Built by Harrison Olvera under the Olvera Productions brand.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://paperline-xi.vercel.app",
   ),
   openGraph: {
     title: "Paperline — Turn documents into answers.",
     description:
-      "AI-powered document intelligence for invoices, contracts, resumes, and reports.",
+      "AI document intelligence with structured extraction, cited retrieval, and reviewable outputs.",
     siteName: "Paperline",
     type: "website",
   },

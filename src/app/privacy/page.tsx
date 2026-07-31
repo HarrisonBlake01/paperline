@@ -27,6 +27,7 @@ const sections = [
     title: "AI and document processing",
     body: [
       "Paperline may send portions of documents, extracted text, prompts, templates, or user questions to AI and document-processing providers so the service can parse, extract, summarize, classify, embed, or answer with citations.",
+      "AI-generated fields, summaries, confidence indicators, and answers are probabilistic and may be incomplete or incorrect. Review them against the source document before relying on them.",
       "Do not upload documents unless you are comfortable processing them through the product and its configured providers. Avoid uploading highly sensitive regulated data unless a separate written agreement and required controls are in place.",
     ],
   },
@@ -85,9 +86,9 @@ export default function PrivacyPage() {
         <h1 className="mt-3 font-[var(--font-display)] text-4xl font-semibold tracking-tight sm:text-5xl">
           Privacy Policy
         </h1>
-        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 20, 2026</p>
+        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 31, 2026</p>
         <p className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm leading-7 text-pl-fg-dim">
-          This Privacy Policy explains how Paperline, an Olvera Productions product, handles account data, documents, and product usage information.
+          This Privacy Policy explains how Paperline handles account data, documents, and product usage information. Harrison Olvera operates Paperline as an unregistered sole proprietor under the Olvera Productions brand; the brand is not represented as a separate corporation or LLC. This project policy has not been presented as legal-review or compliance certification.
         </p>
 
         <div className="mt-10 space-y-8">

@@ -2,7 +2,7 @@
 
 ## One-line pitch
 
-Paperline is a full-stack AI document-intelligence SaaS that turns uploaded business documents into structured, cited, reviewable outputs while keeping consequential actions behind explicit human approval.
+Paperline is a full-stack AI document-intelligence SaaS that turns uploaded business documents into structured, cited, reviewable outputs. Its synthetic Ops Agent demo illustrates how consequential actions could remain behind explicit human approval; those actions are not an implemented automation path.
 
 ## The problem
 
@@ -91,7 +91,7 @@ pnpm lint
 pnpm build
 ```
 
-The original four-command portfolio gate passed on 2026-07-14. On 2026-07-27, the complete recruiter-mode local gate passed against Next.js 16.2.12 with `.env.local` isolated, live Stripe disabled, disposable PostgreSQL migration behavior exercised, production dependencies audited, and exact-candidate/history secret scans clean. Lighthouse accessibility findings on the landing, auth, and Ops Agent routes were remediated to 1.00 for the audited public routes. Candidate Clerk/provider configuration and the signed-in two-workspace SaaS matrix remain explicit deployed-environment gates.
+The original four-command portfolio gate passed on 2026-07-14. On 2026-07-27, the complete recruiter-mode local gate passed against Next.js 16.2.12 with `.env.local` isolated, live Stripe disabled, disposable PostgreSQL migration behavior exercised, production dependencies audited, and exact-candidate/history secret scans clean. Lighthouse accessibility findings on the landing, auth, and Ops Agent routes were remediated to 1.00 for the audited public routes. Hosted CI passed the reviewed release SHA; the recruiter deployment now uses production Clerk and Stripe test mode with protected readiness checks. A refreshed production-Clerk two-workspace/destructive-path run remains explicitly unclaimed.
 
 ## Portfolio artifacts
 
@@ -109,8 +109,8 @@ The original four-command portfolio gate passed on 2026-07-14. On 2026-07-27, th
 2. Add durable background execution with retries, idempotency, resume, and dead-letter handling.
 3. Persist approval policies and action state transitions.
 4. Wire end-to-end traces, cost/latency dashboards, and alerting.
-5. Bind the reviewed tree to a release commit, run hosted CI, and apply migrations 0017–0018 in order only to the approved isolated recruiter database after backup and legacy-state preflight.
-6. Prove two-workspace isolation, test-mode billing, direct Hermes credential isolation, allowed/denied calls, revocation, monitoring receipt, and rollback on the immutable recruiter candidate.
+5. Apply migrations 0017–0018 in order only to an approved isolated database after backup and legacy-state preflight.
+6. Refresh production-Clerk two-workspace and destructive-path evidence; then prove continuous monitoring receipt, backup/restore, and rollback procedures.
 
 ## Interview talking points
 

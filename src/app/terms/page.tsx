@@ -46,9 +46,8 @@ const sections = [
   {
     title: "6. Plans, billing, and cancellation",
     body: [
-      "Paid plans, usage limits, page allowances, and billing intervals are shown in the product and checkout flow. Subscription fees are billed in advance and renew automatically until canceled.",
-      "You may cancel through the billing portal. Cancellation takes effect at the end of the current paid billing period, and access remains available through that period. Fees are non-refundable except where required by law or expressly stated otherwise at checkout.",
-      "We may change plan features or pricing prospectively. We will provide reasonable notice before a pricing change applies to an existing paid subscription.",
+      "The recruiter demo uses Stripe test mode only: it does not accept live payment methods or create real charges. Displayed plans and prices demonstrate product configuration and are not evidence of active commercial subscriptions.",
+      "If a separate commercial service is launched later, its checkout flow and then-current terms will describe billing intervals, cancellation, refunds, and pricing changes before a live purchase is accepted.",
     ],
   },
   {
@@ -92,9 +91,9 @@ export default function TermsPage() {
         <h1 className="mt-3 font-[var(--font-display)] text-4xl font-semibold tracking-tight sm:text-5xl">
           Terms of Service
         </h1>
-        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 20, 2026</p>
+        <p className="mt-4 text-sm text-pl-fg-dim">Effective: July 31, 2026</p>
         <p className="mt-6 rounded-2xl border border-pl-border bg-pl-surface p-5 text-sm leading-7 text-pl-fg-dim">
-          These Terms of Service govern access to and use of Paperline, an Olvera Productions product.
+          These Terms of Service govern access to and use of the Paperline recruiter demo. Harrison Olvera operates Paperline as an unregistered sole proprietor under the Olvera Productions brand; the brand is not represented as a separate corporation or LLC. These project terms are not a claim of counsel review or formal compliance approval.
         </p>
 
         <div className="mt-10 space-y-8">

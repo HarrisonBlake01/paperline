@@ -2,13 +2,13 @@
 
 **Paperline turns documents into structured, verifiable answers.**
 
-It is an AI document intelligence SaaS built as an Olvera Productions product. Users upload PDFs, DOCX files, scans, reports, contracts, invoices, and other business documents; Paperline parses/OCRs them, extracts structured fields with reusable templates, and lets users chat with the source material using citations.
+It is an AI document-intelligence SaaS built by Harrison Olvera under the Paperline product brand, operated through his Olvera Productions sole proprietorship. Users upload PDFs, DOCX files, images/scans, and text; Paperline parses or OCRs them, extracts structured fields with reusable templates, and supports document chat with source citations.
 
 **Live recruiter demo:** [paperline-demo.olveraproductions.com](https://paperline-demo.olveraproductions.com) — synthetic/test data, production Clerk authentication, and Stripe test mode only.
 
 ## Why this project matters
 
-Paperline is designed around a practical AI-engineering problem: making LLM output useful in workflows where users need **receipts**, not just summaries. The app combines document parsing, OCR fallback, embeddings, retrieval, schema-guided extraction, billing, auth, and multi-tenant data boundaries into a production-style SaaS foundation.
+Paperline is designed around a practical AI-engineering problem: making LLM output useful in workflows where users need **receipts**, not just summaries. The app combines document parsing, OCR fallback, embeddings, retrieval, schema-guided extraction, test-mode billing, authentication, and multi-tenant data boundaries in a deployed recruiter-demo environment.
 
 For recruiters and technical reviewers, the core signal is end-to-end product engineering:
 
@@ -18,7 +18,7 @@ For recruiters and technical reviewers, the core signal is end-to-end product en
 - Supabase Postgres + pgvector storage for document chunks and semantic search
 - Stripe billing for Free / Pro / Team plans
 - Community template publishing, voting, copying, and starter seeded examples
-- Production-minded Next.js 16 App Router implementation with TypeScript and Tailwind v4
+- Next.js 16 App Router implementation with TypeScript, Tailwind v4, CI, and release runbooks
 
 **Harrison Olvera’s contribution:** product architecture, full-stack implementation, AI/document pipeline, tenant and lifecycle hardening, Stripe state reconciliation, security/QA evidence, CI, and release engineering. Paperline is the product; the Ops Agent route is a supporting synthetic demonstration.
 
@@ -32,7 +32,7 @@ The recruiter demo path is intentionally simple: sign in, upload an important do
 
 ### Security and privacy posture
 
-**Designed for sensitive documents.** Paperline treats uploaded files as private workspace data and avoids public-by-default access patterns. Server routes should enforce Clerk authentication, workspace ownership checks, and private Supabase access for documents, extractions, workflows, templates, and API keys.
+**Designed for sensitive documents.** Paperline treats uploaded files as private workspace data and avoids public-by-default access patterns. Protected routes resolve Clerk identity and workspace membership, while privileged server queries apply explicit workspace and role filters because the Supabase service role bypasses RLS.
 
 Paperline applies sensitive-document threat modeling, private-storage defaults, and tenant-aware access controls, but it does **not** claim formal HIPAA, SOC 2, or legal compliance certification. See [`SECURITY.md`](./SECURITY.md) for the current security posture and pre-deployment checklist.
 
@@ -48,7 +48,7 @@ Paperline applies sensitive-document threat modeling, private-storage defaults, 
 - Sync subscription state from Stripe webhooks
 - Auto-provision personal workspaces from Clerk users/webhooks
 
-The recruiter environment has production Clerk authentication, a signature-verified least-privilege Clerk webhook, protected dependency readiness, and verified Stripe sandbox checkout/cancellation reconciliation. Destructive document/workspace paths remain security-engineering evidence rather than a promise of unrestricted commercial production readiness.
+The recruiter environment has production Clerk authentication, a signature-verified Clerk webhook limited to user provisioning, protected dependency-readiness checks, and verified Stripe sandbox checkout/cancellation reconciliation. Destructive document/workspace paths remain security-engineering evidence rather than a promise of unrestricted commercial production readiness.
 
 ## Starter template scenarios
 
@@ -82,8 +82,8 @@ In every case, the goal is the same: transform messy documents into structured f
 | AI | OpenAI extraction, chat, embeddings, OCR-assisted flows |
 | Billing | Stripe |
 | Email | Resend |
-| Jobs | Inngest planned/installed for background workflow expansion |
-| Observability | Sentry + PostHog planned/installed |
+| Jobs | Synchronous tracked execution today; Inngest is installed but not wired |
+| Observability | Privacy-scrubbed Sentry hooks (enabled only when configured); PostHog dashboards are planned |
 | Hosting | Vercel |
 
 Status vocabulary used throughout the evidence package:
@@ -122,7 +122,7 @@ supabase/migrations/        Database schema, RLS, RPCs, seed data
 
 ## Pricing model
 
-Pricing source of truth lives in [`src/lib/plans.ts`](./src/lib/plans.ts).
+Pricing source of truth lives in [`src/lib/plans.ts`](./src/lib/plans.ts). Paid checkout in the recruiter environment is Stripe test mode only; these tiers are product configuration, not evidence of customers or revenue.
 
 | Plan | Price | Monthly pages | Seats | Notes |
 | ---- | ----- | ------------- | ----- | ----- |
@@ -134,7 +134,7 @@ Pricing source of truth lives in [`src/lib/plans.ts`](./src/lib/plans.ts).
 ## Local development
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 cp .env.example .env.local
 pnpm dev
 ```
@@ -195,4 +195,4 @@ See [`docs/vercel-deployment.md`](./docs/vercel-deployment.md) and the [active r
 
 ## License
 
-Proprietary. © Olvera Productions.
+Proprietary. © Harrison Olvera. Paperline and Olvera Productions are product/business names he operates as an unregistered sole proprietor; they are not represented here as a separate corporation or LLC.

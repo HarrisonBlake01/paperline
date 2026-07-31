@@ -28,7 +28,7 @@ export default function StatusPage() {
           Status
         </h1>
         <p className="mt-4 text-sm text-pl-fg-dim">
-          Paperline is monitored through independent liveness and dependency-readiness checks. Verified incident updates will be posted here when needed.
+          Paperline exposes separate liveness and protected dependency-readiness checks, but this page is not connected to continuous monitoring or an incident-management service.
         </p>
 
         <section className="mt-8 rounded-3xl border border-pl-border bg-pl-surface p-6">
@@ -39,7 +39,7 @@ export default function StatusPage() {
             </h2>
           </div>
           <p className="mt-4 text-sm leading-7 text-pl-fg-dim">
-            Paperline is still an early product. This page does not claim that authentication, document processing, AI providers, storage, or billing are operational.
+            The recruiter demo is an early product. A successful page load proves only this public route responded; it does not verify authentication, document processing, AI providers, storage, or Stripe test-mode billing.
           </p>
         </section>
 

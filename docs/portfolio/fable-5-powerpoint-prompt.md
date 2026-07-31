@@ -8,10 +8,10 @@ You are Fable 5 acting as a senior technical storyteller, product-design lead, a
 This is an artifact-production task, not a writing exercise. Inspect the repository and supplied assets, create a real `.pptx`, render it for visual QA, revise visible problems, and deliver the verified PowerPoint plus a PDF preview and slide/contact-sheet preview.
 
 PROJECT ROOT
-/Users/openclaw-server/.openclaw/workspace/paperline/app
+Repository root
 
 CANONICAL PORTFOLIO FOLDER
-/Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio
+docs/portfolio
 
 PRIMARY AUDIENCE
 A technical recruiter or hiring manager evaluating Harrison for Applied AI Engineer, Agentic AI Engineer, LLM Engineer, AI Automation Engineer, or full-stack AI roles.
@@ -30,51 +30,51 @@ Make a recruiter understand within 60 seconds that Harrison can:
 NON-NEGOTIABLE CLAIMS RULE
 Read this file first and treat it as the claims source of truth:
 
-/Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/presentation-claims-audit.md
+docs/portfolio/presentation-claims-audit.md
 
 Do not include a claim unless it is supported by that audit, visible on the current site, or directly verified in repository source. If a claim is uncertain, omit it or label it as planned/demonstrated/synthetic.
 
 REQUIRED SOURCE FILES TO INSPECT
 
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/README.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/SECURITY.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/README.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/case-study.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/architecture.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/interview-talking-points.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshot-checklist.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/walkthrough-production-notes.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/evals/document-extraction/README.md
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/src/app/(app)/ops-agent/page.tsx
-- /Users/openclaw-server/.openclaw/workspace/paperline/app/src/lib/ops-agent-demo.ts
+- README.md
+- SECURITY.md
+- docs/portfolio/README.md
+- docs/portfolio/case-study.md
+- docs/portfolio/architecture.md
+- docs/portfolio/interview-talking-points.md
+- docs/portfolio/screenshot-checklist.md
+- docs/portfolio/walkthrough-production-notes.md
+- evals/document-extraction/README.md
+- src/app/(app)/ops-agent/page.tsx
+- src/lib/ops-agent-demo.ts
 
 LIVE PAGE TO INSPECT
-https://paperline-xi.vercel.app/ops-agent
+https://paperline-demo.olveraproductions.com/ops-agent
 
 If browser access is available, inspect the live page and confirm its current labels before designing. Do not modify or deploy the site.
 
 EXISTING MEDIA TO REUSE
 
 - Main walkthrough video:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/paperline-ops-agent-walkthrough.mp4
+  docs/portfolio/paperline-ops-agent-walkthrough.mp4
 
 - Hero screenshot:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshots/01-ops-agent-hero.png
+  docs/portfolio/screenshots/01-ops-agent-hero.png
 
 - Cited extraction and approvals:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshots/02-cited-extraction-approvals.png
+  docs/portfolio/screenshots/02-cited-extraction-approvals.png
 
 - Billing, trace, and secure-runtime direction:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshots/03-billing-trace-security.png
+  docs/portfolio/screenshots/03-billing-trace-security.png
 
 - Full-page capture:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshots/ops-agent-fullpage.png
+  docs/portfolio/screenshots/ops-agent-fullpage.png
 
 - QA contact sheet:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/screenshots/walkthrough-contact-sheet.jpg
+  docs/portfolio/screenshots/walkthrough-contact-sheet.jpg
 
 - Mermaid source architecture:
-  /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/architecture.md
+  docs/portfolio/architecture.md
 
 Keep the narrated walkthrough as a companion artifact, but do not place its long Google Drive URL on the final slide. The PowerPoint should stand alone.
 
@@ -82,11 +82,11 @@ OUTPUT FILES
 
 Create:
 
-1. /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/Paperline_Recruiter_Case_Study.pptx
-2. /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/Paperline_Recruiter_Case_Study.pdf
-3. /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/presentation-preview/contact-sheet.png
-4. /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/presentation-preview/slide-01.png through the final slide preview
-5. /Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/presentation-build-notes.md
+1. docs/portfolio/Paperline_Recruiter_Case_Study.pptx
+2. docs/portfolio/Paperline_Recruiter_Case_Study.pdf
+3. docs/portfolio/presentation-preview/contact-sheet.png
+4. docs/portfolio/presentation-preview/slide-01.png through the final slide preview
+5. docs/portfolio/presentation-build-notes.md
 
 Do not commit, push, deploy, publish, upload, apply to jobs, or contact anyone.
 
@@ -372,7 +372,7 @@ Harrison Olvera · Applied AI / Agentic AI / LLM Engineering
 
 Include clean links:
 
-- Live Ops Agent: https://paperline-xi.vercel.app/ops-agent
+- Live Ops Agent: https://paperline-demo.olveraproductions.com/ops-agent
 - GitHub: https://github.com/HarrisonBlake01/paperline
 
 If generating QR codes, generate and scan/verify them before use. One QR maximum, preferably for the live Ops Agent page; keep the URLs as editable text.
@@ -462,7 +462,7 @@ Use the configured Fable 5 model in a fresh Hermes session, then provide:
 
 ```text
 Read and execute the full artifact-production prompt at:
-/Users/openclaw-server/.openclaw/workspace/paperline/app/docs/portfolio/fable-5-powerpoint-prompt.md
+docs/portfolio/fable-5-powerpoint-prompt.md
 
 Create and verify the actual PowerPoint, PDF, slide previews, and build notes. Do not deploy, publish, apply, contact anyone, or introduce claims not supported by the claims audit.
 ```

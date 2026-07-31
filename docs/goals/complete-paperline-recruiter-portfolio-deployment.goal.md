@@ -1,10 +1,11 @@
-/goal Complete and publish Paperline’s recruiter-facing portfolio deployment at `https://paperline-xi.vercel.app`, prepare GitHub for intentional recruiter review, and keep the separate commercial `paperline.io` launch frozen until Harrison explicitly resumes it.
+/goal Maintain Paperline’s recruiter-facing portfolio deployment at `https://paperline-demo.olveraproductions.com`, prepare GitHub for intentional recruiter review, and keep the separate commercial `paperline.io` launch frozen until Harrison explicitly resumes it.
 
 ## Repository and deployment identities
 
-- Repository: `/Users/openclaw-server/.openclaw/workspace/paperline/app`
+- Repository: this checkout's root
 - GitHub: `https://github.com/HarrisonBlake01/paperline`
-- Recruiter site: `https://paperline-xi.vercel.app`
+- Recruiter site: `https://paperline-demo.olveraproductions.com`
+- Canonical Vercel/Stripe route: `https://paperline-xi.vercel.app`
 - Recruiter Vercel project: `harrisonolvera23-7297s-projects/paperline` (`prj_OfKl0NNnacxQ5pTX3X0QNhNkbrMc`)
 - Future commercial site: `https://paperline.io`
 
@@ -90,14 +91,14 @@ The dated checklists contain evidence, not permission. Re-verify material facts 
 
 ## Phase 3 — configure the current Vercel project as recruiter/demo
 
-1. Keep `paperline-xi.vercel.app` as the stable recruiter URL.
+1. Keep `paperline-demo.olveraproductions.com` as the public recruiter URL and `paperline-xi.vercel.app` as the canonical Vercel/Stripe route.
 2. Change Vercel Node.js from `24.x` to repository-pinned `22.x` after explicit approval; read the setting back.
 3. Use deterministic install/build commands and a reviewed Git commit as deployment provenance.
 4. Reconcile the recruiter project’s stable environment by variable name and scope without printing values.
 5. Set:
    - `PAPERLINE_RECRUITER_DEMO=true`
    - `PAPERLINE_ALLOW_LIVE_STRIPE=false`
-   - `NEXT_PUBLIC_APP_URL=https://paperline-xi.vercel.app`
+   - `NEXT_PUBLIC_APP_URL=https://paperline-demo.olveraproductions.com`
    - exact recruiter host allowlists and redirect/webhook URLs
 6. Use recruiter-specific or safely isolated provider resources:
    - candidate Clerk application

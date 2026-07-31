@@ -5,7 +5,7 @@ Purpose: 1–3 minute submission video for the Hermes Agent Accelerated Business
 Demo URL/path:
 
 - Local route: `/ops-agent`
-- Public Paperline URL to reference: <https://paperline-xi.vercel.app/>
+- Public Paperline URL to reference: <https://paperline-demo.olveraproductions.com/>
 
 ## Target length
 

@@ -25,7 +25,9 @@ export default function ContactPage() {
         Talk with the person building Paperline.
       </h1>
       <p className="mt-5 max-w-2xl text-lg leading-8 text-pl-fg-dim">
-        Paperline is currently in pre-launch review. Use the contact below for
+        Paperline is a recruiter-demo product built and operated by Harrison Olvera
+        as an unregistered sole proprietor under the Olvera Productions brand. Use
+        the contact below for
         product questions, recruiter or engineering review, and responsible
         security reports. Do not include private documents, credentials, or
         sensitive customer information in email.

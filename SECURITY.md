@@ -1,6 +1,6 @@
 # Security Policy
 
-Paperline is designed for sensitive document workflows. This repository is currently prepared for mentor/demo review and does **not** claim formal HIPAA, SOC 2, or legal compliance certification yet.
+Paperline is designed for sensitive document workflows and is deployed as a controlled recruiter demo. It does **not** claim formal HIPAA, SOC 2, or legal compliance certification.
 
 ## Current Security Posture
 
@@ -73,9 +73,9 @@ For a suspected credential or cross-workspace incident:
 
 Formal on-call targets, notification timelines, and compliance-specific incident procedures remain pre-launch work.
 
-## Pre-Deployment Security Checklist
+## Future Commercial-Release Security Checklist
 
-Before live deployment:
+Before any future unrestricted commercial release (separate from the recruiter demo):
 
 - [ ] Run lint/build/tests.
 - [ ] Run a tracked-file secret scan.

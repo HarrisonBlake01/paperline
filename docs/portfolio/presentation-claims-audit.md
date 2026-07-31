@@ -6,10 +6,10 @@ This file is the source-of-truth claims ledger for a recruiter-facing Paperline 
 
 ## Live artifact verification
 
-- Live Ops Agent route: <https://paperline-xi.vercel.app/ops-agent>
-- HTTP verification: returned `200` on 2026-07-14.
-- Browser verification: page rendered with no missing main sections.
-- Page title: `Ops Agent · Paperline · Paperline`.
+- Live Ops Agent route: <https://paperline-demo.olveraproductions.com/ops-agent>
+- Public HTTP verification (2026-07-31): the recruiter root returned `200`; a signed-out Ops Agent request returned `307` to `/sign-in`, whose final response was `200`.
+- Historical authenticated browser verification: the Ops Agent page rendered with no missing main sections.
+- Page title at that review: `Ops Agent · Paperline · Paperline`.
 
 Visible on the live page:
 

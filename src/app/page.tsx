@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     question: "Do answers include sources?",
-    answer: "Every chat answer is designed to point back to the exact document passage, so users can verify before acting.",
+    answer: "When Paperline has supporting document evidence, chat answers include page and passage citations so users can review the source before acting. AI output can still be incomplete or wrong.",
   },
   {
     question: "Can I define my own fields?",
@@ -103,7 +103,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-pl-fg-dim">
               Paperline reads your PDFs, contracts, invoices, and reports — then gives you
-              structured data, summaries, and page-level citations you can trust.
+              structured data, summaries, and page-level citations you can review against the source.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -122,7 +122,7 @@ export default function HomePage() {
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-pl-fg-dim">
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" /> No credit card required</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" /> Works with PDFs, DOCX, scans, and text</span>
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" /> Citations included</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" /> Source citations for grounded chat</span>
             </div>
           </div>
 
@@ -178,7 +178,7 @@ export default function HomePage() {
           <Stat value="4" label="common file types" />
           <Stat value="Page" label="level source citations" />
           <Stat value="Custom" label="extraction templates" />
-          <Stat value="Team" label="workspaces ready" />
+          <Stat value="Scoped" label="workspace data model" />
         </div>
       </section>
 
@@ -191,9 +191,9 @@ export default function HomePage() {
           </h2>
         </div>
         <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-pl-border bg-pl-border md:grid-cols-3">
-          <Feature icon={<FileText className="h-5 w-5" strokeWidth={1.5} />} title="Upload anything" body="PDFs, DOCX, scans, invoices. We handle parsing and OCR." />
+          <Feature icon={<FileText className="h-5 w-5" strokeWidth={1.5} />} title="Upload supported files" body="PDF, DOCX, image/scan, and text inputs with parsing and OCR fallback." />
           <Feature icon={<Layers className="h-5 w-5" strokeWidth={1.5} />} title="Extract structured data" body="Built-in patterns for invoices, contracts, resumes, and reports." />
-          <Feature icon={<MessageSquare className="h-5 w-5" strokeWidth={1.5} />} title="Chat with citations" body="Every answer cites the exact page and passage." />
+          <Feature icon={<MessageSquare className="h-5 w-5" strokeWidth={1.5} />} title="Chat with citations" body="Grounded answers return the supporting page and passage citations selected by the model." />
           <Feature icon={<Zap className="h-5 w-5" strokeWidth={1.5} />} title="Custom templates" body="Define your own fields and run them across batches of docs." />
           <Feature icon={<Users className="h-5 w-5" strokeWidth={1.5} />} title="Team workspaces" body="Keep documents, templates, and results organized by workspace." />
           <Feature icon={<Sparkles className="h-5 w-5" strokeWidth={1.5} />} title="API-ready foundation" body="Built for future Drive, Dropbox, email, webhook, and REST workflows." />
@@ -215,7 +215,7 @@ export default function HomePage() {
           <div className="grid gap-4">
             <Step icon={<Upload className="h-5 w-5" strokeWidth={1.5} />} title="1. Upload documents" body="Drop in PDFs, DOCX files, images, or text. Paperline parses the file and runs OCR when needed." />
             <Step icon={<ClipboardCheck className="h-5 w-5" strokeWidth={1.5} />} title="2. Extract the fields that matter" body="Choose a document type or custom template, then review values with confidence scores and citations." />
-            <Step icon={<Search className="h-5 w-5" strokeWidth={1.5} />} title="3. Ask questions across your files" body="Chat with one document or a workspace and get sourced answers instead of unsupported guesses." />
+            <Step icon={<Search className="h-5 w-5" strokeWidth={1.5} />} title="3. Ask questions across your files" body="Chat with one document or a workspace, review cited evidence, and treat unsupported or uncertain output as a prompt to check the source." />
           </div>
         </div>
       </section>
@@ -366,7 +366,7 @@ export default function HomePage() {
 
       <footer className="mt-auto border-t border-pl-border">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-pl-fg-dim md:flex-row md:items-center">
-          <div>© {new Date().getFullYear()} Paperline · An Olvera Productions product.</div>
+          <div>© {new Date().getFullYear()} Harrison Olvera · Paperline is operated under the Olvera Productions brand.</div>
           <div className="flex flex-wrap gap-5">
             <a href="https://olveraproductions.com/support">Support</a>
             <Link href="/privacy">Privacy</Link>

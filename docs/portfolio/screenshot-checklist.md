@@ -1,6 +1,6 @@
 # Paperline Portfolio Screenshot Checklist
 
-## Current approved internal captures
+## Current tracked recruiter captures
 
 All current captures use synthetic Ops Agent fixtures and contain no customer documents or secrets.
 

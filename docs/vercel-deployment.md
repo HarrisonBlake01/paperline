@@ -12,7 +12,8 @@ Use these settings when importing `HarrisonBlake01/paperline` into Vercel:
 - **Build command:** `pnpm build`
 - **Output directory:** `.next` (Vercel auto-detects this)
 - **Node version:** 22.x (pinned in `package.json`)
-- **Stable recruiter URL:** `paperline-xi.vercel.app`
+- **Public recruiter URL:** `paperline-demo.olveraproductions.com`
+- **Canonical Vercel/Stripe route:** `paperline-xi.vercel.app`
 
 `vercel.json` pins the framework/build/install settings so the dashboard and CLI stay consistent.
 
@@ -23,7 +24,7 @@ The current project is the recruiter/demo project even though Vercel names its s
 The app intentionally fails fast in production if these are missing:
 
 ```text
-NEXT_PUBLIC_APP_URL=https://paperline-xi.vercel.app
+NEXT_PUBLIC_APP_URL=https://paperline-demo.olveraproductions.com
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
@@ -32,7 +33,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 OPENAI_API_KEY=
 PAPERLINE_RECRUITER_DEMO=true
 PAPERLINE_ALLOW_LIVE_STRIPE=false
-PAPERLINE_MCP_ALLOWED_HOSTS=paperline-xi.vercel.app
+PAPERLINE_MCP_ALLOWED_HOSTS=paperline-demo.olveraproductions.com
 PAPERLINE_READINESS_TOKEN=
 ```
 
@@ -83,10 +84,10 @@ DEMO_WORKSPACE_ID=
 
 ## CLI deployment procedure
 
-The local repository is linked to Vercel project `paperline`. Before deployment, inspect the project and reconcile the dashboard Node version with the repository-pinned Node 22.x; the 2026-07-27 inspection reported Node 24.x.
+The local repository is linked to Vercel project `paperline`. Before deployment, inspect the project and confirm the dashboard still uses the repository-pinned Node 22.x; that setting was read back on 2026-07-29.
 
 ```bash
-cd /Users/openclaw-server/.openclaw/workspace/paperline/app
+# Run from the repository root.
 vercel project inspect paperline
 vercel env ls production
 # Only after commit-bound CI, provider, migration, and deployment approval.
@@ -115,7 +116,7 @@ pnpm build
 After deploy:
 
 ```bash
-curl https://paperline-xi.vercel.app/api/health
+curl https://paperline-demo.olveraproductions.com/api/health
 ```
 
 Then execute the recruiter runtime matrix in `docs/release/checklists/2026-07-27-pre-deployment-test-matrix.md` using synthetic users, documents, and Stripe test data only.

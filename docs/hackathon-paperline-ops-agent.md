@@ -1,8 +1,8 @@
 # Paperline Ops Agent — Hermes Accelerated Business Hackathon Plan
 
 Created: 2026-06-16  
-Project path: `/Users/openclaw-server/.openclaw/workspace/paperline/app`  
-Live demo URL to use for public references: <https://paperline-xi.vercel.app/>  
+Project path: repository root
+Live recruiter demo: <https://paperline-demo.olveraproductions.com/> (the canonical Vercel/Stripe route remains <https://paperline-xi.vercel.app/>).
 Hackathon: Hermes Agent Accelerated Business Hackathon by Nous Research, NVIDIA, and Stripe  
 Deadline: EOD Tuesday, June 30, 2026
 
@@ -98,7 +98,7 @@ From uploaded documents to paid, cited business actions.
 
 - “Read documents with receipts.”
 - “Turn PDFs into approval-ready workflows.”
-- “Every answer links back to the source page.”
+- “Grounded answers include source-page citations for review.”
 - “Agent actions stay behind human approval before spend or external changes.”
 - “Built for sensitive document operations, with a secure NemoClaw/OpenShell deployment path.”
 

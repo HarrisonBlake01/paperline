@@ -72,7 +72,7 @@ It kept the first end-to-end product path small and inspectable. The route persi
 
 ### Where is tenant isolation enforced?
 
-Clerk establishes identity; server routes resolve workspace membership and role; database migrations add workspace-scoped RLS policies. Privileged service-role access remains server-only, but because it bypasses RLS, every privileged query still needs explicit workspace filters and ownership checks. I added a hardening migration that validates both sides of tenant relationships, but I still require two-workspace negative integration tests before public launch.
+Clerk establishes identity; server routes resolve workspace membership and role; database migrations add workspace-scoped RLS policies. Privileged service-role access remains server-only, but because it bypasses RLS, every privileged query still needs explicit workspace filters and ownership checks. I added a hardening migration that validates both sides of tenant relationships and verified a synthetic two-workspace candidate matrix. A refreshed production-Clerk matrix remains follow-up evidence rather than a claim of unrestricted commercial readiness.
 
 ### How would you productionize approvals?
 

@@ -1,7 +1,15 @@
 {
   "name": "paperline",
   "version": "0.1.0",
+  "description": "Recruiter-demo AI document intelligence SaaS with cited retrieval, structured extraction, workspace boundaries, and test-mode billing.",
   "private": true,
+  "author": "Harrison Olvera",
+  "license": "UNLICENSED",
+  "homepage": "https://paperline-demo.olveraproductions.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HarrisonBlake01/paperline.git"
+  },
   "packageManager": "pnpm@10.33.4",
   "engines": {
     "node": "22.x"

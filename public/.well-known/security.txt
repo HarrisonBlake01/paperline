@@ -1,5 +1,5 @@
 Contact: mailto:harrison@olveraproductions.com
 Preferred-Languages: en
-Canonical: https://paperline-xi.vercel.app/.well-known/security.txt
+Canonical: https://paperline-demo.olveraproductions.com/.well-known/security.txt
 Policy: https://github.com/HarrisonBlake01/paperline/security/policy
 Expires: 2027-06-06T00:00:00Z

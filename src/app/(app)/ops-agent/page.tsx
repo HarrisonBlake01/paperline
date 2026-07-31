@@ -24,7 +24,7 @@ import {
 export const metadata = {
   title: "Ops Agent · Paperline",
   description:
-    "Paperline Ops Agent demo for cited document extraction, approvals, Stripe test-mode billing, and secure Hermes operations.",
+    "Synthetic Paperline Ops Agent demo for cited document extraction, approval boundaries, and Stripe test-mode billing.",
 };
 
 const workflowSteps = [
@@ -50,7 +50,7 @@ export default function OpsAgentPage() {
               Hermes Accelerated Business Hackathon demo
             </p>
             <h1 className="mt-5 max-w-3xl text-balance font-[var(--font-display)] text-4xl font-semibold tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-              Paperline Ops Agent turns documents into verified operations.
+              Paperline Ops Agent turns cited document facts into reviewable next steps.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-pl-fg-dim sm:text-lg">
               Upload invoices and contracts, extract cited facts, generate approval-ready follow-up, and keep Stripe-backed spend or provisioning behind a human approval boundary.
@@ -105,7 +105,7 @@ export default function OpsAgentPage() {
               <div className="mt-5 rounded-2xl border border-pl-border bg-pl-bg/50 p-3">
                 <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-pl-fg-dim">
                   <Zap className="h-3.5 w-3.5 text-[var(--pl-accent-2)]" strokeWidth={1.7} />
-                  Live workflow trace
+                  Synthetic workflow trace
                 </div>
                 <div className="grid gap-2 sm:grid-cols-4">
                   {workflowSteps.map((step, index) => (
