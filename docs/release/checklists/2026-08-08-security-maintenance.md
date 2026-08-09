@@ -80,8 +80,20 @@ Final local markers: `OCR_RENDER_ISOLATE_TARGETED_PASS`, `PAPERLINE_FINAL_FULL_L
 - [x] Rejected and deleted a temporary readiness-token QA harness after independent review found one Medium denial-of-service risk from exposing repeated 40 MiB fixture generation behind the shared readiness credential. All four failed QA deployments, one successful control deployment, the remote QA branch, temporary environment pulls, and local QA archives were removed. Final project state: `previewDeploymentsDisabled: false`; `protectionBypassCount: 0`.
 - [x] The temporary harness exposed a production-build path where PDF.js enforced the image decode budget but swallowed `pdf_decoded_stream_limit_exceeded` and returned a blank render. The fix-only change rethrows the explicit budget error from modern and legacy PDF.js image decoders and preserves it across render-worker errors; no QA route is included. The regression uses a compact 33 MiB decoded image against the 32 MiB ceiling and requires the exact decoder error. Five consecutive runs passed after setting the secondary render-isolate old-generation cap to 256 MiB, ensuring the primary decode ceiling fires before the independent V8 containment boundary.
 - [x] Complete fix-only local matrix passed: frozen install; templates; demo; security; lifecycle; disposable lifecycle DB plus legacy preflight; readiness; exact parser runtime; MCP; TypeScript; ESLint; production audit; clean Next.js build; whitespace; exact 282-file Gitleaks tree scan; and Git-history scan. The rejected QA route is absent from source.
-- [x] Removed the superseded candidate, temporary fix/isolation worktrees, deployment archives, exact scan tree, response artifacts, and both automatically assigned candidate aliases. Final read-back: `previewDeploymentsDisabled: false`; `protectionBypassCount: 0`; SSO protection enabled; temporary generated aliases return `404`; stable recruiter aliases still target `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx` and return `200`.
-- [ ] Obtain separate alias-promotion approval, then rerun public/auth/readiness/parser smoke checks.
-- [ ] Confirm the GitHub High alerts close after the fixed dependency graph reaches the default branch.
+- [x] Removed the superseded candidate, temporary fix/isolation worktrees, deployment archives, exact scan tree, response artifacts, and both automatically assigned candidate aliases. Final pre-promotion read-back: `previewDeploymentsDisabled: false`; `protectionBypassCount: 0`; SSO protection enabled.
+- [x] Opened and merged PR `#8` into `main`; merge commit `c902a5ed30d9da7be6ab806851618b3565e73077` contains runtime commit `954e3936e8ace4cb373d6871798b275a8f817741`. Hosted Release gates run `31294081421` passed on that exact merge SHA.
+- [x] Deployed exact merge commit with production alias assignment. Promoted deployment `dpl_D7TgeCgQsauEvyvR6BBNabT1gDBc` (`paperline-l2us2zpk4-harrisonolvera23-7297s-projects.vercel.app`) is now the production target.
+- [x] Stable recruiter aliases moved to the remediated deployment and remain HTTP `200`:
+  - `paperline-xi.vercel.app` → `dpl_D7TgeCgQsauEvyvR6BBNabT1gDBc`
+  - `paperline-demo.olveraproductions.com` → `dpl_D7TgeCgQsauEvyvR6BBNabT1gDBc`
+- [x] Production smoke checks passed after promotion:
+  - public `/api/health` on both stable aliases returned `200` with `ok: true`
+  - unauthorized public `/api/readiness` returned `401` / `unauthorized`
+  - authorized public `/api/readiness` returned `200`, `ready: true`, including healthy `pdf_runtime`
+  - temporary automation bypass was revoked immediately after immutable-deployment identity confirmation (`protectionBypassCount: 0`)
+  - SSO protection remains enabled for non-custom deployment URLs
+- [x] Previous production deployment `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx` remains `READY` as the explicit rollback target.
+- [ ] Full signed-in remote upload/OCR/hostile-fixture acceptance remains blocked on application-level Clerk authentication. The deployed Clerk keyset differs from the available local keyset (`jwk-kid-mismatch`), and Vercel does not return encrypted secret values through Production `env pull`.
+- [ ] Confirm Dependabot/GitHub High alerts close after the fixed dependency graph fully settles on the default branch.
 
-The currently promoted recruiter deployment remains `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx` and still contains `pdfjs-dist@5.7.284`. Neither stable recruiter alias has moved, no production promotion is approved, and the public deployment is not yet remediated.
+The currently promoted recruiter deployment is `dpl_D7TgeCgQsauEvyvR6BBNabT1gDBc` from merge commit `c902a5ed30d9da7be6ab806851618b3565e73077`. Public production is remediated for the PDF runtime hardening release. Rollback target remains `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx`.
