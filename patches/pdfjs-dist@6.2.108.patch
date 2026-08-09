@@ -1,5 +1,19 @@
+diff --git a/build/pdf.worker.mjs b/build/pdf.worker.mjs
+index 66ae0d0b2282d6763eaa00b53983964e07b295dd..64ccff8dd6a1b50077fee579061e335eb5983d54 100644
+--- a/build/pdf.worker.mjs
++++ b/build/pdf.worker.mjs
+@@ -34562,6 +34562,9 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (reason instanceof Error && reason.message.includes("pdf_decoded_stream_limit_exceeded")) {
++        throw reason;
++      }
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);
 diff --git a/legacy/build/pdf.worker.mjs b/legacy/build/pdf.worker.mjs
-index ff381bb9b154685f8ed641b6c1adabb4c732e1f3..6aaace0f8753feafcb3b0f86dd39a793271b3c32 100644
+index ff381bb9b154685f8ed641b6c1adabb4c732e1f3..9d5c6cab3c41c95709ce7a9688a7228a4cdd4e17 100644
 --- a/legacy/build/pdf.worker.mjs
 +++ b/legacy/build/pdf.worker.mjs
 @@ -9373,4 +9373,26 @@ class ImageResizer {
@@ -66,3 +80,13 @@ index ff381bb9b154685f8ed641b6c1adabb4c732e1f3..6aaace0f8753feafcb3b0f86dd39a793
        return {
          decompressed: null,
          compressed: bytes
+@@ -40451,6 +40484,9 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (reason instanceof Error && reason.message.includes("pdf_decoded_stream_limit_exceeded")) {
++        throw reason;
++      }
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);

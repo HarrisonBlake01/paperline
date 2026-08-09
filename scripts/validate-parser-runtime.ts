@@ -181,12 +181,14 @@ async function main() {
   assert.ok(Date.now() - operatorStartedAt < 10_000, "Operator-budget rejection was too slow");
 
   // Compact image XObject for OCR/render isolate decode budget.
-  const imageBomb = buildCompressedGrayImagePdf(40 * 1024 * 1024);
+  const imageBomb = buildCompressedGrayImagePdf(
+    PDF_DECODE_ALLOCATION_BUDGET_BYTES + 1024 * 1024,
+  );
   assert.ok(imageBomb.length < 200_000, "Image fixture is not compact");
   const imageStartedAt = Date.now();
   await assert.rejects(
     renderPdfPages(imageBomb, 1),
-    /pdf_decoded_stream_limit_exceeded|pdf_render_resource_limit_exceeded/,
+    /pdf_decoded_stream_limit_exceeded/,
   );
   assert.ok(Date.now() - imageStartedAt < 10_000, "Image-budget rejection was too slow");
 

@@ -16,7 +16,7 @@ overrides:
 
 patchedDependencies:
   pdfjs-dist@6.2.108:
-    hash: 41fb945bbce66d5405aa2d86b6fc7be1bde7a134820697b53e285acf7808a99c
+    hash: 009901e69ec3e5cb47f993cc718bbc897eee6c480521419597fa2c026305ad04
     path: patches/pdfjs-dist@6.2.108.patch
 
 importers:

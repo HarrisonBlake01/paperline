@@ -28,7 +28,7 @@ interface RenderWorkerFailure {
 type RenderWorkerMessage = RenderWorkerSuccess | RenderWorkerFailure;
 
 const PDF_RENDER_DEADLINE_MS = 15_000;
-const PDF_RENDER_OLD_HEAP_MB = 192;
+const PDF_RENDER_OLD_HEAP_MB = 256;
 const PDF_RENDER_YOUNG_HEAP_MB = 32;
 const PDF_RENDER_DECODE_BUDGET_BYTES = 32 * 1024 * 1024;
 
@@ -43,6 +43,12 @@ function resolvePdfRenderWorkerPath(): string {
 }
 
 function renderWorkerFailureCode(error: unknown): string {
+  if (
+    error instanceof Error &&
+    error.message.includes("pdf_decoded_stream_limit_exceeded")
+  ) {
+    return "pdf_decoded_stream_limit_exceeded";
+  }
   if (
     error instanceof Error &&
     "code" in error &&

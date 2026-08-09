@@ -342,6 +342,11 @@ function testSecurityInvariants() {
   assert.match(pdfjsPatch, /paperlineChargeDecodedAllocation/);
   assert.match(pdfjsPatch, /for await \(const chunk of readable\)/);
   assert.match(pdfjsPatch, /Preserve explicit Paperline decode budgets/);
+  assert.match(pdfjsPatch, /Unable to decode image/);
+  assert.match(
+    pdfjsPatch,
+    /reason\.message\.includes\("pdf_decoded_stream_limit_exceeded"\)/,
+  );
   const packageJson = read("package.json");
   assert.match(packageJson, /"pdfjs-dist@6\.2\.108":\s*"patches\/pdfjs-dist@6\.2\.108\.patch"/);
   assert.doesNotMatch(pdfOcr, /SWIFT_RENDER_SCRIPT|execFileAsync|pdf-parse/);
@@ -349,8 +354,13 @@ function testSecurityInvariants() {
   assert.match(pdfOcr, /Reflect\.construct\(Worker/);
   assert.match(pdfOcr, /PDF_RENDER_DECODE_BUDGET_BYTES\s*=\s*32\s*\*\s*1024\s*\*\s*1024/);
   assert.match(pdfOcr, /PDF_RENDER_DEADLINE_MS\s*=\s*15_000/);
+  assert.match(pdfOcr, /PDF_RENDER_OLD_HEAP_MB\s*=\s*256/);
   assert.match(pdfOcr, /resourceLimits/);
   assert.match(pdfOcr, /pdf-render-worker\.mjs/);
+  assert.match(
+    pdfOcr,
+    /error\.message\.includes\("pdf_decoded_stream_limit_exceeded"\)/,
+  );
   assert.match(pdfRenderWorker, /__paperlinePdfDecodeAllocationLimitBytes/);
   assert.match(pdfRenderWorker, /require\.resolve\("pdfjs-dist\/package\.json"\)/);
   assert.match(pdfRenderWorker, /MAX_RENDER_PIXELS\s*=\s*16_000_000/);
