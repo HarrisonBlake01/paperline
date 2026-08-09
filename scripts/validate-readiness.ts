@@ -38,6 +38,8 @@ const required = [
   "supabase/migrations/0017_lifecycle_checkout_recovery.sql",
   "supabase/migrations/0018_storage_cleanup_jobs.sql",
   "src/lib/storage/cleanup.ts",
+  "src/lib/parsing/pdf-text-worker.mjs",
+  "src/lib/parsing/pdf-render-worker.mjs",
   "scripts/validate-parser-runtime.ts",
   "scripts/validate-mcp.ts",
 ];
@@ -116,23 +118,61 @@ assert.match(accessPanel, /Included on Free/);
 assert.match(accessPanel, /Streamable HTTP/);
 
 const nextConfig = fs.readFileSync(path.join(root, "next.config.ts"), "utf8");
-assert.doesNotMatch(nextConfig, /outputFileTracingIncludes/);
+assert.match(nextConfig, /outputFileTracingIncludes/);
+assert.match(nextConfig, /src\/lib\/parsing\/pdf-text-worker\.mjs/);
+assert.match(nextConfig, /src\/lib\/parsing\/pdf-render-worker\.mjs/);
+assert.match(nextConfig, /pdfjs-dist\/package\.json/);
+assert.match(nextConfig, /pdfjs-dist\/legacy\/build\/pdf\.mjs/);
+assert.match(nextConfig, /pdfjs-dist\/legacy\/build\/pdf\.worker\.mjs/);
+assert.match(nextConfig, /@napi-rs\/canvas-\*\/\*\*\/\*/);
 
 const readinessImplementation = fs.readFileSync(
   path.join(root, "src/lib/readiness.ts"),
   "utf8",
 );
 assert.match(readinessImplementation, /import\("@napi-rs\/canvas"\)/);
-assert.match(readinessImplementation, /import\("pdf-parse\/worker"\)/);
+assert.match(
+  readinessImplementation,
+  /import\("pdfjs-dist\/legacy\/build\/pdf\.mjs"\)/,
+);
+assert.match(
+  readinessImplementation,
+  /import\("pdfjs-dist\/legacy\/build\/pdf\.worker\.mjs"\)/,
+);
 
-for (const parserPath of [
-  "src/lib/parsing/pdf.ts",
-  "src/lib/parsing/pdf-ocr.ts",
-]) {
-  assert.match(
-    fs.readFileSync(path.join(root, parserPath), "utf8"),
-    /import\("pdf-parse\/worker"\)/,
-  );
+const pdfParser = fs.readFileSync(
+  path.join(root, "src/lib/parsing/pdf.ts"),
+  "utf8",
+);
+const pdfTextWorker = fs.readFileSync(
+  path.join(root, "src/lib/parsing/pdf-text-worker.mjs"),
+  "utf8",
+);
+const pdfOcr = fs.readFileSync(
+  path.join(root, "src/lib/parsing/pdf-ocr.ts"),
+  "utf8",
+);
+const pdfRenderWorker = fs.readFileSync(
+  path.join(root, "src/lib/parsing/pdf-render-worker.mjs"),
+  "utf8",
+);
+assert.match(pdfParser, /Reflect\.construct\(Worker/);
+assert.match(pdfParser, /resourceLimits/);
+assert.match(pdfParser, /decodeAllocationLimitBytes/);
+assert.doesNotMatch(pdfParser, /require\.resolve\(/);
+assert.doesNotMatch(pdfParser, /standardFontDataUrl|pdfjsWorkerSrc/);
+assert.match(pdfTextWorker, /await import\("pdfjs-dist\/legacy\/build\/pdf\.mjs"\)/);
+assert.match(pdfTextWorker, /streamTextContent\(\)/);
+assert.match(pdfTextWorker, /__paperlinePdfDecodeAllocationLimitBytes/);
+assert.match(pdfTextWorker, /require\.resolve\("pdfjs-dist\/package\.json"\)/);
+assert.match(pdfOcr, /Reflect\.construct\(Worker/);
+assert.match(pdfOcr, /PDF_RENDER_DECODE_BUDGET_BYTES/);
+assert.doesNotMatch(pdfOcr, /pdfjs-dist|@napi-rs\/canvas/);
+assert.match(pdfRenderWorker, /await import\("pdfjs-dist\/legacy\/build\/pdf\.mjs"\)/);
+assert.match(pdfRenderWorker, /__paperlinePdfDecodeAllocationLimitBytes/);
+assert.match(pdfRenderWorker, /MAX_RENDER_PIXELS\s*=\s*16_000_000/);
+for (const implementation of [pdfParser, pdfTextWorker, pdfOcr, pdfRenderWorker]) {
+  assert.doesNotMatch(implementation, /(?:from |import\()["']pdf-parse/);
 }
 
 async function testReadinessBehavior() {

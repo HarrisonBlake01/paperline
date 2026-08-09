@@ -22,7 +22,18 @@ const contentSecurityPolicyReportOnly = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
+  serverExternalPackages: ["pdfjs-dist", "@napi-rs/canvas"],
+  outputFileTracingIncludes: {
+    "/api/documents/**/*": [
+      "./src/lib/parsing/pdf-text-worker.mjs",
+      "./src/lib/parsing/pdf-render-worker.mjs",
+      "./node_modules/pdfjs-dist/package.json",
+      "./node_modules/pdfjs-dist/legacy/build/pdf.mjs",
+      "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+      "./node_modules/pdfjs-dist/standard_fonts/**/*",
+      "./node_modules/@napi-rs/canvas-*/**/*",
+    ],
+  },
   // Allow local-network access during demos and QA without weakening production host checks.
   turbopack: {
     root: path.join(__dirname),
