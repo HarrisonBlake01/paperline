@@ -1,0 +1,92 @@
+diff --git a/build/pdf.worker.mjs b/build/pdf.worker.mjs
+index 66ae0d0b2282d6763eaa00b53983964e07b295dd..64ccff8dd6a1b50077fee579061e335eb5983d54 100644
+--- a/build/pdf.worker.mjs
++++ b/build/pdf.worker.mjs
+@@ -34562,6 +34562,9 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (reason instanceof Error && reason.message.includes("pdf_decoded_stream_limit_exceeded")) {
++        throw reason;
++      }
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);
+diff --git a/legacy/build/pdf.worker.mjs b/legacy/build/pdf.worker.mjs
+index ff381bb9b154685f8ed641b6c1adabb4c732e1f3..9d5c6cab3c41c95709ce7a9688a7228a4cdd4e17 100644
+--- a/legacy/build/pdf.worker.mjs
++++ b/legacy/build/pdf.worker.mjs
+@@ -9373,4 +9373,26 @@ class ImageResizer {
+ const emptyBuffer = new Uint8Array(0);
++let paperlineDecodedStreamAllocatedBytes = 0;
++function paperlineDecodeAllocationLimit() {
++  const limit = globalThis.__paperlinePdfDecodeAllocationLimitBytes;
++  return Number.isSafeInteger(limit) && limit > 0 ? limit : null;
++}
++function paperlineChargeDecodedAllocation(size) {
++  const allocationLimit = paperlineDecodeAllocationLimit();
++  if (allocationLimit === null) {
++    return;
++  }
++  // Charge complete allocations so realloc/copy peaks remain bounded for this
++  // one-document isolate, including DecompressionStream output chunks.
++  if (
++    !Number.isSafeInteger(size) ||
++    size < 0 ||
++    size > allocationLimit ||
++    paperlineDecodedStreamAllocatedBytes > allocationLimit - size
++  ) {
++    throw new Error("pdf_decoded_stream_limit_exceeded");
++  }
++  paperlineDecodedStreamAllocatedBytes += size;
++}
+ class DecodeStream extends BaseStream {
+   buffer = emptyBuffer;
+   bufferLength = 0;
+@@ -9404,6 +9426,7 @@ class DecodeStream extends BaseStream {
+     while (size < requested) {
+       size *= 2;
+     }
++    paperlineChargeDecodedAllocation(size);
+     const buffer2 = new Uint8Array(size);
+     buffer2.set(buffer);
+     return this.buffer = buffer2;
+@@ -9467,9 +9490,11 @@ class DecodeStream extends BaseStream {
+       const chunks = [];
+       let totalLength = 0;
+       for await (const chunk of readable) {
++        paperlineChargeDecodedAllocation(chunk.byteLength);
+         chunks.push(chunk);
+         totalLength += chunk.byteLength;
+       }
++      paperlineChargeDecodedAllocation(totalLength);
+       const data = new Uint8Array(totalLength);
+       let offset = 0;
+       for (const chunk of chunks) {
+@@ -9480,7 +9505,15 @@ class DecodeStream extends BaseStream {
+         decompressed: data,
+         compressed: bytes
+       };
+-    } catch {
++    } catch (error) {
++      // Preserve explicit Paperline decode budgets; only unknown decompression
++      // failures fall back to the synchronous inflater.
++      if (
++        error instanceof Error &&
++        error.message.includes("pdf_decoded_stream_limit_exceeded")
++      ) {
++        throw error;
++      }
+       return {
+         decompressed: null,
+         compressed: bytes
+@@ -40451,6 +40484,9 @@ class PartialEvaluator {
+       }
+       return this._sendImgData(objId, imgData, cacheGlobally);
+     }).catch(reason => {
++      if (reason instanceof Error && reason.message.includes("pdf_decoded_stream_limit_exceeded")) {
++        throw reason;
++      }
+       warn(`Unable to decode image "${objId}": "${reason}".`);
+       if (imageRef) {
+         this.globalImageCache.addDecodeFailed(imageRef);

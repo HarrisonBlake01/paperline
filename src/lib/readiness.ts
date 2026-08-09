@@ -104,16 +104,16 @@ function createDefaultReadinessProbes(): ReadinessProbes {
     },
 
     async pdf_runtime() {
-      let PDFParse: (typeof import("pdf-parse"))["PDFParse"];
-      let worker: { getPath: () => string };
+      let pdfjs: { getDocument?: unknown };
+      let worker: { WorkerMessageHandler?: unknown };
       let canvas: { createCanvas?: unknown };
       try {
-        ({ PDFParse } = await import("pdf-parse"));
+        pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
       } catch {
-        throw readinessDependencyError("pdf_parse_import");
+        throw readinessDependencyError("pdfjs_import");
       }
       try {
-        worker = await import("pdf-parse/worker");
+        worker = await import("pdfjs-dist/legacy/build/pdf.worker.mjs");
       } catch {
         throw readinessDependencyError("pdf_worker_import");
       }
@@ -122,8 +122,11 @@ function createDefaultReadinessProbes(): ReadinessProbes {
       } catch {
         throw readinessDependencyError("canvas_import");
       }
-      const workerPath = worker.getPath();
-      if (!PDFParse || !workerPath || typeof canvas.createCanvas !== "function") {
+      if (
+        typeof pdfjs.getDocument !== "function" ||
+        !worker.WorkerMessageHandler ||
+        typeof canvas.createCanvas !== "function"
+      ) {
         throw new Error("pdf_runtime_unavailable");
       }
     },

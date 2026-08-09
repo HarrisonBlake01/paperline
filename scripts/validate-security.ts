@@ -308,11 +308,67 @@ function testSecurityInvariants() {
   }
 
   const pdfParser = read("src/lib/parsing/pdf.ts");
+  const pdfTextWorker = read("src/lib/parsing/pdf-text-worker.mjs");
   const pdfOcr = read("src/lib/parsing/pdf-ocr.ts");
+  const pdfRenderWorker = read("src/lib/parsing/pdf-render-worker.mjs");
   const nextConfig = read("next.config.ts");
-  assert.match(pdfParser, /import\("pdf-parse"\)/);
-  assert.doesNotMatch(pdfOcr, /SWIFT_RENDER_SCRIPT|execFileAsync/);
-  assert.match(nextConfig, /serverExternalPackages:\s*\["pdf-parse", "@napi-rs\/canvas"\]/);
+  assert.doesNotMatch(pdfParser, /(?:from |import\()["']pdf-parse/);
+  assert.match(pdfParser, /Reflect\.construct\(Worker/);
+  assert.match(pdfParser, /resourceLimits/);
+  assert.match(pdfParser, /maxOldGenerationSizeMb/);
+  assert.match(pdfParser, /PDF_PARSE_DEADLINE_MS\s*=\s*10_000/);
+  assert.match(pdfParser, /PDF_DECODE_ALLOCATION_BUDGET_BYTES\s*=\s*32\s*\*\s*1024\s*\*\s*1024/);
+  assert.match(pdfParser, /decodeAllocationLimitBytes/);
+  assert.doesNotMatch(pdfParser, /require\.resolve\(/);
+  assert.doesNotMatch(pdfParser, /standardFontDataUrl|pdfjsWorkerSrc/);
+  assert.match(pdfParser, /pdf_resource_limit_exceeded/);
+  assert.match(pdfParser, /pdf_parse_deadline_exceeded/);
+  assert.match(pdfTextWorker, /pdfjs-dist\/legacy\/build\/pdf\.mjs/);
+  assert.doesNotMatch(pdfTextWorker, /pdf-parse/);
+  assert.match(pdfTextWorker, /require\.resolve\("pdfjs-dist\/package\.json"\)/);
+  assert.match(pdfTextWorker, /MAX_PDF_TEXT_PAGES\s*=\s*250/);
+  assert.match(pdfTextWorker, /MAX_PDF_TEXT_CHARACTERS\s*=\s*200_000/);
+  assert.match(pdfTextWorker, /streamTextContent\(\)/);
+  assert.match(pdfTextWorker, /__paperlinePdfDecodeAllocationLimitBytes/);
+  assert.match(pdfTextWorker, /pdf_page_limit_exceeded/);
+  assert.match(pdfTextWorker, /pdf_text_limit_exceeded/);
+  assert.match(pdfTextWorker, /pdf_decoded_stream_limit_exceeded/);
+  assert.match(pdfTextWorker, /standardFontDataUrl/);
+  assert.match(pdfTextWorker, /pdfjsWorkerSrc/);
+  assert.match(nextConfig, /pdfjs-dist\/package\.json/);
+  assert.match(nextConfig, /pdfjs-dist\/legacy\/build\/pdf\.mjs/);
+  const pdfjsPatch = read("patches/pdfjs-dist@6.2.108.patch");
+  assert.match(pdfjsPatch, /pdf_decoded_stream_limit_exceeded/);
+  assert.match(pdfjsPatch, /paperlineChargeDecodedAllocation/);
+  assert.match(pdfjsPatch, /for await \(const chunk of readable\)/);
+  assert.match(pdfjsPatch, /Preserve explicit Paperline decode budgets/);
+  assert.match(pdfjsPatch, /Unable to decode image/);
+  assert.match(
+    pdfjsPatch,
+    /reason\.message\.includes\("pdf_decoded_stream_limit_exceeded"\)/,
+  );
+  const packageJson = read("package.json");
+  assert.match(packageJson, /"pdfjs-dist@6\.2\.108":\s*"patches\/pdfjs-dist@6\.2\.108\.patch"/);
+  assert.doesNotMatch(pdfOcr, /SWIFT_RENDER_SCRIPT|execFileAsync|pdf-parse/);
+  assert.doesNotMatch(pdfOcr, /pdfjs-dist|@napi-rs\/canvas/);
+  assert.match(pdfOcr, /Reflect\.construct\(Worker/);
+  assert.match(pdfOcr, /PDF_RENDER_DECODE_BUDGET_BYTES\s*=\s*32\s*\*\s*1024\s*\*\s*1024/);
+  assert.match(pdfOcr, /PDF_RENDER_DEADLINE_MS\s*=\s*15_000/);
+  assert.match(pdfOcr, /PDF_RENDER_OLD_HEAP_MB\s*=\s*256/);
+  assert.match(pdfOcr, /resourceLimits/);
+  assert.match(pdfOcr, /pdf-render-worker\.mjs/);
+  assert.match(
+    pdfOcr,
+    /error\.message\.includes\("pdf_decoded_stream_limit_exceeded"\)/,
+  );
+  assert.match(pdfRenderWorker, /__paperlinePdfDecodeAllocationLimitBytes/);
+  assert.match(pdfRenderWorker, /require\.resolve\("pdfjs-dist\/package\.json"\)/);
+  assert.match(pdfRenderWorker, /MAX_RENDER_PIXELS\s*=\s*16_000_000/);
+  assert.match(pdfRenderWorker, /pdf_page_dimensions_exceeded/);
+  assert.match(pdfRenderWorker, /pdf_decoded_stream_limit_exceeded/);
+  assert.match(pdfRenderWorker, /import\("@napi-rs\/canvas"\)/);
+  assert.match(nextConfig, /src\/lib\/parsing\/pdf-render-worker\.mjs/);
+  assert.match(nextConfig, /serverExternalPackages:\s*\["pdfjs-dist", "@napi-rs\/canvas"\]/);
 
   const healthRoute = read("src/app/api/health/route.ts");
   assert.match(healthRoute, /dependencies_checked:\s*false/);
