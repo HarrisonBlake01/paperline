@@ -94,6 +94,6 @@ Final local markers: `OCR_RENDER_ISOLATE_TARGETED_PASS`, `PAPERLINE_FINAL_FULL_L
   - SSO protection remains enabled for non-custom deployment URLs
 - [x] Previous production deployment `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx` remains `READY` as the explicit rollback target.
 - [ ] Full signed-in remote upload/OCR/hostile-fixture acceptance remains blocked on application-level Clerk authentication. The deployed Clerk keyset differs from the available local keyset (`jwk-kid-mismatch`), and Vercel does not return encrypted secret values through Production `env pull`.
-- [x] Dependabot open-alert count on the default branch is `0` after the fixed dependency graph reached `main`.
+- [x] Dependabot High alert `#9` (`js-yaml` via eslint toolchain) closed by adding pnpm override `js-yaml@>=4.0.0 <4.3.1 -> 4.3.1` and refreshing the lockfile to `js-yaml@4.3.1`. Production dependency audit remains clean; this is a development-toolchain pin.
 
 The currently promoted recruiter deployment is `dpl_D7TgeCgQsauEvyvR6BBNabT1gDBc` from merge commit `c902a5ed30d9da7be6ab806851618b3565e73077`. Public production is remediated for the PDF runtime hardening release. Rollback target remains `dpl_9eogpM3ax6Xn4bnvfLsrg3gDp6yx`.

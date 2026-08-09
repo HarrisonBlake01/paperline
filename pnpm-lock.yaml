@@ -13,6 +13,7 @@ overrides:
   hono@<4.12.34: 4.12.34
   dompurify@<=3.4.12: 3.4.13
   glob@10.5.0: 13.0.6
+  js-yaml@>=4.0.0 <4.3.1: 4.3.1
 
 patchedDependencies:
   pdfjs-dist@6.2.108:
@@ -112,7 +113,7 @@ importers:
         version: 6.48.0(ws@8.21.1)(zod@4.4.3)
       pdfjs-dist:
         specifier: 6.2.108
-        version: 6.2.108(patch_hash=41fb945bbce66d5405aa2d86b6fc7be1bde7a134820697b53e285acf7808a99c)
+        version: 6.2.108(patch_hash=009901e69ec3e5cb47f993cc718bbc897eee6c480521419597fa2c026305ad04)
       posthog-js:
         specifier: ^1.404.1
         version: 1.404.1
@@ -4125,8 +4126,8 @@ packages:
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  js-yaml@4.3.0:
-    resolution: {integrity: sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==}
+  js-yaml@4.3.1:
+    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
 
   jsesc@3.1.0:
@@ -5804,7 +5805,7 @@ snapshots:
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -9661,7 +9662,7 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@4.3.0:
+  js-yaml@4.3.1:
     dependencies:
       argparse: 2.0.1
 
@@ -10062,7 +10063,7 @@ snapshots:
 
   pathe@2.0.3: {}
 
-  pdfjs-dist@6.2.108(patch_hash=41fb945bbce66d5405aa2d86b6fc7be1bde7a134820697b53e285acf7808a99c):
+  pdfjs-dist@6.2.108(patch_hash=009901e69ec3e5cb47f993cc718bbc897eee6c480521419597fa2c026305ad04):
     optionalDependencies:
       '@napi-rs/canvas': 1.0.3
 
