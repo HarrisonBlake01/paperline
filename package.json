@@ -47,7 +47,7 @@
     "@radix-ui/react-tabs": "^1.1.17",
     "@radix-ui/react-tooltip": "^1.2.12",
     "@react-email/components": "^1.0.12",
-    "@sentry/nextjs": "^10.68.0",
+    "@sentry/nextjs": "^10.75.2",
     "@stripe/stripe-js": "^9.10.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.110.7",
